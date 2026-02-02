@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:16-alpine #podemos canviar la versión de postgres sin alpine, preguntar a antonio
+    container_name: fuenteagria_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: fuenteagria_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Interfaz gráfica para gestionar la BD
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: fuenteagria_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgres
+
+volumes:
+  #- ./uploads:/usr/src/app/uploads  # Mapea una carpeta local a la del contenedor
+  postgres_data:
