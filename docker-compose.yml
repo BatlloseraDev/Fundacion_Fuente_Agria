@@ -32,6 +32,38 @@ services:
     networks:
       - app-network
 
+  # --- BASE DE DATOS NoSQL (MongoDB) ---
+  mongo:
+    image: mongo:7.0
+    container_name: fuenteagria_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - '27018:27017' # lo he cambiado al 27018 por los que tenemos mongo instalado para que no de problemas
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  # --- GESTOR DE BD NoSQL (Mongo Express) ---
+  mongo-express:
+    image: mongo-express
+    container_name: fuenteagria_mongo_express
+    restart: always
+    ports:
+      - '8081:8081'
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
   # --- BACKEND (NestJS) ---
   back:
     build:
