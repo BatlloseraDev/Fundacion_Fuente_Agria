@@ -1,34 +1,98 @@
 version: '3.8'
-#Meter mas aplicaciones
 
 services:
-  # Base de datos PostgreSQL
+  # --- BASE DE DATOS ---
   postgres:
-    image: postgres:16-alpine #podemos canviar la versión de postgres sin alpine, preguntar a antonio
+    image: postgres:17
     container_name: fuenteagria_db
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: fuenteagria_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
-  # Interfaz gráfica para gestionar la BD
+  # --- GESTOR DE BD ---
   pgadmin:
     image: dpage/pgadmin4
     container_name: fuenteagria_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
       - '5050:80'
     depends_on:
       - postgres
+    networks:
+      - app-network
+
+  # --- BACKEND (NestJS) ---
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: fuenteagria_back
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      # Pasamos la URL completa para Prisma
+      DATABASE_URL: ${DATABASE_URL}
+      # Pasamos variables individuales por si NestJS las necesita sueltas
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_DATABASE: ${POSTGRES_DB}
+    volumes:
+      - ./back:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  # --- FRONTEND (Vite + React) ---
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: fuenteagria_front
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - app-network
+
+  # --- NGINX ---
+  nginx:
+    image: nginx:alpine
+    container_name: fuenteagria_nginx
+    restart: always
+    ports:
+      - '8080:80'
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - back
+      - front
+    networks:
+      - app-network
 
 volumes:
-  #- ./uploads:/usr/src/app/uploads  # Mapea una carpeta local a la del contenedor
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
