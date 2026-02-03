@@ -109,7 +109,7 @@ services:
 
   # --- NGINX ---
   nginx:
-    image: nginx:alpine
+    image: nginx
     container_name: fuenteagria_nginx
     restart: always
     ports:
@@ -124,6 +124,8 @@ services:
 
 volumes:
   postgres_data:
+  mongo_data:
+
 
 networks:
   app-network:
