@@ -1,4 +1,5 @@
 version: '3.8'
+#Meter mas aplicaciones
 
 services:
   # Base de datos PostgreSQL
