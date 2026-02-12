@@ -4,6 +4,8 @@ REM --- Router de Comandos ---
 IF "%1"=="start" GOTO start
 IF "%1"=="stop" GOTO stop
 IF "%1"=="restart" GOTO restart
+IF "%1"=="hard_restart" GOTO hard_restart
+IF "%1"=="reinstall" GOTO reinstall
 IF "%1"=="logs" GOTO logs
 IF "%1"=="init" GOTO init
 IF "%1"=="install" GOTO install
@@ -21,6 +23,8 @@ ECHO Comandos disponibles:
 ECHO   start          - Arrancar contenedores
 ECHO   stop           - Detener contenedores
 ECHO   restart        - Reiniciar contenedores
+ECHO   hard_restart   - Reiniciar completamente
+ECHO   reinstall      - Reiniciar y actualizar
 ECHO   logs           - Ver logs en tiempo real
 ECHO   init           - Instalar dependencias y arrancar (primera vez)
 ECHO   install        - Instalar dependencias en back y front
@@ -38,11 +42,26 @@ REM --- DEFINICIÓN DE COMANDOS ---
     GOTO end
 
 :stop
+    docker compose stop
+    GOTO end
+
+:down
     docker compose down
     GOTO end
 
+
 :restart
+    docker compose stop
+    docker compose up -d
+    GOTO end
+
+:hard_restart
     docker compose down
+    docker compose up -d
+    GOTO end
+
+:reinstall
+    docker compose down -v
     docker compose up -d
     GOTO end
 

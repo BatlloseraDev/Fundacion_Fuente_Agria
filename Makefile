@@ -1,7 +1,7 @@
 # Makefile para Fundación Fuente Agria
 # Comandos para automatizar Docker en entorno de desarrollo
 
-.PHONY: all build start stop restart logs install install-back install-front shell-back shell-front clean
+.PHONY: all build start stop restart hard-restart reinstall logs install install-back install-front shell-back shell-front clean
 
 # --- COMANDOS PRINCIPALES ---
 
@@ -11,10 +11,24 @@ start:
 
 # Detener todo
 stop:
+	docker compose stop
+
+# Detener y eliminar todo
+down:
 	docker compose down
+# docker compose down
 
 # Reiniciar contenedores
 restart: stop start
+
+hard-restart:
+	docker compose down 
+	docker compose up -d
+
+reinstall:
+	docker compose down -v
+	docker compose up -d
+
 
 # Ver logs en tiempo real
 logs:
