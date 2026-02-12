@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panel de Administración - Fundación Fuente Agria">
+    <title>Admin - Fundación Fuente Agria</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        .bg-gradient-light {
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        /* Avatar con iniciales */
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        /* Estilos lista de mensajes */
+        .message-list-item {
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .message-list-item:hover, .message-list-item.active {
+            background-color: #f8f9fa;
+        }
+        
+        .message-list-item.active {
+            border-left-color: #0d6efd;
+        }
+
+        .message-unread {
+            font-weight: 600;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        /* Scroll personalizado para el chat */
+        .chat-history {
+            height: 350px;
+            overflow-y: auto;
+        }
+        
+        /* Scrollbar fina */
+        .chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-history::-webkit-scrollbar-thumb {
+            background-color: #dee2e6;
+            border-radius: 4px;
+        }
+
+        /* Burbujas de chat */
+        .chat-bubble-user {
+            background-color: #f1f3f5;
+            color: #212529;
+            border-radius: 15px 15px 15px 0;
+            padding: 10px 15px;
+            max-width: 80%;
+        }
+
+        .chat-bubble-admin {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 15px 15px 0 15px;
+            padding: 10px 15px;
+            max-width: 80%;
+            margin-left: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-2">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
+                <img src="./imgs/Logo_FFA.png" alt="Logo" style="width: 30px; filter: brightness(0) invert(1);">
+                <span class="small">ADMINISTRACIÓN</span>
+            </a>
+
+            <div class="d-flex align-items-center gap-3">
+                <div class="dropdown">
+                    <a href="#" class="text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i> Admin Principal
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item" href="index.html">Ver Sitio Web</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#">Cerrar Sesión</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 py-4">
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-4 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle me-3">
+                            <i class="bi bi-people-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-secondary small text-uppercase mb-1">Usuarios Totales</h6>
+                            <h3 class="fw-bold mb-0">1,245</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle me-3">
+                            <i class="bi bi-shield-lock-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-secondary small text-uppercase mb-1">Equipo Editor</h6>
+                            <h3 class="fw-bold mb-0">8</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle me-3 position-relative">
+                            <i class="bi bi-chat-dots-fill fs-4"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                                3
+                            </span>
+                        </div>
+                        <div>
+                            <h6 class="text-secondary small text-uppercase mb-1">Mensajes Nuevos</h6>
+                            <h3 class="fw-bold mb-0">12</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="col-md-4 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                       <div>
+                            <h6 class="text-white-50 small text-uppercase mb-1">Acciones Rápidas</h6>
+                            <div class="d-flex gap-2 mt-2">
+                                <button class="btn btn-sm btn-light text-primary fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#modalInvite"><i class="bi bi-person-plus-fill me-1"></i> Invitar</button>
+                            </div>
+                       </div>
+                       <i class="bi bi-lightning-charge fs-1 text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-xl-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-person-gear me-2 text-primary"></i>Control de Usuarios</h5>
+                        <div class="input-group input-group-sm w-auto">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0" placeholder="Buscar email...">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-secondary small text-uppercase">
+                                <tr>
+                                    <th class="ps-4">Usuario</th>
+                                    <th>Rol Actual</th>
+                                    <th>Último Acceso</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3 bg-primary text-white">LM</div>
+                                            <div>
+                                                <div class="fw-bold">Laura Martínez</div>
+                                                <div class="small text-secondary">laura@fuenteagria.org</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-primary rounded-pill">Administrador</span></td>
+                                    <td class="small text-muted">Ahora mismo</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#modalPermisos"><i class="bi bi-pencil-fill"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3">JP</div>
+                                            <div>
+                                                <div class="fw-bold">Juan Pérez</div>
+                                                <div class="small text-secondary">juan.p@gmail.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-info text-dark bg-opacity-25 border border-info rounded-pill">Editor Tienda</span></td>
+                                    <td class="small text-muted">Hace 2 horas</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#modalPermisos"><i class="bi bi-pencil-fill"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-circle"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3">MR</div>
+                                            <div>
+                                                <div class="fw-bold">María Rodríguez</div>
+                                                <div class="small text-secondary">maria.rod@hotmail.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-secondary border rounded-pill">Usuario</span></td>
+                                    <td class="small text-muted">Ayer</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#modalPermisos"><i class="bi bi-pencil-fill"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-circle"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3 bg-warning text-dark bg-opacity-50">CR</div>
+                                            <div>
+                                                <div class="fw-bold">Carlos Ruiz</div>
+                                                <div class="small text-secondary">carlos.taller@fuenteagria.org</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-info text-dark bg-opacity-25 border border-info rounded-pill">Editor Blog</span></td>
+                                    <td class="small text-muted">Hace 3 días</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#modalPermisos"><i class="bi bi-pencil-fill"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger rounded-circle"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                     <div class="card-footer bg-white text-center border-top-0 py-3">
+                        <button class="btn btn-link text-decoration-none small">Ver todos los usuarios</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-5">
+                <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                    <div class="row h-100 g-0">
+                        
+                        <div class="col-4 border-end bg-light d-flex flex-column h-100">
+                            <div class="p-3 border-bottom bg-white">
+                                <h6 class="fw-bold mb-0"><i class="bi bi-inbox me-2"></i>Buzón</h6>
+                            </div>
+                            <div class="overflow-auto flex-grow-1" style="max-height: 500px;">
+                                <div class="p-3 border-bottom message-list-item active">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold small text-truncate">Familia García</span>
+                                        <small class="text-muted" style="font-size: 0.7rem;">10:30</small>
+                                    </div>
+                                    <p class="small text-secondary mb-0 text-truncate">Hola, sobre la visita...</p>
+                                </div>
+                                <div class="p-3 border-bottom message-list-item message-unread position-relative">
+                                    <span class="position-absolute top-0 end-0 mt-2 me-2 p-1 bg-primary border border-light rounded-circle"></span>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold small text-truncate">Empresa S.L.</span>
+                                        <small class="text-primary fw-bold" style="font-size: 0.7rem;">09:15</small>
+                                    </div>
+                                    <p class="small text-dark fw-bold mb-0 text-truncate">Presupuesto aceptado</p>
+                                </div>
+                                <div class="p-3 border-bottom message-list-item">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold small text-truncate">Voluntario J.</span>
+                                        <small class="text-muted" style="font-size: 0.7rem;">Ayer</small>
+                                    </div>
+                                    <p class="small text-secondary mb-0 text-truncate">¿Cuándo es el evento?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-8 d-flex flex-column h-100 bg-white">
+                            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-circle" style="width: 30px; height: 30px; font-size: 0.8rem;">FG</div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 small">Familia García</h6>
+                                        <small class="text-success" style="font-size: 0.7rem;">● En línea</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-light border rounded-circle"><i class="bi bi-three-dots-vertical"></i></button>
+                            </div>
+
+                            <div class="flex-grow-1 p-3 chat-history bg-light bg-opacity-25">
+                                <div class="text-center mb-3">
+                                    <span class="badge bg-light text-secondary border fw-normal">Hoy</span>
+                                </div>
+                                
+                                <div class="d-flex mb-3">
+                                    <div class="chat-bubble-user shadow-sm">
+                                        <small class="fw-bold d-block mb-1 text-primary">Familia García</small>
+                                        Hola, queríamos confirmar el horario de visita para el centro ocupacional.
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mb-3">
+                                    <div class="chat-bubble-admin shadow-sm">
+                                        Hola, el horario es de 10:00 a 13:00 de Lunes a Viernes. ¿Os viene bien?
+                                    </div>
+                                </div>
+
+                                <div class="d-flex mb-3">
+                                    <div class="chat-bubble-user shadow-sm">
+                                        Perfecto, pasaremos el martes. ¡Gracias!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-3 border-top bg-white">
+                                <div class="input-group">
+                                    <button class="btn btn-light border text-secondary"><i class="bi bi-paperclip"></i></button>
+                                    <input type="text" class="form-control border-start-0 border-end-0" placeholder="Escribe una respuesta...">
+                                    <button class="btn btn-primary"><i class="bi bi-send-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalPermisos" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Gestionar Permisos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3">
+                        <div class="avatar-circle me-3 bg-white border">JP</div>
+                        <div>
+                            <h6 class="fw-bold mb-0">Juan Pérez</h6>
+                            <small class="text-secondary">juan.p@gmail.com</small>
+                        </div>
+                    </div>
+                    
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Asignar Rol</label>
+                            <select class="form-select">
+                                <option value="user">Usuario (Sin permisos)</option>
+                                <option value="editor_tienda" selected>Editor - Tienda</option>
+                                <option value="editor_blog">Editor - Actividades</option>
+                                <option value="admin">Administrador Total</option>
+                            </select>
+                            <div class="form-text mt-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Editor Tienda:</strong> Puede añadir/editar productos y ver encargos.<br>
+                                <strong>Editor Actividades:</strong> Solo puede gestionar el blog.
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="banUser">
+                            <label class="form-check-label text-danger fw-bold small" for="banUser">Suspender cuenta temporalmente</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalInvite" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Invitar al Equipo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Correo Electrónico</label>
+                        <input type="email" class="form-control" placeholder="nombre@ejemplo.com">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Rol Inicial</label>
+                        <select class="form-select">
+                            <option>Editor</option>
+                            <option>Administrador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-primary rounded-pill w-100" data-bs-dismiss="modal">Enviar Invitación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
