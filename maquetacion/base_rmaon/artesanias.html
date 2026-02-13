@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fundación Fuente Agria · Demo · Artesanías</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="assets/styles.css" rel="stylesheet" />
+</head>
+<body data-page="artesanias">
+
+  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top" aria-label="Barra de navegación">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="inicio.html" aria-label="Ir al inicio">
+        <img src="Logo_FFA.png" alt="Logo Fundación Fuente Agria (asociación matriz)" />
+        <span class="fw-semibold text-dark">Fundación Fuente Agria</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" aria-current="false" href="inicio.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="artesanias.html">Artesanías</a></li>
+          <li class="nav-item"><a class="nav-link" aria-current="false" href="reparacion.html">Reparación de muebles</a></li>
+        </ul>
+        <div class="ms-lg-3 d-flex align-items-center">
+          <a class="btn btn-sm btn-primary px-3" href="admin/index.html">Panel Admin</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-5 bg-white border-top border-bottom">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="text-muted small">Página: <strong>Artesanías</strong></div>
+        <div class="d-flex gap-2">
+          <a class="btn btn-sm btn-outline-secondary" href="inicio.html">Volver al inicio</a>
+          <a class="btn btn-sm btn-outline-secondary" href="reparacion.html">Ir a reparación</a>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-3">
+        <div>
+          <h1 class="h3 section-title mb-1">Artesanías por encargo</h1>
+          <p class="text-muted mb-0">Catálogo demo (datos en <code>assets/data.js</code>).</p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+          <div>
+            <label for="craftSearch" class="form-label small mb-1">Buscar</label>
+            <input id="craftSearch" type="search" class="form-control" placeholder="Ej.: cerámica, madera, regalo..." />
+          </div>
+          <div>
+            <label for="craftCategory" class="form-label small mb-1">Categoría</label>
+            <select id="craftCategory" class="form-select"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="craftEmpty" class="alert alert-light border d-none" role="status" aria-live="polite">
+        No hay resultados con esos filtros. Prueba con otra búsqueda o categoría.
+      </div>
+
+      <div id="craftGrid" class="row g-3"></div>
+    </div>
+  </main>
+
+  <!-- MODAL: Detalles artesanía (carousel + solicitar encargo) -->
+  <div class="modal fade" id="modalCraftDetails" tabindex="-1" aria-labelledby="modalCraftDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h2 class="h5 modal-title mb-1" id="modalCraftDetailsLabel">Detalles</h2>
+            <div class="text-muted small" id="craftDetailsMeta"></div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div id="craftCarousel" class="carousel slide" data-bs-ride="carousel" aria-label="Galería de imágenes">
+                <div class="carousel-indicators" id="craftCarouselIndicators"></div>
+                <div class="carousel-inner" id="craftCarouselInner"></div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#craftCarousel" data-bs-slide="prev" aria-label="Imagen anterior">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#craftCarousel" data-bs-slide="next" aria-label="Imagen siguiente">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-lg-5">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                <span class="badge badge-soft" id="craftDetailsCategory">Categoría</span>
+                <span class="price-pill" id="craftDetailsPrice">Precio</span>
+              </div>
+
+              <p id="craftDetailsDescription" class="mb-3"></p>
+
+              <ul class="list-unstyled text-muted mb-3">
+                <li><strong>Materiales:</strong> <span id="craftDetailsMaterials"></span></li>
+                <li><strong>Tiempo estimado:</strong> <span id="craftDetailsTime"></span></li>
+                <li><strong>Disponibilidad:</strong> <span id="craftDetailsAvailability"></span></li>
+              </ul>
+
+              <hr />
+
+              <h3 class="h6 fw-semibold mb-2">Solicitar encargo</h3>
+              <form id="orderForm">
+                <input type="hidden" id="orderCraftId" />
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label class="form-label small" for="orderName">Nombre</label>
+                    <input id="orderName" class="form-control" required />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small" for="orderPhone">Teléfono</label>
+                    <input id="orderPhone" class="form-control" inputmode="tel" placeholder="+34 ..." required />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small" for="orderEmail">Email</label>
+                    <input id="orderEmail" type="email" class="form-control" placeholder="nombre@correo.com" required />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label small" for="orderMsg">Mensaje</label>
+                    <textarea id="orderMsg" class="form-control" rows="3" required
+                      placeholder="Describe tu idea (tamaño, colores, fecha objetivo, etc.)"></textarea>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                  <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="submit" class="btn btn-primary">Enviar solicitud (demo)</button>
+                </div>
+
+                <div class="alert alert-success d-none mt-3" id="orderSuccess" role="status">
+                  Solicitud enviada (demo). Te contactaremos pronto.
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!-- CHAT GLOBAL -->
+
+  <button class="btn btn-primary chat-fab px-3 py-2" type="button" data-bs-toggle="offcanvas"
+    data-bs-target="#chatOffcanvas" aria-controls="chatOffcanvas" aria-label="Abrir chat">
+    💬 Chat
+  </button>
+
+
+
+  <div class="offcanvas offcanvas-end" style="--bs-offcanvas-width: 100%; max-width: 100%;" data-bs-scroll="true"
+    tabindex="-1" id="chatOffcanvas" aria-labelledby="chatOffcanvasLabel">
+    <div class="offcanvas-header">
+      <h2 class="h5 mb-0" id="chatOffcanvasLabel">Mis mensajes</h2>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="offcanvas-body p-0 d-flex" style="height:100%;">
+
+      <!-- Lista de chats por pedido -->
+      <div class="border-end bg-white" style="width: 42%; overflow-y:auto;">
+        <div class="p-3 border-bottom">
+          <div class="fw-semibold">Conversaciones</div>
+          <div class="small text-muted">Tus pedidos y consultas</div>
+        </div>
+
+        <div class="list-group list-group-flush" id="customerChatList">
+          <a href="#" class="list-group-item list-group-item-action active" data-chat="A-104">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold">Pedido A-104</div>
+              <span class="badge text-bg-primary">En curso</span>
+            </div>
+            <div class="small text-muted">Bandeja personalizada · Último msg: hoy</div>
+          </a>
+
+          <a href="#" class="list-group-item list-group-item-action" data-chat="R-021">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold">Pedido R-021</div>
+              <span class="badge text-bg-secondary">Cerrado</span>
+            </div>
+            <div class="small text-muted">Restauración de silla · Último msg: ayer</div>
+          </a>
+
+          <a href="#" class="list-group-item list-group-item-action" data-chat="C-008">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold">Consulta C-008</div>
+              <span class="badge text-bg-warning text-dark">Pendiente</span>
+            </div>
+            <div class="small text-muted">Dudas sobre acabado · Último msg: 2 días</div>
+          </a>
+
+          <a href="#" class="list-group-item list-group-item-action" data-chat="A-122">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="fw-semibold">Pedido A-122</div>
+              <span class="badge text-bg-success">Entregado</span>
+            </div>
+            <div class="small text-muted">Llavero grabado · Último msg: 1 semana</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Conversación -->
+      <div class="flex-grow-1 d-flex flex-column p-3">
+        <div class="mb-3">
+          <div class="fw-semibold" id="customerChatTitle">Pedido A-104</div>
+          <div class="small text-muted" id="customerChatMeta">Bandeja personalizada · En curso</div>
+        </div>
+
+        <div class="flex-grow-1 overflow-auto mb-3" style="max-height: 55vh;" id="customerChatThread"
+          aria-live="polite">
+          <div class="mb-2">
+            <div class="bg-light p-2 rounded-3 small">Hola, ¿podríais grabar “Ramón” en una bandeja?</div>
+            <div class="small text-muted mt-1">Tú · 10:12</div>
+          </div>
+          <div class="mb-2 text-end">
+            <div class="bg-primary text-white p-2 rounded-3 small d-inline-block">
+              ¡Claro! ¿Qué tamaño y qué tipo de madera prefieres?
+            </div>
+            <div class="small text-muted mt-1">Equipo FFA · 10:18</div>
+          </div>
+          <div class="mb-2">
+            <div class="bg-light p-2 rounded-3 small">40×25 cm, madera de pino. ¿Cuánto tardaría?</div>
+            <div class="small text-muted mt-1">Tú · 10:21</div>
+          </div>
+          <div class="mb-2 text-end">
+            <div class="bg-primary text-white p-2 rounded-3 small d-inline-block">
+              Aproximadamente 5–7 días. Te avisamos cuando esté lista para recoger o enviar.
+            </div>
+            <div class="small text-muted mt-1">Equipo FFA · 10:26</div>
+          </div>
+        </div>
+
+        <form class="d-flex gap-2" id="customerChatForm" autocomplete="off">
+          <input class="form-control" id="customerChatInput" placeholder="Escribe un mensaje..." />
+          <button class="btn btn-primary" type="submit">Enviar</button>
+        </form>
+
+        <div class="small text-muted mt-2">
+          Tus conversaciones están organizadas por pedido/consulta.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Interacción mínima (front-only): cambiar chat activo (wireframe funcional)
+    (function () {
+      const chats = {
+        "A-104": {
+          title: "Pedido A-104",
+          meta: "Bandeja personalizada · En curso",
+          thread: [
+            { side: "me", text: "Hola, ¿podríais grabar “Ramón” en una bandeja?", time: "10:12" },
+            { side: "ffa", text: "¡Claro! ¿Qué tamaño y qué tipo de madera prefieres?", time: "10:18" },
+            { side: "me", text: "40×25 cm, madera de pino. ¿Cuánto tardaría?", time: "10:21" },
+            { side: "ffa", text: "Aproximadamente 5–7 días. Te avisamos cuando esté lista para recoger o enviar.", time: "10:26" }
+          ]
+        },
+        "R-021": {
+          title: "Pedido R-021",
+          meta: "Restauración de silla · Cerrado",
+          thread: [
+            { side: "me", text: "¿Podéis restaurar una silla antigua de pino?", time: "17:03" },
+            { side: "ffa", text: "Sí. Envíanos fotos (frontal y detalle del asiento) y te damos presupuesto.", time: "17:12" },
+            { side: "me", text: "Perfecto, ya las he enviado. Gracias.", time: "17:20" },
+            { side: "ffa", text: "Recibidas. Presupuesto enviado. ¡Gracias!", time: "17:40" }
+          ]
+        },
+        "C-008": {
+          title: "Consulta C-008",
+          meta: "Dudas sobre acabado · Pendiente",
+          thread: [
+            { side: "me", text: "¿Recomendáis barniz al agua u aceite para interior?", time: "09:15" },
+            { side: "ffa", text: "Depende del uso: para limpieza fácil, barniz; para acabado natural, aceite.", time: "09:22" }
+          ]
+        },
+        "A-122": {
+          title: "Pedido A-122",
+          meta: "Llavero grabado · Entregado",
+          thread: [
+            { side: "me", text: "¿Podéis hacer un llavero con dos nombres?", time: "12:01" },
+            { side: "ffa", text: "Sí. Dinos el texto exacto y el estilo.", time: "12:06" },
+            { side: "me", text: "“María & Ramón”, estilo simple.", time: "12:10" },
+            { side: "ffa", text: "Listo y entregado. ¡Esperamos que te guste!", time: "12:40" }
+          ]
+        }
+      };
+
+      const list = document.getElementById("customerChatList");
+      const title = document.getElementById("customerChatTitle");
+      const meta = document.getElementById("customerChatMeta");
+      const thread = document.getElementById("customerChatThread");
+      const form = document.getElementById("customerChatForm");
+      const input = document.getElementById("customerChatInput");
+
+      function render(chatId) {
+        const c = chats[chatId];
+        if (!c) return;
+        title.textContent = c.title;
+        meta.textContent = c.meta;
+        thread.innerHTML = c.thread.map(m => {
+          const isMe = m.side === "me";
+          return `
+            <div class="mb-2 ${isMe ? "text-end" : ""}">
+              <div class="${isMe ? "bg-light" : "bg-primary text-white d-inline-block"} p-2 rounded-3 small ${isMe ? "" : ""}" style="${isMe ? "" : ""}">
+                ${escapeHtml(m.text)}
+              </div>
+              <div class="small text-muted mt-1">${isMe ? "Tú" : "Equipo FFA"} · ${escapeHtml(m.time)}</div>
+            </div>`;
+        }).join("");
+        thread.scrollTop = thread.scrollHeight;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      if (list) {
+        list.addEventListener("click", (e) => {
+          const a = e.target.closest("[data-chat]");
+          if (!a) return;
+          e.preventDefault();
+          list.querySelectorAll(".list-group-item").forEach(x => x.classList.remove("active"));
+          a.classList.add("active");
+          render(a.getAttribute("data-chat"));
+        });
+      }
+
+      if (form) {
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const active = list?.querySelector(".list-group-item.active")?.getAttribute("data-chat");
+          const txt = (input?.value || "").trim();
+          if (!active || !txt) return;
+          chats[active].thread.push({ side: "me", text: txt, time: "Ahora" });
+          input.value = "";
+          render(active);
+        });
+      }
+
+      // initial render
+      render("A-104");
+    })();
+  </script>
+
+
+  <footer class="border-top bg-white">
+    <div class="container py-5">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <img src="Logo_FFA.png" alt="Logo Fundación Fuente Agria (asociación matriz)" style="height:56px;width:auto;" />
+            <div>
+              <div class="fw-semibold">Fundación Fuente Agria</div>
+              <div class="text-muted small">Asociación matriz</div>
+            </div>
+          </div>
+          <p class="text-muted mb-0">
+            Demo: encargo de artesanías y servicio de reparación/restauración de muebles.
+          </p>
+        </div>
+
+        <div class="col-lg-4">
+          <h3 class="h6 fw-semibold">Contacto (genérico)</h3>
+          <ul class="list-unstyled text-muted mb-0">
+            <li>📍 Dirección: Calle Ejemplo, 123 · Ciudad Real</li>
+            <li>📞 Tel: +34 900 000 000</li>
+            <li>✉️ Email: contacto@fundacion-ejemplo.org</li>
+            <li>🕒 Horario: L–V 9:00–14:00</li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3">
+          <h3 class="h6 fw-semibold">Entidades colaboradoras</h3>
+          <div class="d-flex flex-wrap gap-3 align-items-center footer-logos">
+            <img src="Logo_CCM.png" class="img-fluid" alt="Logo entidad colaboradora: CCM" />
+            <img src="Logo_ASPADES.png" class="img-fluid" alt="Logo entidad colaboradora: ASPADES - La Laguna" />
+            <img src="Logo_CastillaLaMancha.png" class="img-fluid" alt="Logo entidad colaboradora: Castilla-La Mancha" />
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+
+      <div class="d-flex flex-wrap justify-content-between gap-2 text-muted small">
+        <span>© <span id="yearNow"></span> Fundación Fuente Agria (demo)</span>
+        <span>Accesible · Responsive · Bootstrap 5.3</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
