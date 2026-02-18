@@ -65,3 +65,8 @@ clean:
 	docker compose down -v
 
 ##Cosas de vic por usar wsl: sudo chown -R $USER:$USER back
+
+# Generar el prisma
+back-prisma-generate:
+	docker compose exec back npx prisma generate
+	
