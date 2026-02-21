@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editor de Actividades - Fundación Fuente Agria">
+    <title>Editor Actividades - Fundación Fuente Agria</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        .bg-gradient-light {
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        /* --- ESTILOS MODO EDITOR --- */
+        .editable-container {
+            position: relative;
+            border: 2px dashed transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .editable-container:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.03);
+            cursor: pointer;
+        }
+
+        .btn-edit-float {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            z-index: 100;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .editable-container:hover .btn-edit-float {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Simulación de Editor WYSIWYG en el Modal */
+        .wysiwyg-toolbar {
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+
+        .admin-table-row {
+            transition: background-color 0.2s;
+        }
+
+        .admin-table-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="bg-dark text-white py-2 text-center sticky-top border-bottom border-secondary" style="z-index: 1030;">
+        <small class="fw-bold text-uppercase spacing-1"><i class="bi bi-pencil-square me-2"></i>Gestor de
+            Blog/Actividades</small>
+        <button class="btn btn-sm btn-outline-light ms-3 py-0 rounded-pill">Guardar Cambios</button>
+        <a href="actividades.html" class="btn btn-sm btn-link text-white text-decoration-none py-0">Salir</a>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary" href="#">
+                <img src="./imgs/Logo_FFA.png" alt="Logo" style="width: 40px; ">
+                <span>Catálogo Fuente Agria</span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center fw-semibold">
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./tienda.html">Tienda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./encargos.html">Encargos</a></li>
+                    <li class="nav-item"><a class="nav-link active text-primary"
+                            href="./actividades.html">Actividades</a></li>
+                    <li class="nav-item ms-lg-3"><a class="btn btn-primary rounded-pill px-4" href="#">Iniciar
+                            sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-5 bg-gradient-light border-bottom">
+        <div class="container text-center py-4">
+            <div class="editable-container d-inline-block" data-bs-toggle="modal" data-bs-target="#modalHeaderEdit">
+                <button class="btn btn-primary btn-sm rounded-circle btn-edit-float"><i
+                        class="bi bi-pencil-fill"></i></button>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 mb-3">VIDA EN LA
+                    FUNDACIÓN</span>
+                <h1 class="display-4 fw-bold mb-3">Gestión de <span class="text-primary">Actividades</span></h1>
+                <p class="lead text-secondary mx-auto mb-4" style="max-width: 700px;">
+                    Administra las noticias, talleres y eventos. Añade nuevas entradas o edita el historial.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-5 bg-white">
+        <div class="container">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div class="d-flex gap-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Buscar actividad...">
+                    </div>
+                    <select class="form-select w-auto">
+                        <option>Todas las fechas</option>
+                        <option>2025</option>
+                        <option>2024</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success rounded-pill px-4 shadow-sm fw-bold" data-bs-toggle="modal"
+                    data-bs-target="#modalPost">
+                    <i class="bi bi-plus-circle me-2"></i>Nueva Actividad
+                </button>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-secondary small text-uppercase">
+                            <tr>
+                                <th scope="col" class="ps-4 py-3" style="width: 100px;">Imagen</th>
+                                <th scope="col" class="py-3">Título / Extracto</th>
+                                <th scope="col" class="py-3">Estado</th>
+                                <th scope="col" class="py-3">Categoría</th>
+                                <th scope="col" class="py-3">Fecha</th>
+                                <th scope="col" class="text-end pe-4 py-3">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr class="admin-table-row">
+                                <td class="ps-4">
+                                    <img src="./imgs/img-stock-2.jpg" class="rounded-3 object-fit-cover border"
+                                        width="80" height="60" alt="Thumb">
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 fw-bold text-dark">Taller de Cerámica y Pintura</h6>
+                                    <p class="text-secondary small mb-0 text-truncate" style="max-width: 300px;">
+                                        Nuestros usuarios disfrutaron de una jornada creativa moldeando arcilla...</p>
+                                </td>
+                                <td><span
+                                        class="badge bg-success bg-opacity-10 text-success border border-success">Publicado</span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">Talleres</span></td>
+                                <td class="text-secondary small">15 Oct, 2025</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1"
+                                        data-bs-toggle="modal" data-bs-target="#modalPost" title="Editar"><i
+                                            class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle" data-bs-toggle="modal"
+                                        data-bs-target="#modalDelete" title="Eliminar"><i
+                                            class="bi bi-trash-fill"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="admin-table-row">
+                                <td class="ps-4">
+                                    <img src="./imgs/img-stock-1.jpg" class="rounded-3 object-fit-cover border"
+                                        width="80" height="60" alt="Thumb">
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 fw-bold text-dark">Senderismo en el Valle de Alcudia</h6>
+                                    <p class="text-secondary small mb-0 text-truncate" style="max-width: 300px;">
+                                        Aprovechando el buen tiempo, organizamos una ruta de senderismo...</p>
+                                </td>
+                                <td><span
+                                        class="badge bg-success bg-opacity-10 text-success border border-success">Publicado</span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">Excursión</span></td>
+                                <td class="text-secondary small">22 Sep, 2025</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1"
+                                        data-bs-toggle="modal" data-bs-target="#modalPost"><i
+                                            class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle" data-bs-toggle="modal"
+                                        data-bs-target="#modalDelete"><i class="bi bi-trash-fill"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="admin-table-row">
+                                <td class="ps-4">
+                                    <img src="./imgs/img-stock-3.jpg" class="rounded-3 object-fit-cover border"
+                                        width="80" height="60" alt="Thumb">
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 fw-bold text-dark">Mercadillo Solidario Anual</h6>
+                                    <p class="text-secondary small mb-0 text-truncate" style="max-width: 300px;">Gracias
+                                        a todos los vecinos que se acercaron a nuestro puesto...</p>
+                                </td>
+                                <td><span
+                                        class="badge bg-warning bg-opacity-10 text-warning border border-warning">Borrador</span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">Evento</span></td>
+                                <td class="text-secondary small">10 Sep, 2025</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-primary rounded-circle me-1"
+                                        data-bs-toggle="modal" data-bs-target="#modalPost"><i
+                                            class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-circle" data-bs-toggle="modal"
+                                        data-bs-target="#modalDelete"><i class="bi bi-trash-fill"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="admin-table-row bg-light bg-opacity-25">
+                                <td class="ps-4">
+                                    <div class="bg-secondary bg-opacity-10 rounded border d-flex align-items-center justify-content-center"
+                                        style="width:80px; height:60px;"><i class="bi bi-image text-muted"></i></div>
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 text-muted">Visita al Museo Municipal</h6><small
+                                        class="text-muted">Actividad antigua...</small>
+                                </td>
+                                <td><span
+                                        class="badge bg-secondary bg-opacity-10 text-secondary border">Archivado</span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">Cultura</span></td>
+                                <td class="text-secondary small">05 Ago, 2025</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-circle me-1"><i
+                                            class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary rounded-circle"><i
+                                            class="bi bi-trash-fill"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="admin-table-row bg-light bg-opacity-25">
+                                <td class="ps-4">
+                                    <div class="bg-secondary bg-opacity-10 rounded border d-flex align-items-center justify-content-center"
+                                        style="width:80px; height:60px;"><i class="bi bi-image text-muted"></i></div>
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 text-muted">Fiesta de Verano</h6><small
+                                        class="text-muted">Celebración en el patio...</small>
+                                </td>
+                                <td><span
+                                        class="badge bg-secondary bg-opacity-10 text-secondary border">Archivado</span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border">Fiesta</span></td>
+                                <td class="text-secondary small">15 Jul, 2025</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-circle me-1"><i
+                                            class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary rounded-circle"><i
+                                            class="bi bi-trash-fill"></i></button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white border-top text-center py-3">
+                    <small class="text-muted">Mostrando 5 actividades. Fin de la lista.</small>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+ <footer class="bg-light border-top py-5">
+        <div class="container py-4">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5 class="fw-bold mb-3 text-primary">Catálogo Fundación Fuente Agria</h5>
+                    <p class="text-secondary small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Id, ipsam magni eos repudiandae nisi dolore laudantium voluptates, aperiam numquam nostrum tenetur qui non adipisci. Obcaecati deserunt officia ex explicabo in!</p>
+                </div>
+                <div class="col-lg-2 offset-lg-1">
+                    <h6 class="fw-bold mb-3">Explorar</h6>
+                    <ul class="list-unstyled small text-secondary">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Tienda</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Encargos</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Actividades</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-bold mb-3">Legales</h6>
+                    <ul class="list-unstyled small text-secondary">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Privacidad</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Cookies</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 text-center text-lg-start">
+                    <button class="btn btn-primary w-100 rounded-pill mb-2 shadow-sm"  onclick="window.location.href='actividades-editor.html'">Área editor</button>
+                    <button class="btn btn-outline-secondary w-100 rounded-pill">Área administrador</button>
+                </div>
+            </div>
+            <hr class="my-5 opacity-10">
+            <div class="text-center text-secondary small">
+                &copy; 2026 Fundación Fuente Agria.
+            </div>
+        </div>
+    </footer>
+
+
+    <div class="modal fade" id="modalPost" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom py-3">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-postcard me-2 text-primary"></i>Editor de Actividad
+                    </h5>
+                    <div class="ms-auto">
+                        <button class="btn btn-outline-secondary btn-sm me-2 rounded-pill">Guardar Borrador</button>
+                        <button class="btn btn-primary btn-sm rounded-pill px-4" data-bs-dismiss="modal">Publicar /
+                            Actualizar</button>
+                    </div>
+                    <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body bg-light">
+                    <div class="row g-4">
+
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-3 mb-3">
+                                <div class="card-body p-4">
+                                    <div class="mb-3">
+                                        <input type="text"
+                                            class="form-control form-control-lg fw-bold border-0 px-0 fs-3"
+                                            placeholder="Añadir el título aquí..." value="Taller de Cerámica y Pintura">
+                                    </div>
+
+                                    <div class="border rounded-top bg-light p-2 d-flex gap-1 mb-0 border-bottom-0">
+                                        <button class="btn btn-sm btn-light border"><i
+                                                class="bi bi-type-bold"></i></button>
+                                        <button class="btn btn-sm btn-light border"><i
+                                                class="bi bi-type-italic"></i></button>
+                                        <button class="btn btn-sm btn-light border"><i
+                                                class="bi bi-list-ul"></i></button>
+                                        <button class="btn btn-sm btn-light border"><i class="bi bi-link"></i></button>
+                                        <div class="vr mx-1"></div>
+                                        <button class="btn btn-sm btn-light border"><i class="bi bi-card-image"></i>
+                                            Añadir Objeto</button>
+                                    </div>
+                                    <textarea class="form-control border-top-0 rounded-bottom rounded-top-0 shadow-none"
+                                        rows="12" style="resize: vertical;">
+Nuestros usuarios disfrutaron de una jornada creativa moldeando arcilla y expresando sus emociones a través de la pintura. 
+
+Una actividad diseñada para mejorar la motricidad fina y fomentar la imaginación en un ambiente relajado y colaborativo.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                                    </textarea>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm rounded-3">
+                                <div class="card-header bg-white fw-bold small py-3">Extracto (Resumen)</div>
+                                <div class="card-body">
+                                    <textarea class="form-control"
+                                        rows="3">Resumen breve para mostrar en las tarjetas...</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+
+                            <div class="card border-0 shadow-sm rounded-3 mb-3">
+                                <div class="card-header bg-white fw-bold small py-3">Publicación</div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="small text-muted"><i class="bi bi-eye me-1"></i>Visibilidad:</span>
+                                        <span class="small fw-bold text-primary">Público <a href="#"
+                                                class="text-decoration-none ms-1">Editar</a></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <span class="small text-muted"><i class="bi bi-calendar3 me-1"></i>Fecha:</span>
+                                        <input type="date" class="form-control form-control-sm w-auto"
+                                            value="2025-10-15">
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked"
+                                            checked>
+                                        <label class="form-check-label small" for="flexSwitchCheckChecked">Fijar en la
+                                            parte superior</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm rounded-3 mb-3">
+                                <div class="card-header bg-white fw-bold small py-3">Imagen Destacada</div>
+                                <div class="card-body text-center">
+                                    <div class="bg-light border border-dashed rounded mb-3 d-flex align-items-center justify-content-center overflow-hidden position-relative"
+                                        style="height: 150px;">
+                                        <img src="./imgs/img-stock-2.jpg"
+                                            class="w-100 h-100 object-fit-cover position-absolute">
+                                        <button
+                                            class="btn btn-sm btn-light position-absolute top-0 end-0 m-2 shadow-sm"><i
+                                                class="bi bi-pencil"></i></button>
+                                    </div>
+                                    <button class="btn btn-outline-primary btn-sm w-100">Cambiar imagen</button>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm rounded-3">
+                                <div class="card-header bg-white fw-bold small py-3">Categorías</div>
+                                <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" checked>
+                                        <label class="form-check-label small">Talleres</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox">
+                                        <label class="form-check-label small">Excursiones</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox">
+                                        <label class="form-check-label small">Eventos</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox">
+                                        <label class="form-check-label small">Noticias</label>
+                                    </div>
+                                    <hr class="my-2">
+                                    <a href="#" class="text-decoration-none small fw-bold">+ Añadir nueva categoría</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-body text-center py-4">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-trash fs-1 bg-danger bg-opacity-10 p-3 rounded-circle"></i>
+                    </div>
+                    <h5 class="fw-bold">¿Borrar actividad?</h5>
+                    <p class="text-secondary small">Esta acción moverá la entrada a la papelera.</p>
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <button type="button" class="btn btn-light rounded-pill w-50"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger rounded-pill w-50"
+                            data-bs-dismiss="modal">Borrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalHeaderEdit" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Editar Título Sección</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" rows="3">Gestión de Actividades...</textarea>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-primary rounded-pill" data-bs-dismiss="modal">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

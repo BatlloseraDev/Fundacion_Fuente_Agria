@@ -1,0 +1,79 @@
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  object-position: center;
+  background-color: #f8f9fa;
+}
+
+.sponsor-logo {
+  height: 40px;
+  background: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  z-index: 1050;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.chat-header {
+  cursor: pointer;
+}
+
+.list-group-item.active {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.msg-bubble {
+  padding: 8px 12px;
+  border-radius: 15px;
+  margin-bottom: 8px;
+  max-width: 80%;
+  font-size: 0.9rem;
+}
+
+.msg-in {
+  background: #e9ecef;
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+.msg-out {
+  background: #cfe2ff;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}

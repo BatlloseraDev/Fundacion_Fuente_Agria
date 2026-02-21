@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fundación Fuente Agria - Apoyo integral a personas con discapacidad intelectual.">
+    <title>CatálogoFundación Fuente Agria</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/styles.css">
+
+    <style>
+        .bg-gradient-light {
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .product-card-editor {
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        /* Capa de herramientas sobre la tarjeta del producto */
+        .product-tools-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        /* Mostrar herramientas al hacer hover sobre la card */
+        .product-card-editor:hover .product-tools-overlay {
+            opacity: 1;
+        }
+        
+        /* Borde visual para indicar selección */
+        .product-card-editor:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+            border-color: #0d6efd !important; 
+        }
+
+        /* Estilo para las pestañas del modal */
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            color: #0d6efd;
+            border-bottom: 3px solid #0d6efd;
+        }
+        .nav-tabs .nav-link {
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="bg-dark text-white py-2 text-center sticky-top border-bottom border-secondary" style="z-index: 1030;">
+        <small class="fw-bold text-uppercase spacing-1"><i class="bi bi-pencil-square me-2"></i>Gestor de Tienda</small>
+        <button class="btn btn-sm btn-outline-light ms-3 py-0 rounded-pill">Guardar Cambios</button>
+        <a href="tienda.html" class="btn btn-sm btn-link text-white text-decoration-none py-0">Salir</a>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary" href="#">
+                <img src="./imgs/Logo_FFA.png" alt="Logo" style="width: 40px; ">
+                <span>Catálogo Fuente Agria</span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center fw-semibold">
+                    <li class="nav-item"><a class="nav-link" href="./index.html">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link active text-primary" href="./tienda.html">Tienda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./encargos.html">Encargos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="./actividades.html">Actividades</a></li>
+                    <li class="nav-item ms-lg-3"><a class="btn btn-primary rounded-pill px-4" href="#">Iniciar sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-5 bg-gradient-light border-bottom">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-md-5 editable-container" data-bs-toggle="modal" data-bs-target="#modalEditText">
+                    <button class="btn btn-primary btn-sm rounded-circle btn-edit-float"><i class="bi bi-pencil-fill"></i></button>
+                    <h1 class="fw-bold display-5 ">Nuestros <span class="text-primary">Productos</span></h1>
+                    <p class="text-secondary mb-0">Explora opciones personalizadas diseñadas especialmente para tus eventos.</p>
+                </div>
+                
+                <div class="col-md-7">
+                    <div class="d-flex flex-wrap gap-2 justify-content-md-end align-items-center">
+                        
+                        <button class="btn btn-success rounded-pill shadow-sm fw-bold px-4 me-2" data-bs-toggle="modal" data-bs-target="#modalProduct">
+                            <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
+                        </button>
+
+                        <div class="dropdown">
+                            <button class="btn btn-white border shadow-sm dropdown-toggle rounded-pill" type="button" data-bs-toggle="dropdown">Categoría</button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Eventos</a></li>
+                                <li><a class="dropdown-item" href="#">Regalos Empresa</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="input-group mb-0" style="max-width: 200px;">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-pill"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0 rounded-end-pill" placeholder="Buscar...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-5 bg-white">
+        <div class="container">
+            <div class="row g-4">
+                
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border shadow-sm rounded-4 overflow-hidden product-card-editor">
+                        <div class="product-tools-overlay">
+                            <button class="btn btn-light btn-sm shadow rounded-circle text-primary" data-bs-toggle="modal" data-bs-target="#modalProduct" title="Editar Producto">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm shadow rounded-circle" data-bs-toggle="modal" data-bs-target="#modalDelete" title="Eliminar Producto">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-light d-flex align-items-center justify-content-center position-relative" style="height: 200px;">
+                            <img src="./imgs/img-stock-7.jpg" class="img-fluid h-100 object-fit-cover" alt="Producto">
+                        </div>
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold">Detalles de Comunión</h5>
+                            <p class="card-text text-secondary small">Jabones artesanales personalizados con etiqueta de madera.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 mb-0 fw-bold text-primary">~2,50€ <small class="text-muted" style="font-size: 0.7rem;">/ud</small></span>
+                                <span class="badge bg-light text-secondary border">Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border shadow-sm rounded-4 overflow-hidden product-card-editor">
+                        <div class="product-tools-overlay">
+                            <button class="btn btn-light btn-sm shadow rounded-circle text-primary" data-bs-toggle="modal" data-bs-target="#modalProduct"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-danger btn-sm shadow rounded-circle" data-bs-toggle="modal" data-bs-target="#modalDelete"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <img src="./imgs/img-stock-8.jpg" class="img-fluid h-100 object-fit-cover">
+                        </div>
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold">Centros de Mesa</h5>
+                            <p class="card-text text-secondary small">Composiciones con flores secas y base de cerámica.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 mb-0 fw-bold text-primary">~15,00€</span>
+                                <span class="badge bg-light text-secondary border">Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border shadow-sm rounded-4 overflow-hidden product-card-editor">
+                        <div class="product-tools-overlay">
+                            <button class="btn btn-light btn-sm shadow rounded-circle text-primary" data-bs-toggle="modal" data-bs-target="#modalProduct"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-danger btn-sm shadow rounded-circle" data-bs-toggle="modal" data-bs-target="#modalDelete"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <img src="./imgs/img-stock-9.jpg" class="img-fluid h-100 object-fit-cover">
+                        </div>
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold">Libretas Corporativas</h5>
+                            <p class="card-text text-secondary small">Encuadernación artesanal con logo grabado.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 mb-0 fw-bold text-primary">~8,00€</span>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">Borrador</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border shadow-sm rounded-4 overflow-hidden product-card-editor">
+                        <div class="product-tools-overlay">
+                            <button class="btn btn-light btn-sm shadow rounded-circle text-primary" data-bs-toggle="modal" data-bs-target="#modalProduct"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-danger btn-sm shadow rounded-circle" data-bs-toggle="modal" data-bs-target="#modalDelete"><i class="bi bi-trash"></i></button>
+                        </div>
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <img src="./imgs/img-stock-10.avif" class="img-fluid h-100 object-fit-cover">
+                        </div>
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold">Cuadros Personalizados</h5>
+                            <p class="card-text text-secondary small">Marcos a mano bajo pedido previo.</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 mb-0 fw-bold text-primary">~25,00€</span>
+                                <span class="badge bg-light text-secondary border">Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+        <footer class="bg-light border-top py-5">
+        <div class="container py-4">
+            <div class="row g-4">
+                <div class="col-lg-4 editable-container p-2" data-bs-toggle="modal" data-bs-target="#modalEditText">
+                    <button class="btn btn-primary btn-sm rounded-circle btn-edit-float"><i class="bi bi-pencil-fill"></i></button>
+                    <h5 class="fw-bold mb-3 text-primary">Catálogo Fundación Fuente Agria</h5>
+                    <p class="text-secondary small">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Id, ipsam
+                        magni eos repudiandae nisi dolore laudantium voluptates, aperiam numquam nostrum tenetur qui non
+                        adipisci. Obcaecati deserunt officia ex explicabo in!</p>
+                </div>
+                <div class="col-lg-2 offset-lg-1">
+                    <h6 class="fw-bold mb-3">Explorar</h6>
+                    <ul class="list-unstyled small text-secondary">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Tienda</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Encargos</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Actividades</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="fw-bold mb-3">Legales</h6>
+                    <ul class="list-unstyled small text-secondary">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Privacidad</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-reset">Cookies</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 text-center text-lg-start">
+                    <button class="btn btn-primary w-100 rounded-pill mb-2 shadow-sm">Página editor</button>
+                    <button class="btn btn-outline-secondary w-100 rounded-pill">Área administrador</button>
+                </div>
+            </div>
+            <hr class="my-5 opacity-10">
+            <div class="text-center text-secondary small">
+                &copy; 2026 Fundación Fuente Agria.
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="modalProduct" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-primary"><i class="bi bi-box-seam me-2"></i>Gestión de Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body pt-2">
+                    <ul class="nav nav-tabs mb-4" id="productTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">General</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="images-tab" data-bs-toggle="tab" data-bs-target="#images" type="button" role="tab">Imágenes</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">Descripción</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">SEO</button>
+                        </li>
+                    </ul>
+
+                    <form>
+                        <div class="tab-content" id="productTabContent">
+                            
+                            <div class="tab-pane fade show active" id="general" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-bold small">Título del Producto</label>
+                                        <input type="text" class="form-control" placeholder="Ej: Jabones Artesanales">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold small">Estado</label>
+                                        <select class="form-select">
+                                            <option selected>Publicado</option>
+                                            <option>Borrador</option>
+                                            <option>Sin Stock</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Precio (€)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">€</span>
+                                            <input type="number" class="form-control" placeholder="0.00" step="0.01">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Categoría</label>
+                                        <select class="form-select">
+                                            <option>Seleccionar...</option>
+                                            <option>Eventos</option>
+                                            <option>Regalos Empresa</option>
+                                            <option>Decoración</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold small">Descripción Corta (Resumen)</label>
+                                        <textarea class="form-control" rows="2" placeholder="Breve resumen para la tarjeta..."></textarea>
+                                        <div class="form-text">Se muestra en la cuadrícula de productos.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="images" role="tabpanel">
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small d-block">Imagen Principal</label>
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="bg-light border rounded-3 d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                            <i class="bi bi-image text-secondary fs-3"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <input class="form-control mb-2" type="file">
+                                            <div class="form-text">Tamaño recomendado: 800x800px. JPG o PNG.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div>
+                                    <label class="form-label fw-bold small d-block">Galería de Imágenes (Adicionales)</label>
+                                    <input class="form-control mb-3" type="file" multiple>
+                                    <div class="row g-2">
+                                        <div class="col-3 position-relative">
+                                            <img src="https://via.placeholder.com/150" class="img-thumbnail rounded">
+                                            <button type="button" class="btn btn-danger btn-sm badge position-absolute top-0 end-0 m-1"><i class="bi bi-x"></i></button>
+                                        </div>
+                                        <div class="col-3 position-relative">
+                                            <img src="https://via.placeholder.com/150" class="img-thumbnail rounded">
+                                            <button type="button" class="btn btn-danger btn-sm badge position-absolute top-0 end-0 m-1"><i class="bi bi-x"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="details" role="tabpanel">
+                                <label class="form-label fw-bold small">Descripción Detallada</label>
+                                <textarea class="form-control bg-light" rows="10" placeholder="Escribe aquí toda la información del producto..."></textarea>
+                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-bold"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-type-italic"></i></button>
+                                    <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-list-ul"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="seo" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Título SEO (Meta Title)</label>
+                                    <input type="text" class="form-control" placeholder="Dejar vacío para usar el título del producto">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Meta Descripción</label>
+                                    <textarea class="form-control" rows="3" placeholder="Descripción para buscadores (Google)..."></textarea>
+                                    <div class="form-text">Máximo 160 caracteres recomendado.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small">Slug (URL amigable)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-secondary">/tienda/</span>
+                                        <input type="text" class="form-control" placeholder="nombre-producto-ejemplo">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top-0 pt-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success rounded-pill px-4" data-bs-dismiss="modal">Guardar Producto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-body text-center py-4">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-trash fs-1 bg-danger bg-opacity-10 p-3 rounded-circle"></i>
+                    </div>
+                    <h5 class="fw-bold">¿Eliminar producto?</h5>
+                    <p class="text-secondary small">Esta acción no se puede deshacer. El producto desaparecerá de la tienda.</p>
+                    <div class="d-flex gap-2 justify-content-center mt-4">
+                        <button type="button" class="btn btn-light rounded-pill w-50" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger rounded-pill w-50" data-bs-dismiss="modal">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <div class="modal fade" id="modalEditText" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Editar Contenido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" rows="4">Texto recuperado...</textarea>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="button" class="btn btn-primary rounded-pill" data-bs-dismiss="modal">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

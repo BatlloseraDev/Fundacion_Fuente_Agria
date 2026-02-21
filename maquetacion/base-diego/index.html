@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundación Fuente Agria - Gestión Integral</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#" onclick="showView('home')">
+                <img src="./imgs/Logo_FFA.png" alt="logo" style="height: 40px; background:white; padding:2px; border-radius:4px; margin-right:10px;">
+                Fundación Fuente Agria
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link active" href="#" onclick="showView('home')" data-target="home">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showView('news')" data-target="news">Noticias</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showView('catalog')" data-target="catalog">Talleres (Catálogo)</a></li>
+                    
+                    <li class="nav-item d-none" id="adminNavItem">
+                        <a class="nav-link text-warning fw-bold" href="#" onclick="showView('admin')" data-target="admin">
+                            <i class="bi bi-gear-fill"></i> Gestión
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <div id="authContainer">
+                        <button class="btn btn-outline-light btn-sm" onclick="showView('login')">
+                            <i class="bi bi-person-circle"></i> Iniciar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-5 flex-grow-1">
+
+        <section id="home" class="view active fade-in">
+            <div class="p-5 mb-4 bg-light rounded-3 border shadow-sm hero-section">
+                <div class="container-fluid py-5">
+                    <h1 class="display-5 fw-bold" id="heroTitleDisplay">Bienvenidos a la Fundación Fuente Agria</h1>
+                    <p class="col-md-8 fs-4" id="heroDescDisplay">Apoyando la integración y el desarrollo a través de nuestros talleres ocupacionales.</p>
+                    <button class="btn btn-primary btn-lg" onclick="showView('catalog')">Ver Catálogo de Productos</button>
+                </div>
+            </div>
+
+            <h3 class="mb-4 pb-2 border-bottom border-primary">Últimas novedades</h3>
+            <div class="row g-4" id="homeNewsContainer">
+                </div>
+        </section>
+
+        <section id="news" class="view d-none fade-in">
+            <h2 class="mb-4 border-bottom border-warning d-inline-block">Actualidad y Noticias</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-4" id="newsContainer">
+                </div>
+        </section>
+
+        <section id="catalog" class="view d-none fade-in">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Catálogo de Talleres</h2>
+                <p class="lead text-muted">Productos artesanales elaborados en nuestros centros.</p>
+            </div>
+            <div class="row row-cols-1 row-cols-md-3 g-4" id="catalogContainer">
+                </div>
+        </section>
+
+        <section id="login" class="view d-none fade-in">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow p-4">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold text-primary">Iniciar Sesión</h3>
+                            <p class="text-muted">Accede a tu cuenta</p>
+                        </div>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="loginEmail" placeholder="admin@fundacion.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="loginPass" placeholder="1234" required>
+                            </div>
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary">Entrar</button>
+                            </div>
+                            <div class="text-center">
+                                <small>¿No tienes cuenta? <a href="#" onclick="showView('register')">Regístrate aquí</a></small>
+                            </div>
+                            <hr>
+                            <div class="alert alert-info small">
+                                <strong>Cuentas de prueba:</strong><br>
+                                Admin: admin@fundacion.com / 1234<br>
+                                Usuario: user@test.com / 1234
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="register" class="view d-none fade-in">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card shadow p-4">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold text-success">Crear Cuenta</h3>
+                            <p class="text-muted">Únete a la comunidad</p>
+                        </div>
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="regName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="regEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="regPass" required>
+                            </div>
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-success">Registrarse</button>
+                            </div>
+                            <div class="text-center">
+                                <small>¿Ya tienes cuenta? <a href="#" onclick="showView('login')">Inicia sesión</a></small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin" class="view d-none fade-in">
+            <div class="alert alert-warning d-flex justify-content-between align-items-center mb-4 shadow-sm">
+                <span><i class="bi bi-shield-lock-fill"></i> Panel de Administración</span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="list-group shadow-sm" id="list-tab" role="tablist">
+                        <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#admin-home">Portada</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#admin-news">Noticias</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#admin-products">Productos</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#admin-sponsors">Colaboradores</a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#admin-orders">Encargos <span class="badge bg-danger ms-2" id="orderCountBadge">0</span></a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#admin-chat">Chat Soporte</a>
+                        <a class="list-group-item list-group-item-action list-group-item-dark mt-2" data-bs-toggle="list" href="#admin-users">Usuarios Admin</a>
+                    </div>
+                </div>
+                
+                <div class="col-md-9">
+                    <div class="tab-content" id="nav-tabContent">
+                        
+                        <div class="tab-pane fade show active" id="admin-home">
+                            <div class="card p-4 shadow-sm mb-4">
+                                <h4 class="mb-3">Editar Cabecera</h4>
+                                <form id="heroForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Título Principal</label>
+                                        <input type="text" class="form-control" id="heroTitleInput" value="Bienvenidos a la Fundación Fuente Agria">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Subtítulo</label>
+                                        <textarea class="form-control" id="heroDescInput" rows="2">Apoyando la integración y el desarrollo a través de nuestros talleres ocupacionales.</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Actualizar Portada</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="admin-news">
+                            <div class="card p-4 shadow-sm">
+                                <h4 class="mb-3">Publicar Noticia</h4>
+                                <form id="newsForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Título</label>
+                                        <input type="text" class="form-control" id="newsTitle" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Descripción</label>
+                                        <textarea class="form-control" id="newsDesc" rows="3" required></textarea>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="newsFeatured">
+                                        <label class="form-check-label fw-bold text-primary" for="newsFeatured">Destacar en la Página de Inicio</label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Imagen</label>
+                                        <input type="file" class="form-control" id="newsImage" accept="image/*" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Publicar</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="admin-products">
+                            <div class="card p-4 shadow-sm">
+                                <h4 class="mb-3">Añadir Producto al Catálogo</h4>
+                                <form id="productForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre del Producto</label>
+                                        <input type="text" class="form-control" id="prodName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Descripción corta</label>
+                                        <input type="text" class="form-control" id="prodDesc" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Foto del Producto</label>
+                                        <input type="file" class="form-control" id="prodImage" accept="image/*" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Añadir al Catálogo</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="admin-sponsors">
+                            <div class="card p-4 shadow-sm">
+                                <h4 class="mb-3">Añadir Colaborador</h4>
+                                <form id="sponsorForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre de la Entidad</label>
+                                        <input type="text" class="form-control" id="sponsorName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Logo de la Entidad</label>
+                                        <input type="file" class="form-control" id="sponsorImage" accept="image/*" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning">Añadir al Footer</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="admin-orders">
+                            <h4>Encargos Recibidos</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mt-3">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th>Contacto</th>
+                                            <th>Producto</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody"></tbody>
+                                </table>
+                                <p id="noOrdersMsg" class="text-center text-muted mt-3">No hay encargos pendientes.</p>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="admin-chat">
+                            <h4>Soporte a Usuarios</h4>
+                            <div class="card shadow-sm" style="height: 500px;">
+                                <div class="row g-0 h-100">
+                                    <div class="col-4 border-end overflow-auto bg-light">
+                                        <div class="list-group list-group-flush" id="chatUserList">
+                                            </div>
+                                    </div>
+                                    <div class="col-8 d-flex flex-column">
+                                        <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+                                            <strong id="currentChatUser">Seleccionar usuario</strong>
+                                            <span class="badge bg-success">Online</span>
+                                        </div>
+                                        <div class="flex-grow-1 p-3 overflow-auto" id="adminChatDisplay" style="background:#f8f9fa;"></div>
+                                        <div class="p-3 border-top bg-white">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="adminChatInput" placeholder="Responder...">
+                                                <button class="btn btn-primary" onclick="adminSendMessage()">Enviar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="admin-users">
+                            <div class="card p-4 border-danger shadow-sm">
+                                <h4 class="mb-3 text-danger">Registrar Nuevo Administrador</h4>
+                                <form id="createAdminForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="newAdminName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Correo</label>
+                                        <input type="email" class="form-control" id="newAdminEmail" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Contraseña</label>
+                                        <input type="password" class="form-control" id="newAdminPass" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger">Crear Admin</button>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-dark text-light py-4 mt-auto">
+        <div class="container text-center">
+            <p class="mb-2">Con el apoyo de:</p>
+            <div class="d-flex justify-content-center gap-3 mb-3 flex-wrap" id="sponsorsContainer">
+                <img src="./imgs/Logo_CCM.png" alt="logo-ccm" class="sponsor-logo">
+                <img src="./imgs/Logo_ASPADES.png" alt="logo-aspades" class="sponsor-logo">
+            </div>
+            <small>&copy; 2026 Fundación Fuente Agria.</small>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Solicitud de Encargo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="orderForm">
+                        <div class="mb-3">
+                            <label class="form-label">Producto seleccionado</label>
+                            <input type="text" class="form-control" id="productNameInput" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tu Nombre</label>
+                            <input type="text" class="form-control" id="orderClientName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email / Teléfono</label>
+                            <input type="text" class="form-control" id="orderClientContact" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-widget shadow" id="chatWidget">
+        <div class="chat-header bg-primary text-white p-2 d-flex justify-content-between align-items-center rounded-top pointer">
+            <span class="fw-bold"><i class="bi bi-chat-dots"></i> Chat de soporte</span>
+            <i class="bi bi-chevron-up"></i>
+        </div>
+        <div class="chat-content bg-white d-none" id="chatContent">
+            <div class="chat-body p-3" id="chatBody" style="height: 250px; overflow-y: auto;">
+                <div class="d-flex flex-column align-items-start mb-2">
+                    <span class="bg-light text-dark p-2 rounded">¡Hola! ¿En qué podemos ayudarte?</span>
+                </div>
+            </div>
+            <div class="chat-footer p-2 border-top">
+                <div class="input-group">
+                    <input type="text" class="form-control form-control-sm" placeholder="Mensaje...">
+                    <button class="btn btn-primary btn-sm"><i class="bi bi-send"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./main.js"></script>
+</body>
+</html>
