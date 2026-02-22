@@ -1,33 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter, Routes, Route } from 'react-router';
+import { Header } from './components/ui/Header';
+import { Footer } from './components/ui/Footer';
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+// A modo de testeo he puesto esto
+const Inicio = () => <div className="container py-5"><h2>Página de Inicio</h2></div>;
+const Tienda = () => <div className="container py-5"><h2>Página de Tienda</h2></div>;
 
+
+
+function App() {
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <BrowserRouter>
+        <div className='d-flex flex-column min-vh-100 '>
+
+
+          <Header /> {/*Esto hace que siempre se renderice el header independientemente de la ruta */}
+          <main className="flex-grow-1 container-fluid px-0" style={{ minHeight: '60vh' }}>
+            <Routes>
+              <Route path="/" element={<Inicio />} />
+              <Route path="/tienda" element={<Tienda />} />
+              <Route path="/encargos" element={<div className="container py-5"><h2>Encargos</h2></div>} />
+              <Route path="/actividades" element={<div className="container py-5"><h2>Actividades</h2></div>} />
+              {/* Añadir aquí el resto de las rutas (admin, editor, login, contacto, etc.) */}
+            </Routes>
+          </main>
+          <Footer editorToken={true} adminToken={true} />
+          {/*Esto hace que siempre se renderice el footer independientemente de la ruta 
+        APUNTE: editor Token y adminToken es lo que se va a encargar de renderizar los botones si tiene permisos, tneemos que investigar la correcta
+        integración de esto
+      */}
+        </div>
+      </BrowserRouter>
     </>
   )
 }
