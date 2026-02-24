@@ -11,10 +11,6 @@ export default function EncargosPage() {
     <div className="container py-5">
       <div className="d-flex flex-column gap-2 mb-4">
         <h1 className="h3 mb-0">Encargos personalizados</h1>
-        <p className="text-secondary mb-0">
-          Solicita un encargo a medida (tazas, reparacion de madera, detalles artesanales, etc.).
-          Puedes adjuntar una imagen de referencia (max 4MB).
-        </p>
 
         <div className="mt-3">
           <button type="button" className="btn btn-primary" onClick={() => setOpen(true)}>
