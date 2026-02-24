@@ -22,7 +22,6 @@ export function EncargosCarousel({ items, autoMs = 4500 }: Props) {
     if (safeItems.length <= 1) return;
     const t = window.setInterval(() => next(), autoMs);
     return () => window.clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeItems.length, autoMs]);
 
   if (safeItems.length === 0) return null;
