@@ -3,6 +3,7 @@ import { Header } from './components/ui/Header';
 import { Footer } from './components/ui/Footer';
 import { ActividadesPage } from './actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from './actividades/pages/ActividadDetailPage';
+import InicioPage from './inicio/pages/InicioPage';
 import './App.css'
 
 // A modo de testeo he puesto esto
@@ -21,7 +22,7 @@ function App() {
           <Header /> {/*Esto hace que siempre se renderice el header independientemente de la ruta */}
           <main className="flex-grow-1 container-fluid px-0" style={{ minHeight: '60vh' }}>
             <Routes>
-              <Route path="/" element={<Inicio />} />
+              <Route path="/" element={<InicioPage />} />
               <Route path="/tienda" element={<Tienda />} />
               <Route path="/encargos" element={<div className="container py-5"><h2>Encargos</h2></div>} />
               <Route path="/actividades" element={<ActividadesPage />} />
