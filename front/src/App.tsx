@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { Header } from './components/ui/Header';
 import { Footer } from './components/ui/Footer';
+import EncargosPage from "./encargos/pages/EncargosPage";
 import './App.css'
 
 // A modo de testeo he puesto esto
@@ -21,7 +22,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Inicio />} />
               <Route path="/tienda" element={<Tienda />} />
-              <Route path="/encargos" element={<div className="container py-5"><h2>Encargos</h2></div>} />
+              <Route path="/encargos" element={<EncargosPage />} />
               <Route path="/actividades" element={<div className="container py-5"><h2>Actividades</h2></div>} />
               {/* Añadir aquí el resto de las rutas (admin, editor, login, contacto, etc.) */}
             </Routes>
