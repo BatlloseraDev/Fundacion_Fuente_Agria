@@ -22,16 +22,17 @@ function App() {
             <Routes>
               <Route path="/" element={<Inicio />} />
               <Route path="/tienda" element={<Tienda />} />
-              <Route path="/encargos" element={<EncargosPage />} />
-              <Route path="/actividades" element={<div className="container py-5"><h2>Actividades</h2></div>} />
+              <Route path="/encargos" element={<div className="container py-5"><h2>Encargos</h2></div>} />
+              <Route path="/actividades" element={<ActividadesPage />} />
+              <Route path="/actividades/:id" element={<ActividadDetailPage />} />
               {/* Añadir aquí el resto de las rutas (admin, editor, login, contacto, etc.) */}
             </Routes>
           </main>
           <Footer editorToken={true} adminToken={true} />
           {/*Esto hace que siempre se renderice el footer independientemente de la ruta 
-        APUNTE: editor Token y adminToken es lo que se va a encargar de renderizar los botones si tiene permisos, tneemos que investigar la correcta
-        integración de esto
-      */}
+            APUNTE: editor Token y adminToken es lo que se va a encargar de renderizar los botones si tiene permisos, tneemos que investigar la correcta
+            integración de esto
+          */}
         </div>
       </BrowserRouter>
     </>
