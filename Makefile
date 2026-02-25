@@ -1,7 +1,7 @@
 # Makefile para Fundación Fuente Agria
 # Comandos para automatizar Docker en entorno de desarrollo
 
-.PHONY: all build start stop restart hard-restart reinstall logs install install-back install-front shell-back shell-front clean
+.PHONY: all build start stop restart hard-restart reinstall logs install install-back install-front shell-back shell-front clean 
 
 # --- COMANDOS PRINCIPALES ---
 
@@ -65,6 +65,12 @@ clean:
 	docker compose down -v
 
 ##Cosas de vic por usar wsl: sudo chown -R $USER:$USER back
+
+node_modules: 
+	docker compose run --rm back yarn install
+	docker compose run --rm front npm install
+ 
+
 
 # Generar el prisma
 back-prisma-generate:

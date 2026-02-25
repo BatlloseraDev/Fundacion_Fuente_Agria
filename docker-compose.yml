@@ -16,6 +16,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+   
 
   # --- GESTOR DE BD ---
   pgadmin:
@@ -31,6 +32,7 @@ services:
       - postgres
     networks:
       - app-network
+    
 
   # --- BASE DE DATOS NoSQL (MongoDB) ---
   mongo:
@@ -63,6 +65,7 @@ services:
       - mongo
     networks:
       - app-network
+ 
 
   # --- BACKEND (NestJS) ---
   back:
@@ -89,6 +92,8 @@ services:
       - postgres
     networks:
       - app-network
+    #user: "${UID:-1000}:${GID:-1000}"
+    command: sh -c " yarn prisma generate && yarn start:dev"
 
   # --- FRONTEND (Vite + React) ---
   front:
@@ -106,6 +111,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
     networks:
       - app-network
+    #user: "${UID:-1000}:${GID:-1000}"
+   
 
   # --- NGINX ---
   nginx:

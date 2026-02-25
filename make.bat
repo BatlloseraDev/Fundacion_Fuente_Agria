@@ -14,6 +14,10 @@ IF "%1"=="install-front" GOTO install-front
 IF "%1"=="shell-back" GOTO shell-back
 IF "%1"=="shell-front" GOTO shell-front
 IF "%1"=="clean" GOTO clean
+IF "%1"=="node_modules" GOTO node_modules
+GOTO help
+
+:help
 
 REM Si no hay argumentos o no coincide, muestra ayuda
 ECHO.
@@ -33,6 +37,7 @@ ECHO   install-front  - Instalar solo front (npm)
 ECHO   shell-back     - Entrar a terminal del back
 ECHO   shell-front    - Entrar a terminal del front
 ECHO   clean          - Borrar todo (contenedores y volumenes)
+ECHO   node_modules   - Reinstalar node_modules
 GOTO end
 
 REM --- DEFINICIÓN DE COMANDOS ---
@@ -101,5 +106,12 @@ REM --- DEFINICIÓN DE COMANDOS ---
     echo BORRANDO TODO (BD INCLUIDA)...
     docker compose down -v
     GOTO end
+
+:node_modules
+    echo Reinstalando node_modules
+    docker compose run --rm back yarn install
+ 	docker compose run --rm front npm install
+    GOTO end
+
 
 :end
