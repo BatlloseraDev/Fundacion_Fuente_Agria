@@ -17,7 +17,7 @@ export const Header = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto align-items-center fw-semibold">
             <li className="nav-item"><Link className="nav-link text-primary" to="/">Inicio</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/tienda">Tienda</Link></li>
+            <li className="nav-item"><Link className="nav-link" to="/catalogo">Catálogo</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/encargos">Encargos</Link></li>
             <li className="nav-item"><Link className="nav-link" to="/actividades">Actividades</Link></li>
             <li className="nav-item ms-lg-3">
