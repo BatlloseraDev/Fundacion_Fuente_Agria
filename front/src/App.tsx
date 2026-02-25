@@ -4,6 +4,7 @@ import { Footer } from './components/ui/Footer';
 import { ActividadesPage } from './actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from './actividades/pages/ActividadDetailPage';
 import { CatalogoPage } from './catalogo/pages/CatalogoPage';
+import EncargosPage from "./encargos/pages/EncargosPage";
 import './App.css'
 
 // A modo de testeo he puesto esto
