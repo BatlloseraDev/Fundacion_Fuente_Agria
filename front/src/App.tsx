@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { Header } from './components/ui/Header';
 import { Footer } from './components/ui/Footer';
-import { ActividadesPage } from './actividades/pages/ActividadesPage';
-import { ActividadDetailPage } from './actividades/pages/ActividadDetailPage';
+import EncargosPage from "./encargos/pages/EncargosPage";
 import './App.css'
 
 // A modo de testeo he puesto esto
