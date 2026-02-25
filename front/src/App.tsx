@@ -3,11 +3,11 @@ import { Header } from './components/ui/Header';
 import { Footer } from './components/ui/Footer';
 import { ActividadesPage } from './actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from './actividades/pages/ActividadDetailPage';
+import { CatalogoPage } from './catalogo/pages/CatalogoPage';
 import './App.css'
 
 // A modo de testeo he puesto esto
 const Inicio = () => <div className="container py-5"><h2>Página de Inicio</h2></div>;
-const Tienda = () => <div className="container py-5"><h2>Página de Tienda</h2></div>;
 
 
 
@@ -22,7 +22,7 @@ function App() {
           <main className="flex-grow-1 container-fluid px-0" style={{ minHeight: '60vh' }}>
             <Routes>
               <Route path="/" element={<Inicio />} />
-              <Route path="/tienda" element={<Tienda />} />
+              <Route path="/catalogo" element={<CatalogoPage />} />
               <Route path="/encargos" element={<div className="container py-5"><h2>Encargos</h2></div>} />
               <Route path="/actividades" element={<ActividadesPage />} />
               <Route path="/actividades/:id" element={<ActividadDetailPage />} />
