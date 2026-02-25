@@ -9,9 +9,6 @@ import EncargosPage from "./encargos/pages/EncargosPage";
 import './App.css'
 
 // A modo de testeo he puesto esto
-const Inicio = () => <div className="container py-5"><h2>Página de Inicio</h2></div>;
-
-
 
 function App() {
   return (
@@ -25,7 +22,7 @@ function App() {
             <Routes>
               <Route path="/" element={<InicioPage />} />
               <Route path="/catalogo" element={<CatalogoPage />} />
-              <Route path="/encargos" element={<div className="container py-5"><h2>Encargos</h2></div>} />
+              <Route path="/encargos" element={<EncargosPage />} />
               <Route path="/actividades" element={<ActividadesPage />} />
               <Route path="/actividades/:id" element={<ActividadDetailPage />} />
               {/* Añadir aquí el resto de las rutas (admin, editor, login, contacto, etc.) */}
