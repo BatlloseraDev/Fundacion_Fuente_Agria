@@ -21,11 +21,13 @@ async function seedUsers(prisma, roles) {
         name: 'Admin',
         subname: 'Sistema',
         password: "admin",
+        address: "Calle Falsa 123",
+        dni: "01234567U",
         roles: {
           create: [
             { role: { connect: { id: roles.admin.id } } }
           ]
-        }
+        }   
       },
       include: { roles: true } // Para ver qué roles se crearon en el log
     });
