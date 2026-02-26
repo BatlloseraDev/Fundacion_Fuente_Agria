@@ -17,7 +17,7 @@ generator client2 {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   // no poner url aquí en Prisma 7
 }
 

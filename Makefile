@@ -75,4 +75,9 @@ node_modules:
 # Generar el prisma
 back-prisma-generate:
 	docker compose exec back npx prisma generate
-	
+
+
+# docker compose exec back yarn prisma migrate dev --name init_mysql	
+
+## Permisos de Docker para mysql si alguien le da el error p1010
+# docker compose exec mysql mysql -u root -proot_password -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%'; FLUSH PRIVILEGES;"
