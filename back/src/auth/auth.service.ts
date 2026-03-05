@@ -1,6 +1,12 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { RoleName } from '../common/types/role-name.enum';
 
@@ -36,11 +42,7 @@ export class AuthService {
         name: dto.name,
         subname: dto.subname,
         roles: {
-          create: [
-            {
-              role: { connect: { id: userRole.id } },
-            },
-          ],
+          create: [{ role: { connect: { id: userRole.id } } }],
         },
       },
       select: {
@@ -52,19 +54,43 @@ export class AuthService {
         dni: true,
         createdAt: true,
         updatedAt: true,
-        roles: {
-          include: { role: true },
-        },
+        roles: { include: { role: true } },
       },
     });
 
-    return {
-      message: 'Usuario registrado correctamente',
-      user,
-    };
+    return { message: 'Usuario registrado correctamente', user };
   }
 
-  async login(dto: any) {
-    return { message: 'Login correcto' };
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      include: {
+        roles: { include: { role: true } },
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Credenciales incorrectas');
+    }
+
+    const ok = await bcrypt.compare(dto.password, user.password);
+    if (!ok) {
+      throw new UnauthorizedException('Credenciales incorrectas');
+    }
+
+    return {
+      message: 'Login correcto',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        subname: user.subname,
+        address: user.address,
+        dni: user.dni,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        roles: user.roles,
+      },
+    };
   }
 }
