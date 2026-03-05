@@ -7,7 +7,7 @@ export function RegisterPage() {
     return (
         <div className="container py-5" style={{ maxWidth: 620 }}>
             <RegisterForm
-                onSuccess={() => navigate('/inicio')}
+                onSuccess={() => navigate('/inicio', { replace: true })}
                 goLogin={() => navigate('/login')}
             />
         </div>

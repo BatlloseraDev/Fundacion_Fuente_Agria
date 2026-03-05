@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState, type PropsWithChildren } from "react";
 import {jwtDecode} from 'jwt-decode'
-
+//TODO: GENERAR BUEN MERGE
 export  type Role = 'ADMIN' | 'EDITOR' | 'USER';
 
 export interface User{
@@ -33,19 +33,20 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
         try{
             //Esta es la lógica real, tenemos que descomentarla despues,
             //ya que voy a tirar de un mock para probar que funcione
-            // const decodedToken: any = jwtDecode(token);
-            // const loggedUser: User = {
-            //     id: decodedToken.sub,
-            //     username: decodedToken.username, //si creamos el token con username si no lo tenemos que cambiar
-            //     roles: decodedToken.roles
-            // }
+            console.log("He llegado al login: ", token);
+            const decodedToken: any = jwtDecode(token);
+            const loggedUser: User = {
+                id: decodedToken.sub,
+                username: decodedToken.username, //si creamos el token con username si no lo tenemos que cambiar
+                roles: decodedToken.roles
+            }
 
             //Mock provisional para testear
-            const loggedUser: User = {
-                id: '1',
-                username: 'User De Prueba',
-                roles: ['ADMIN', 'EDITOR', 'USER'] //  roles: ['admin', 'editor', 'user']
-            }
+            // const loggedUser: User = {
+            //     id: '1',
+            //     username: 'User De Prueba',
+            //     roles: ['ADMIN', 'EDITOR', 'USER'] //  roles: ['admin', 'editor', 'user']
+            // }
 
             setUser(loggedUser);
             setAuthStatus('authenticated');

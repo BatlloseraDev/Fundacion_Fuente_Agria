@@ -1,14 +1,21 @@
 // src/components/Footer.tsx
 import { Link, useNavigate } from 'react-router';
-import { use } from 'react';
-import { UserContext } from '../../context/userContext';
+// import { use } from 'react';
+// import { UserContext } from '../../context/userContext';
 
-export const Footer = () => {
+interface FooterProps {
+  editorToken: boolean;
+  adminToken: boolean;
+}
+
+
+
+export const Footer = ({ editorToken, adminToken }: FooterProps) => {
   const navigate = useNavigate();
-  const { hasRole } = use(UserContext);
+  // const { hasRole } = use(UserContext);
 
-  const isAdmin = hasRole(['ADMIN']);
-  const isEditor = hasRole(['EDITOR']);
+  const isAdmin = adminToken;
+  const isEditor =editorToken;
 
   return (
     <footer className="bg-light border-top py-5">

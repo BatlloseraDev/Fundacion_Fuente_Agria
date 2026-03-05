@@ -20,8 +20,8 @@ export const appRouter = createBrowserRouter([
       { path: '/', element: <InicioPage /> },
 
       { path: '/auth', element: <Navigate to="/register" replace /> },
-      { path: '/register', element: <RegisterPage /> },
-      { path: '/login', element: <LoginPage /> },
+      //{ path: '/register', element: <RegisterPage /> },
+      //{ path: '/login', element: <LoginPage /> },
       { path: '/inicio', element: <InicioPage /> },
       { path: '/catalogo', element: <CatalogoPage /> },
       { path: '/encargos', element: <EncargosPage /> },
@@ -45,4 +45,6 @@ export const appRouter = createBrowserRouter([
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
 ]);

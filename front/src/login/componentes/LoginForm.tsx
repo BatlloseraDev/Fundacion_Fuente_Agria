@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { loginApi, saveAuth } from '../api/authApi';
+import { use } from 'react';
+import { UserContext } from '../../context/userContext';
 
 type Props = {
     onSuccess?: () => void;
@@ -13,6 +15,9 @@ export function LoginForm({ onSuccess, goRegister }: Props) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    const {login} = use(UserContext);
+
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError('');
@@ -22,6 +27,7 @@ export function LoginForm({ onSuccess, goRegister }: Props) {
             const res = await loginApi({ email, password });
             const { accessToken, user } = res.data;
             saveAuth(accessToken, user);
+            login(accessToken);
             onSuccess?.();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
