@@ -1,41 +1,34 @@
-
-
+// back/prisma/seeds/users.seed.cjs
+const bcrypt = require('bcrypt');
 
 async function seedUsers(prisma, roles) {
   console.log('🌱 Seeding users...');
 
+  if (!roles || !roles.ADMIN) {
+    throw new Error('roles.ADMIN no existe. Revisa seedRoles.');
+  }
+
   const email = 'admin@fuenteagria.com';
-  
-  // Verificamos si existe
-  const existingUser = await prisma.user.findUnique({ 
-    where: { email } 
+  const adminPasswordHash = await bcrypt.hash('admin123', 10);
+
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: { password: adminPasswordHash },
+    create: {
+      email,
+      password: adminPasswordHash,
+      name: 'Admin',
+      subname: 'Sistema',
+      address: 'Calle Falsa 123',
+      dni: '01234567U',
+      roles: {
+        create: [{ role: { connect: { id: roles.ADMIN.id } } }],
+      },
+    },
+    include: { roles: { include: { role: true } } },
   });
 
-  if (!existingUser) {
-    
-    
-   
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name: 'Admin',
-        subname: 'Sistema',
-        password: "admin",
-        address: "Calle Falsa 123",
-        dni: "01234567U",
-        roles: {
-          create: [
-            { role: { connect: { id: roles.admin.id } } }
-          ]
-        }   
-      },
-      include: { roles: true } // Para ver qué roles se crearon en el log
-    });
-    
-    console.log(`✅ Usuario Admin creado: ${user.email} con rol ADMIN`);
-  } else {
-    console.log('ℹ️ El usuario Admin ya existe. Saltando...');
-  }
+  console.log(`✅ Usuario Admin creado/actualizado: ${user.email}`);
 }
 
 module.exports = { seedUsers };

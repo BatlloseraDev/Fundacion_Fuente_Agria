@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState, type PropsWithChildren } from "react";
 import {jwtDecode} from 'jwt-decode'
 
-export  type Role = 'admin' | 'editor' | 'user';
+export  type Role = 'ADMIN' | 'EDITOR' | 'USER';
 
 export interface User{
     id: string;
@@ -44,7 +44,7 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
             const loggedUser: User = {
                 id: '1',
                 username: 'User De Prueba',
-                roles: ['admin', 'editor', 'user'] //  roles: ['admin', 'editor', 'user']
+                roles: ['ADMIN', 'EDITOR', 'USER'] //  roles: ['admin', 'editor', 'user']
             }
 
             setUser(loggedUser);
