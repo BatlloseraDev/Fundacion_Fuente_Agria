@@ -19,5 +19,18 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Fast Refresh de Vite: Permite exportar contextos u otras cosas temporalmente
+      'react-refresh/only-export-components': 'warn',
+      
+      // Efectos de React: No bloquea si usas setState dentro de un useEffect ())
+      'react-hooks/set-state-in-effect': 'warn',
+      
+      // Dependencias de los hooks: Avisa si falta algo en el array [ ], pero no falla
+      'react-hooks/exhaustive-deps': 'warn',
+      
+      // Variables no usadas (por ejemplo, el jwtDecode)
+      '@typescript-eslint/no-unused-vars': 'warn',
+    },
   },
 ])

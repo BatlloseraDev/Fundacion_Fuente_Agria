@@ -1,7 +1,7 @@
 import {  RouterProvider } from 'react-router';
 import { appRouter } from './router/app.router';
 import './App.css'
-import { UserContextProvider } from './context/userContext';
+import { UserContextProvider } from './context/userContextProvider';
 
 // A modo de testeo he puesto esto
 

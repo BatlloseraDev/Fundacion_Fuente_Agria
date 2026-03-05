@@ -13,6 +13,7 @@ export const ActividadesPage = () => {
     const itemsPerPage = 3;
     useEffect(() => {
         // Simulo la carga de datos desde el backend
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActividades(actividadesMock);
     }, []);
 
