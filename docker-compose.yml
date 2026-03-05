@@ -1,66 +1,36 @@
 
 
 services:
-  # --- BASE DE DATOS ---
-  postgres:
-    image: postgres:17
+  # --- BASE DE DATOS (MySQL) ---
+  mysql:
+    image: mysql:8.4
     container_name: fuenteagria_db
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - '5432:5432'
+      - '3360:3306'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
     networks:
       - app-network
 
-  # --- GESTOR DE BD ---
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: fuenteagria_pgadmin
+  # --- GESTOR DE BD (phpMyAdmin) ---
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: fuenteagria_phpmyadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PMA_HOST: mysql
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - '5050:80'
+      - '5050:80' # Mantenemos el puerto 5050 que usabas para pgadmin
     depends_on:
-      - postgres
-    networks:
-      - app-network
-
-  # --- BASE DE DATOS NoSQL (MongoDB) ---
-  mongo:
-    image: mongo:7.0
-    container_name: fuenteagria_mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    ports:
-      - '27018:27017' # lo he cambiado al 27018 por los que tenemos mongo instalado para que no de problemas
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - app-network
-
-  # --- GESTOR DE BD NoSQL (Mongo Express) ---
-  mongo-express:
-    image: mongo-express
-    container_name: fuenteagria_mongo_express
-    restart: always
-    ports:
-      - '8081:8081'
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/
-      ME_CONFIG_BASICAUTH: false
-    depends_on:
-      - mongo
+      - mysql
     networks:
       - app-network
 
@@ -76,19 +46,18 @@ services:
     environment:
       # Pasamos la URL completa para Prisma
       DATABASE_URL: ${DATABASE_URL}
-      # Pasamos variables individuales por si NestJS las necesita sueltas
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_DATABASE: ${POSTGRES_DB}
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - ./back:/app
-      #- /app/node_modules
     depends_on:
-      - postgres
+      - mysql
     networks:
       - app-network
+    command: sh -c "yarn prisma generate && yarn start:dev"
 
   # --- FRONTEND (Vite + React) ---
   front:
@@ -106,6 +75,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
     networks:
       - app-network
+    #user: "${UID:-1000}:${GID:-1000}"
+   
 
   # --- NGINX ---
   nginx:
@@ -123,8 +94,7 @@ services:
       - app-network
 
 volumes:
-  postgres_data:
-  mongo_data:
+  mysql_data:
 
 
 networks:

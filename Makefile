@@ -1,7 +1,7 @@
 # Makefile para Fundación Fuente Agria
 # Comandos para automatizar Docker en entorno de desarrollo
 
-.PHONY: all build start stop restart hard-restart reinstall logs install install-back install-front shell-back shell-front clean
+.PHONY: all build start stop restart hard-restart reinstall logs install install-back install-front shell-back shell-front clean 
 
 # --- COMANDOS PRINCIPALES ---
 
@@ -66,7 +66,21 @@ clean:
 
 ##Cosas de vic por usar wsl: sudo chown -R $USER:$USER back
 
+node_modules: 
+	docker compose run --rm back yarn install
+	docker compose run --rm front npm install
+ 
+
+
 # Generar el prisma
 back-prisma-generate:
 	docker compose exec back npx prisma generate
-	
+
+
+# docker compose exec back yarn prisma migrate dev --name init_mysql	
+# docker compose exec back yarn prisma migrate deploy
+
+## Permisos de Docker para mysql si alguien le da el error p1010
+# docker compose exec mysql mysql -u root -proot_password -e "GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%'; FLUSH PRIVILEGES;"
+# docker compose exec back yarn seed
+# docker compose exec back yarn prisma migrate deploy
