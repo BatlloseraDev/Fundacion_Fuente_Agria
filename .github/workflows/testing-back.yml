@@ -1,11 +1,11 @@
 name: Backend CI
 
 on:
-  push:
-    branches: ["main", "master", "develop"]
-    paths:
-      - "back/**"
-      - ".github/workflows/testing-back.yml"
+  # push:
+  #   branches: ["main", "master", "develop"]
+  #   paths:
+  #     - "back/**"
+  #     - ".github/workflows/testing-back.yml"
   pull_request:
     paths:
       - "back/**"
@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20 
+          node-version: 24 
           cache: yarn
           cache-dependency-path: back/yarn.lock
 
