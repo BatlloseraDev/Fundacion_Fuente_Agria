@@ -1,7 +1,6 @@
 // src/prisma/prisma.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '../../generated/prisma/client'
-import { createPool } from 'mysql2/promise';
+import { PrismaClient } from '../../generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 @Injectable()
@@ -13,7 +12,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       port: Number(process.env.DB_PORT || 3306),
       user: process.env.DB_USERNAME || process.env.MYSQL_USER,
       password: process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD,
-      database: process.env.DB_DATABASE || process.env.MYSQL_DATABASE
+      database: process.env.DB_DATABASE || process.env.MYSQL_DATABASE,
     });
     
     super({ adapter });
@@ -26,4 +25,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleDestroy() {
     await this.$disconnect();
   }
+
 }
