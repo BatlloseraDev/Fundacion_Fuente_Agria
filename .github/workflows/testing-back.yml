@@ -1,0 +1,62 @@
+name: Backend CI
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+    paths:
+      - "back/**"
+      - ".github/workflows/testing-back.yml"
+  pull_request:
+    paths:
+      - "back/**"
+      - ".github/workflows/testing-back.yml"
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: back
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 
+          cache: yarn
+          cache-dependency-path: back/yarn.lock
+
+      - name: Cache NestJS and TS build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            back/dist
+            back/tsconfig.tsbuildinfo
+          key: ${{ runner.os }}-back-ts-${{ hashFiles('back/yarn.lock', 'back/tsconfig*.json') }}
+          restore-keys: |
+            ${{ runner.os }}-back-ts-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run Tests
+        env:
+          CI: "true"
+        run: yarn test
+
+      - name: Build
+        env:
+          CI: "true"
+        run: yarn build
