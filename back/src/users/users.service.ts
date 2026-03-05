@@ -1,17 +1,37 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-
   constructor(private prisma: PrismaService) { }
 
+  private readonly userSelect = {
+    id: true,
+    email: true,
+    name: true,
+    subname: true,
+    address: true,
+    dni: true,
+    createdAt: true,
+    updatedAt: true,
+    roles: {
+      include: {
+        role: true,
+      },
+    },
+  } as const;
+
   async create(createUserDto: CreateUserDto) {
-  
     const existingUser = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
+      select: { id: true },
     });
 
     if (existingUser) {
@@ -20,70 +40,105 @@ export class UsersService {
 
     const { roleIds, ...userData } = createUserDto;
 
-    const rolesData = roleIds && roleIds.length > 0
-      ? {
+    const rolesData =
+      roleIds && roleIds.length > 0
+        ? {
           create: roleIds.map((id) => ({
             role: { connect: { id } },
           })),
         }
-      : undefined;
+        : undefined;
 
-    
     return this.prisma.user.create({
       data: {
         ...userData,
-        roles: rolesData, // Aquí se crean las relaciones en UserRole automáticamente
+        roles: rolesData,
       },
-      include: {
-        roles: {
-          include: {
-            role: true, // Para que devuelva los nombres de los roles creados
-          },
-        },
-      },
+      select: this.userSelect,
     });
   }
 
   findAll() {
     return this.prisma.user.findMany({
-      include: {
-        roles: {
-          include: {
-            role: true, // Incluimos la info del rol (nombre, etc)
-          },
-        },
-      },
+      select: this.userSelect,
     });
   }
 
-  findOne(id: number) {
-    return this.prisma.user.findUnique({
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
       where: { id },
-      include: {
-        roles: {
-          include: { role: true },
-        },
-      },
+      select: this.userSelect,
     });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const { roleIds, password, ...userData } = updateUserDto;
-
-    //TODO: hacer control de update
-
-    return this.prisma.user.update({
+    const exists = await this.prisma.user.findUnique({
       where: { id },
-      data: {
-        ...userData,
-      },
+      select: { id: true },
     });
+
+    if (!exists) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const { roleIds, password, ...userData } = updateUserDto as any;
+
+    const hasUserFields = Object.values(userData).some(
+      (v) => v !== undefined && v !== null
+    );
+
+    if (!hasUserFields && !Array.isArray(roleIds)) {
+      throw new BadRequestException('No hay datos para actualizar');
+    }
+
+    const rolesUpdate = Array.isArray(roleIds)
+      ? {
+        roles: {
+          deleteMany: {},
+          create: roleIds.map((roleId: number) => ({
+            role: { connect: { id: roleId } },
+          })),
+        },
+      }
+      : {};
+
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data: {
+          ...userData,
+          ...rolesUpdate,
+        },
+        select: this.userSelect,
+      });
+    } catch (error: any) {
+      // Prisma unique constraint error (GPT)
+      if (error.code === 'P2002') {
+        throw new ConflictException('Email o DNI ya está en uso');
+      }
+      throw error;
+    }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const exists = await this.prisma.user.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!exists) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
     return this.prisma.user.delete({
       where: { id },
+      select: { id: true },
     });
   }
-
 }
