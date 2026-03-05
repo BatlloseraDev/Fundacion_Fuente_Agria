@@ -16,6 +16,7 @@ export const CatalogoPage = () => {
 
     useEffect(() => {
         // Simulamos carga desde backend
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setProductos(productosMock);
     }, []);
 

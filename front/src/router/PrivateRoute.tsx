@@ -1,5 +1,6 @@
 import {use, type JSX } from "react";
-import { UserContext, type Role } from "../context/userContext";
+import { UserContext } from "../context/userContext";
+import type { Role } from "../context/types/user.types";
 import { Navigate } from "react-router";
 
 
