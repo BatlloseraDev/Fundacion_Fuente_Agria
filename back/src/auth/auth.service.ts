@@ -9,10 +9,11 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { RoleName } from '../common/types/role-name.enum';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
@@ -32,7 +33,9 @@ export class AuthService {
     });
 
     if (!userRole) {
-      throw new InternalServerErrorException('Rol USER no existe en la base de datos');
+      throw new InternalServerErrorException(
+        'Rol USER no existe en la base de datos',
+      );
     }
 
     const user = await this.prisma.user.create({
@@ -58,7 +61,19 @@ export class AuthService {
       },
     });
 
-    return { message: 'Usuario registrado correctamente', user };
+    const roles = user.roles.map((ur) => ur.role.name as RoleName);
+
+    const accessToken = await this.jwt.signAsync({
+      sub: user.id,
+      username: user.email,
+      roles,
+    });
+
+    return {
+      message: 'Usuario registrado correctamente',
+      user,
+      accessToken,
+    };
   }
 
   async login(dto: LoginDto) {
@@ -78,6 +93,14 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
 
+    const roles = user.roles.map((ur) => ur.role.name as RoleName);
+
+    const accessToken = await this.jwt.signAsync({
+      sub: user.id,
+      username: user.email,
+      roles,
+    });
+
     return {
       message: 'Login correcto',
       user: {
@@ -91,6 +114,7 @@ export class AuthService {
         updatedAt: user.updatedAt,
         roles: user.roles,
       },
+      accessToken,
     };
   }
 }

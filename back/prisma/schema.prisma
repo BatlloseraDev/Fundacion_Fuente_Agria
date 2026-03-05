@@ -10,12 +10,6 @@ generator client {
   moduleFormat = "cjs"
 }
 
-generator client2 {
-  provider     = "prisma-client-js"
-  output       = "../generated/prisma2"
-  moduleFormat = "cjs"
-}
-
 datasource db {
   provider = "mysql"
   // no poner url aquí en Prisma 7
