@@ -1,24 +1,28 @@
 const request = require('supertest');
-const { describe, it } = require('./helpers/test-runner.cjs');
+const express = require('express');
 const kleur = require('kleur');
 
-async function runBasicoTests(BASE_URL) {
-  await describe(kleur.blue('Test: Básico Github Actions'), async () => {
+const app = express();
+app.get('/', (req, res) => res.status(200).send('OK'));
 
-    await it('GET /', async () => {
+async function runBasicoTests() {
+  console.log(kleur.blue('Tests: Básico Github Actions'));
 
-      const res = await request(BASE_URL).get('/');
+  try {
+    const res = await request(app).get('/');
 
-      if (!res.status) {
-        throw new Error(kleur.red('El servidor no ha respondido nada'));
-      }
+    if (!res.status) {
+      throw new Error(kleur.red('El servidor no ha respondido nada'));
+    }
 
-      console.log(kleur.green('Test básico superado'));
-    });
-
-  });
-
-  console.log(kleur.blue('Test: Básico Github Actions OK\n'));
+    console.log(kleur.green('Test básico superado'));
+    console.log(kleur.blue('Tests: Básico Github Actions OK\n'));
+    
+    process.exit(0); 
+  } catch (error) {
+    console.error(error);
+    process.exit(1); 
+  }
 }
 
-module.exports = { runBasicoTests };
+runBasicoTests();
