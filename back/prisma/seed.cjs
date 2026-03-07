@@ -1,7 +1,7 @@
 // back/prisma/seed.cjs
 require('dotenv/config');
 //import { PrismaClient } from '../../generated/prisma/client';
-const { PrismaClient } = require('../generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
 
 const url = process.env.DATABASE_URL;
