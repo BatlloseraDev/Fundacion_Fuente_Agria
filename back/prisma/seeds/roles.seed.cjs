@@ -1,22 +1,23 @@
-
+// back/prisma/seeds/roles.seed.cjs
 async function seedRoles(prisma) {
   console.log('🌱 Seeding roles...');
 
-  // Usamos upsert para no duplicar si ya existen
-  const admin = await prisma.role.upsert({
-    where: { name: 'ADMIN' },
-    update: {},
-    create: { name: 'ADMIN' },
-  });
+  const roleNames = ['ADMIN', 'USER', 'EDITOR'];
 
-  const user = await prisma.role.upsert({
-    where: { name: 'USER' },
-    update: {},
-    create: { name: 'USER' },
-  });
+  const roles = {};
 
-  console.log(`✅ Roles listos: ${admin.name}, ${user.name}`);
-  return { admin, user };
+  for (const name of roleNames) {
+    const role = await prisma.role.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+
+    roles[name] = role;
+  }
+
+  console.log(`✅ Roles listos: ${Object.keys(roles).join(', ')}`);
+  return roles; // { ADMIN: {...}, USER: {...}, EDITOR: {...} }
 }
 
 module.exports = { seedRoles };

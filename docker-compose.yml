@@ -3,7 +3,7 @@
 services:
   # --- BASE DE DATOS (MySQL) ---
   mysql:
-    image: mysql:8.4
+    image: mysql:8.0
     container_name: fuenteagria_db
     restart: always
     environment:
@@ -51,6 +51,9 @@ services:
       DB_USERNAME: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_DATABASE: ${MYSQL_DATABASE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     volumes:
       - ./back:/app
     depends_on:
