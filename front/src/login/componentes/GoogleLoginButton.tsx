@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, use } from 'react';
 import { googleLoginApi, saveAuth } from '../api/authApi';
-import { use } from 'react';
 import { UserContext } from '../../context/userContext';
 
 declare global {
-  interface Window { google?: any; }
+  interface Window {
+    google?: any;
+  }
 }
 
 type Props = {
@@ -13,26 +14,30 @@ type Props = {
 
 export function GoogleLoginButton({ onSuccess }: Props) {
   const divRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
   const [error, setError] = useState('');
   const { login } = use(UserContext);
 
   useEffect(() => {
-    console.log('VITE_GOOGLE_CLIENT_ID =', import.meta.env.VITE_GOOGLE_CLIENT_ID);
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
     if (!clientId) {
       setError('Falta VITE_GOOGLE_CLIENT_ID en el .env');
       return;
     }
 
-    const timer = setInterval(() => {
-      if (!window.google?.accounts?.id || !divRef.current) return;
+    const tryInit = () => {
+      if (!window.google?.accounts?.id || !divRef.current || initializedRef.current) {
+        return;
+      }
 
-      clearInterval(timer);
+      initializedRef.current = true;
 
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: async (resp: any) => {
           setError('');
+
           try {
             const idToken = resp.credential;
             const res = await googleLoginApi(idToken);
@@ -47,14 +52,23 @@ export function GoogleLoginButton({ onSuccess }: Props) {
         },
       });
 
+      divRef.current.innerHTML = '';
+
       window.google.accounts.id.renderButton(divRef.current, {
         theme: 'outline',
         size: 'large',
         width: 260,
       });
-    }, 100);
+    };
 
-    return () => clearInterval(timer);
+    const interval = setInterval(tryInit, 200);
+    tryInit();
+
+    return () => {
+      clearInterval(interval);
+      initializedRef.current = false;
+      window.google?.accounts?.id?.cancel?.();
+    };
   }, [login, onSuccess]);
 
   return (
