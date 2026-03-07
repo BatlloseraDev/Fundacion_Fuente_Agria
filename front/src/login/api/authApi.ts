@@ -56,3 +56,10 @@ export function clearAuth() {
 export function getAccessToken() {
   return localStorage.getItem('accessToken');
 }
+
+export async function googleLoginApi(idToken: string) {
+  return request<LoginData>('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify({ idToken }),
+  });
+}
