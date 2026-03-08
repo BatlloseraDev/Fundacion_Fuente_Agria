@@ -1,0 +1,66 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+    paths:
+      - "front/**"
+      - ".github/workflows/frontend-ci.yml"
+  pull_request:
+    paths:
+      - "front/**"
+      - ".github/workflows/frontend-ci.yml"
+
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: front
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+
+      - name: Cache Vite and TS build info
+        uses: actions/cache@v4
+        with:
+          path: |
+            front/node_modules/.vite
+            front/tsconfig.tsbuildinfo
+            front/.tsbuildinfo
+          key: ${{ runner.os }}-front-vite-ts-${{ hashFiles('front/package-lock.json', 'front/vite.config.*', 'front/tsconfig*.json') }}
+          restore-keys: |
+            ${{ runner.os }}-front-vite-ts-
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        env:
+          CI: "true"
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: front-dist
+          path: front/dist
+          if-no-files-found: error
+          retention-days: 7

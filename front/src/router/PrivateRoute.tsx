@@ -1,7 +1,8 @@
-import type { JSX } from 'react';
-import { useContext } from 'react';
-import { Navigate } from 'react-router';
-import { UserContext, type Role } from '../context/userContext';
+import { use, type JSX } from "react";
+import { UserContext } from "../context/userContext";
+import type { Role } from "../context/types/user.types";
+import { Navigate } from "react-router";
+
 
 interface Props {
   element: JSX.Element;
@@ -9,7 +10,7 @@ interface Props {
 }
 
 export const PrivateRoute = ({ element, allowedRoles }: Props) => {
-  const { authStatus, hasRole } = useContext(UserContext);
+  const { authStatus, hasRole } = use(UserContext);
 
   if (authStatus === 'checking') {
     return <div className="text-center mt-5">Cargando...</div>;
