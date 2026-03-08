@@ -11,21 +11,21 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
 
     const handleLogin = (token: string) =>{
         try{
-            //Esta es la lógica real, tenemos que descomentarla despues,
-            //ya que voy a tirar de un mock para probar que funcione
-            // const decodedToken: any = jwtDecode(token);
-            // const loggedUser: User = {
-            //     id: decodedToken.sub,
-            //     username: decodedToken.username, //si creamos el token con username si no lo tenemos que cambiar
-            //     roles: decodedToken.roles
-            // }
-
-            //Mock provisional para testear
+            // Esta es la lógica real, tenemos que descomentarla despues,
+            // ya que voy a tirar de un mock para probar que funcione
+            const decodedToken: any = jwtDecode(token);
             const loggedUser: User = {
-                id: '1',
-                username: 'User De Prueba',
-                roles: ['admin', 'editor', 'user'] //  roles: ['admin', 'editor', 'user']
+                id: decodedToken.sub,
+                username: decodedToken.username, //si creamos el token con username si no lo tenemos que cambiar
+                roles: decodedToken.roles
             }
+
+            // //Mock provisional para testear
+            // const loggedUser: User = {
+            //     id: '1',
+            //     username: 'User De Prueba',
+            //     roles: ['admin', 'editor', 'user'] //  roles: ['admin', 'editor', 'user']
+            // }
 
             setUser(loggedUser);
             setAuthStatus('authenticated');
