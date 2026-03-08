@@ -1,5 +1,7 @@
 // src/components/Footer.tsx
 import { Link, useNavigate } from 'react-router';
+// import { use } from 'react';
+// import { UserContext } from '../../context/userContext';
 
 interface FooterProps {
   editorToken: boolean;
@@ -7,11 +9,13 @@ interface FooterProps {
 }
 
 
+
 export const Footer = ({ editorToken, adminToken }: FooterProps) => {
   const navigate = useNavigate();
-  
-  const hasAdminToken = adminToken; 
-  const hasEditorToken = editorToken;
+  // const { hasRole } = use(UserContext);
+
+  const isAdmin = adminToken;
+  const isEditor =editorToken;
 
   return (
     <footer className="bg-light border-top py-5">
@@ -21,7 +25,7 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
           <div className="col-lg-4">
             <h5 className="fw-bold mb-3 text-primary">Catálogo Fundación Fuente Agria</h5>
             <p className="text-secondary small">
-              Fundación Fuente Agria trabaja por la inclusión y el bienestar... (Aquí va la descripción que tiene que ser editable).
+              Fundación Fuente Agria trabaja por la inclusión y el bienestar...
             </p>
           </div>
           
@@ -31,8 +35,6 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
               <li className="mb-2"><Link to="/" className="text-decoration-none text-reset">Inicio</Link></li>
               <li className="mb-2"><Link to="/tienda" className="text-decoration-none text-reset">Tienda</Link></li>
               <li className="mb-2"><Link to="/encargos" className="text-decoration-none text-reset">Encargos</Link></li>
-              <li className="mb-2"><Link to="/patrocinadores" className="text-decoration-none text-reset">Patrocinadores</Link></li>
-              <li className="mb-2"><Link to="/contacto" className="text-decoration-none text-reset">Contacto</Link></li>
             </ul>
           </div>
           
@@ -45,9 +47,8 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
           </div>
           
           <div className="col-lg-3 text-center text-lg-start">
-            {/* Renderizado condicional basado en el token del usuario,
-            Esto lo tendremos que editar a futuro pero como mock esta bien*/}
-            {hasEditorToken && (
+
+            {isEditor && (
               <button 
                 className="btn btn-primary w-100 rounded-pill mb-2 shadow-sm" 
                 onClick={() => navigate('/editor')}
@@ -55,8 +56,8 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
                 Área editor
               </button>
             )}
-            
-            {hasAdminToken && (
+
+            {isAdmin && (
               <button 
                 className="btn btn-outline-secondary w-100 rounded-pill" 
                 onClick={() => navigate('/admin')}
@@ -64,13 +65,17 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
                 Área administrador
               </button>
             )}
+
           </div>
-          
+
         </div>
+
         <hr className="my-5 opacity-10" />
+
         <div className="text-center text-secondary small">
-          &copy; 2026 Fundación Fuente Agria.
+          © 2026 Fundación Fuente Agria.
         </div>
+
       </div>
     </footer>
   );
