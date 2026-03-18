@@ -1,6 +1,7 @@
 import { InicioHero } from '../components/InicioHero';
 import { InicioGrid } from '../components/InicioGrid';
 import { InicioNovedades } from '../components/InicioNovedades';
+import { InicioComentarios } from '../components/InicioComentarios';
 
 export const InicioPage = () => {
     return (
@@ -10,6 +11,8 @@ export const InicioPage = () => {
             <InicioNovedades />
             
             <InicioGrid />
+
+            <InicioComentarios />
         </main>
     );
 };

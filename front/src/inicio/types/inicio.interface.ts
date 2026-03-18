@@ -23,3 +23,10 @@ export interface NovedadItem {
   descripcion: string;
   enlace: string;
 }
+
+export interface ComentarioItem {
+  id: string;
+  texto: string;
+  etiqueta: string;
+  autor: string;
+}

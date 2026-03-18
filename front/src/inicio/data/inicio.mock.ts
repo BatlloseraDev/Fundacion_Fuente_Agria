@@ -1,4 +1,4 @@
-import type { CarouselItem, GridItem,  NovedadItem} from '../types/inicio.interface';
+import type { CarouselItem, GridItem,  NovedadItem, ComentarioItem} from '../types/inicio.interface';
 
 export const mockCarouselData: CarouselItem[] = [
   { 
@@ -99,5 +99,26 @@ export const novedadesMock: NovedadItem[] = [
     titulo: 'Campaña "Regala con impacto" (edición invierno)',
     descripcion: "Encargos personalizados para empresas y particulares con empaquetado sostenible.",
     enlace: "#"
+  }
+];
+
+export const comentariosMock: ComentarioItem[] = [
+  {
+    id: 'comentario-1',
+    texto: '"Encargamos regalos personalizados y fueron un éxito. Trato cercano y muy cuidado."',
+    etiqueta: 'Artesanías',
+    autor: 'Marta G.'
+  },
+  {
+    id: 'comentario-2',
+    texto: '"Mi aparador de madera volvió a brillar. Se nota el mimo en cada paso."',
+    etiqueta: 'Restauración',
+    autor: 'Carlos R.'
+  },
+  {
+    id: 'comentario-3',
+    texto: '"Gran iniciativa social. El proceso de encargo es claro y la comunicación, rápida."',
+    etiqueta: 'Proyecto social',
+    autor: 'Elena P.'
   }
 ];
