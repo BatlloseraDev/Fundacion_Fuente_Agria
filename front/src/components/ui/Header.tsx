@@ -2,28 +2,43 @@ import { Link } from 'react-router';
 
 export const Header = () => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
+    <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top" aria-label="Barra de navegación">
       <div className="container">
-       
-        <Link className="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary" to="/">
-          <img src="/imgs/Logo_FFA.png" alt="Logo fundacion fuente agria" style={{ width: '40px' }} />
-          <span>Catálogo Fuente Agria</span>
+        {/* Link al inicio con el formato de la maqueta */}
+        <Link className="navbar-brand d-flex align-items-center gap-2" to="/" aria-label="Ir al inicio">
+          <img src="/imgs/Logo_FFA.png" alt="Logo Fundación Fuente Agria (asociación matriz)" style={{ width: '40px' }} />
+          <span className="fw-semibold text-dark">Fundación Fuente Agria</span>
         </Link>
 
-        <button className="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        {/* Botón hamburguesa para móvil */}
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+          aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto align-items-center fw-semibold">
-            <li className="nav-item"><Link className="nav-link text-primary" to="/">Inicio</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/catalogo">Catálogo</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/encargos">Encargos</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="/actividades">Actividades</Link></li>
-            <li className="nav-item ms-lg-3">
-              <Link className="btn btn-primary rounded-pill px-4" to="/login">Iniciar sesión</Link>
+        {/* Enlaces de navegación */}
+        <div className="collapse navbar-collapse" id="navMain">
+          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              <Link className="nav-link" to="/">Inicio</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/catalogo">Catálogo</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/encargos">Encargos</Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/actividades">Actividades</Link>
             </li>
           </ul>
+          
+          {/* Botón de Login mantenido de la lógica anterior */}
+          <div className="ms-lg-3 d-flex align-items-center">
+            <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
+              Iniciar sesión
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
