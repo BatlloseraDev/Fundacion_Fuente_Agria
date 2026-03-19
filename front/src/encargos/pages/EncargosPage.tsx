@@ -3,30 +3,28 @@ import { encargosCarruselMock, encargosPopularesMock } from "../data/encargos.mo
 import { EncargosCarousel } from "../componentes/EncargosCarousel";
 import { EncargosPopulares } from "../componentes/EncargosPopulares";
 import { SolicitarEncargoModal } from "../componentes/SolicitarEncargoModal";
+import { EncargosHeader } from "../componentes/EncargosHeader"; // Importamos el nuevo componente
 
 export default function EncargosPage() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="container py-5">
-      <div className="d-flex flex-column gap-2 mb-4">
-        <h1 className="h3 mb-0">Encargos personalizados</h1>
+    <>
+      {/* Componente Header*/}
+      <EncargosHeader onSolicitar={() => setOpen(true)} />
 
-        <div className="mt-3">
-          <button type="button" className="btn btn-primary" onClick={() => setOpen(true)}>
-            Solicitar encargo
-          </button>
-        </div>
-      </div>
+      {/* Contenido Principal */}
+      <main className="container py-5">
+        <section className="mb-4" aria-label="Encargos realizados">
+          <h2 className="h5 mb-3">Encargos realizados</h2>
+          <EncargosCarousel items={encargosCarruselMock} />
+        </section>
 
-      <section className="mb-4" aria-label="Encargos realizados">
-        <h2 className="h5 mb-3">Encargos realizados</h2>
-        <EncargosCarousel items={encargosCarruselMock} />
-      </section>
+        <EncargosPopulares items={encargosPopularesMock} />
+      </main>
 
-      <EncargosPopulares items={encargosPopularesMock} />
-
+      {/* Modal de solicitud */}
       <SolicitarEncargoModal isOpen={open} onClose={() => setOpen(false)} />
-    </div>
+    </>
   );
 }
