@@ -37,7 +37,7 @@ export const appRouter = createBrowserRouter([
         element: (
           <PrivateRoute
             element={<div>Panel de Administracion</div>}
-            allowedRoles={['ADMIN', 'EDITOR']}
+            allowedRoles={['admin', 'editor']}
           />
         ),
       },
