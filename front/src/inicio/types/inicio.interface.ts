@@ -13,3 +13,20 @@ export interface GridItem {
   colorTema: string;   
   textoEnlace: string;  
 }
+
+export interface NovedadItem {
+  id: string;
+  imagenUrl: string;
+  etiqueta: string;
+  fecha: string;
+  titulo: string;
+  descripcion: string;
+  enlace: string;
+}
+
+export interface ComentarioItem {
+  id: string;
+  texto: string;
+  etiqueta: string;
+  autor: string;
+}
