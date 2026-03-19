@@ -2,3 +2,4 @@
 .env.production
 postgres_data/
 .vscode
+nginx/ssl/
