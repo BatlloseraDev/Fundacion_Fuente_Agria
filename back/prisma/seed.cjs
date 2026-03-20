@@ -1,4 +1,3 @@
-// back/prisma/seed.cjs
 require('dotenv/config');
 //import { PrismaClient } from '../../generated/prisma/client';
 const { PrismaClient } = require('@prisma/client');
@@ -18,9 +17,16 @@ async function main() {
 
   const { seedRoles } = require('./seeds/roles.seed.cjs');
   const { seedUsers } = require('./seeds/users.seed.cjs');
+  const { seedCategoryArticles } = require('./seeds/category-articles.seed.cjs');
+  const { seedLabels } = require('./seeds/labels.seed.cjs');
+  const { seedArticles } = require('./seeds/articles.seed.cjs');
 
   const roles = await seedRoles(prisma);
-  await seedUsers(prisma, roles);
+  const users = await seedUsers(prisma, roles);
+
+  const categorias = await seedCategoryArticles(prisma);
+  const etiquetas = await seedLabels(prisma);
+  await seedArticles(prisma, users, categorias, etiquetas);
 
   console.log('🏁 Seed completado correctamente.');
 }
