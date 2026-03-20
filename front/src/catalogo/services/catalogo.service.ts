@@ -2,24 +2,14 @@ import type { Producto } from '../types/producto.interface';
 
 interface BackendCategory {
     id: number;
-    articleId: number;
-    categoryArticleId: number;
-    categoryArticle: {
-        id: number;
-        name: string;
-        color?: string | null;
-    };
+    name: string;
+    color?: string | null;
 }
 
 interface BackendLabel {
     id: number;
-    articleId: number;
-    labelId: number;
-    label: {
-        id: number;
-        name: string;
-        color?: string | null;
-    };
+    name: string;
+    color?: string | null;
 }
 
 interface BackendArticle {
@@ -34,12 +24,11 @@ interface BackendArticle {
     labels?: BackendLabel[];
 }
 
-const colorMap: Record<string, string> = {
-    artesania: 'primary',
-    restauracion: 'warning',
-    decoracion: 'info',
-    solidario: 'success'
-};
+interface CatalogoResponse {
+    success: boolean;
+    message: string;
+    data: BackendArticle[];
+}
 
 const formatearPrecio = (precio: number): string => {
     return new Intl.NumberFormat('es-ES', {
@@ -48,20 +37,8 @@ const formatearPrecio = (precio: number): string => {
     }).format(precio);
 };
 
-const obtenerColorCategoria = (nombreCategoria?: string): string => {
-    if (!nombreCategoria) return 'secondary';
-
-    const key = nombreCategoria
-        .toLowerCase()
-        .trim()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-
-    return colorMap[key] || 'secondary';
-};
-
 const mapArticleToProducto = (article: BackendArticle): Producto => {
-    const categoriaPrincipal = article.categories?.[0]?.categoryArticle;
+    const categoriaPrincipal = article.categories?.[0];
 
     return {
         id: String(article.id),
@@ -71,10 +48,10 @@ const mapArticleToProducto = (article: BackendArticle): Producto => {
         precio: formatearPrecio(article.price),
         precioDesde: false,
         categoria: categoriaPrincipal?.name || 'Sin categoria',
-        colorCategoria: categoriaPrincipal?.color || obtenerColorCategoria(categoriaPrincipal?.name),
+        colorCategoria: categoriaPrincipal?.color || 'secondary',
         imageUrl: article.image || '/imgs/img-placeholder.jpg',
         disponible: article.available,
-        etiquetas: article.labels?.map((item) => item.label.name) || []
+        etiquetas: article.labels?.map((item) => item.name) || []
     };
 };
 
@@ -86,6 +63,11 @@ export const getCatalogo = async (): Promise<Producto[]> => {
         throw new Error('No se pudo cargar el catalogo');
     }
 
-    const data: BackendArticle[] = await response.json();
-    return data.map(mapArticleToProducto);
+    const json: CatalogoResponse = await response.json();
+
+    if (!Array.isArray(json.data)) {
+        throw new Error('La respuesta del backend no contiene un array en data');
+    }
+
+    return json.data.map(mapArticleToProducto);
 };

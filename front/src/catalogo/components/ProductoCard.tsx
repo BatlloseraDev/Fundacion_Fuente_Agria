@@ -52,9 +52,8 @@ export const ProductoCard = ({ producto, onVerDetalles }: Props) => {
 
                 {/* Botón */}
                 <button
-                    className={`btn btn-outline-primary rounded-pill w-100 fw-semibold ${!disponible ? 'disabled' : ''}`}
+                    className="btn btn-outline-primary rounded-pill w-100 fw-semibold"
                     onClick={() => onVerDetalles(producto)}
-                    disabled={!disponible}
                 >
                     Ver detalles
                 </button>
