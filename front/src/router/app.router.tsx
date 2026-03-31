@@ -6,6 +6,7 @@ import { CatalogoPage } from '../catalogo/pages/CatalogoPage';
 import EncargosPage from '../encargos/pages/EncargosPage';
 import { ActividadesPage } from '../actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from '../actividades/pages/ActividadDetailPage';
+import { AdminDashboard } from '../admin/pages/AdminDashboard';
 
 import { PrivateRoute } from './PrivateRoute';
 
@@ -33,11 +34,11 @@ export const appRouter = createBrowserRouter([
         element: <PrivateRoute element={<div>Pagina de Perfil (Solo Login)</div>} />,
       },
       {
-        path: '/admin/dashboard',
+        path: '/admin',
         element: (
           <PrivateRoute
-            element={<div>Panel de Administracion</div>}
-            allowedRoles={['admin', 'editor']}
+            element={<AdminDashboard />}
+            allowedRoles={['ADMIN']}
           />
         ),
       },

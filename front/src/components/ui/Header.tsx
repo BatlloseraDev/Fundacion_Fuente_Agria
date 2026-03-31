@@ -1,6 +1,11 @@
+import { use } from 'react';
 import { Link } from 'react-router';
+import { UserContext } from '../../context/userContext';
 
 export const Header = () => {
+  const { isAuthenticated, hasRole, logout } = use(UserContext);
+  const isAdmin = hasRole(['ADMIN']);
+
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top" aria-label="Barra de navegación">
       <div className="container">
@@ -31,13 +36,25 @@ export const Header = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/actividades">Actividades</Link>
             </li>
+            {isAdmin && (
+              <li className="nav-item">
+                <Link className="nav-link d-flex align-items-center gap-1" to="/admin">
+                  <span>Panel de administrador</span>
+                </Link>
+              </li>
+            )}
           </ul>
-          
-          {/* Botón de Login mantenido de la lógica anterior */}
-          <div className="ms-lg-3 d-flex align-items-center">
-            <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
-              Iniciar sesión
-            </Link>
+
+          <div className="ms-lg-3 d-flex align-items-center gap-2">
+            {isAuthenticated ? (
+              <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={logout}>
+                Cerrar sesión
+              </button>
+            ) : (
+              <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
+                Iniciar sesión
+              </Link>
+            )}
           </div>
         </div>
       </div>
