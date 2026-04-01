@@ -1,6 +1,11 @@
 import type { GridItem as GridItemType } from '../types/inicio.interface';
+import { ComponenteEditable } from './ComponenteEditable';
 
-export const GridItem = ({ titulo, descripcion, icono, colorTema, textoEnlace }: GridItemType) => {
+interface GridItemProps extends GridItemType {
+    modoEditor?: boolean;
+}
+
+export const GridItem = ({ titulo, descripcion, icono, colorTema, textoEnlace, modoEditor = false }: GridItemProps) => {
     return (
         <div className="card h-100 border-0 shadow-sm rounded-4 p-4 transition-all">
             
@@ -10,14 +15,28 @@ export const GridItem = ({ titulo, descripcion, icono, colorTema, textoEnlace }:
             >
                 <i className={`bi ${icono} fs-2`}></i>
             </div>
+
+            <ComponenteEditable 
+                modoEditor={modoEditor} 
+                onEditClick={() => alert('Editar el título')}
+            >
             
             <h3 className="h4 fw-bold">{titulo}</h3>
+
+            </ComponenteEditable>
+
+            <ComponenteEditable 
+                modoEditor={modoEditor} 
+                onEditClick={() => alert('Editar el texto')}
+            >
             
             <p className="text-secondary small">
                 {descripcion}
             </p>
+
+            </ComponenteEditable>
             
-            <a href="#" className={`mt-auto text-decoration-none fw-bold text-${colorTema} stretched-link`}>
+            <a href="#" className={`mt-auto text-decoration-none fw-bold text-${colorTema} ${!modoEditor ? 'stretched-link' : ''}`}>
                 {textoEnlace} <i className="bi bi-arrow-right ms-1"></i>
             </a>
             
