@@ -16,8 +16,8 @@ export function EncargosPopusCard({ item }: Props) {
 
         <div className="small text-secondary">
           <div>
-            <span className="fw-semibold text-body">Tiempo estimado:</span>{" "}
-            {item.tiempoEstimado}
+            <span className="fw-semibold text-body">Tiempo estimado:</span>{" de 2 a 14 días "}
+            {""}
           </div>
           <div>
             <span className="fw-semibold text-body">Precio:</span>{" "}

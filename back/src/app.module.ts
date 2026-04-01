@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { ArticlesModule } from './articles/articles.module';
     UsersModule,
     RolesModule,
     AuthModule,
-    ArticlesModule
+    ArticlesModule,
+    OrdersModule
   ],
   providers: [PrismaService],
 })
