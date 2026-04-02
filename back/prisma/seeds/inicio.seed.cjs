@@ -1,5 +1,5 @@
 async function seedInicio(prisma) {
-    console.log('📦 Seedeando Áreas de Acción de la página de Inicio...');
+    console.log('📦 Seedeando Datos de la página de Inicio...');
 
     const actionAreasData = [
       { 
@@ -43,7 +43,43 @@ async function seedInicio(prisma) {
         });
     }
 
-    console.log('✅ Áreas de Acción configuradas en Page.');
+    const comentariosData = [
+      {
+        id: 'comentario-1',
+        texto: '"Encargamos regalos personalizados y fueron un éxito. Trato cercano y muy cuidado."',
+        etiqueta: 'Artesanías',
+        autor: 'Marta G.'
+      },
+      {
+        id: 'comentario-2',
+        texto: '"Mi aparador de madera volvió a brillar. Se nota el mimo en cada paso."',
+        etiqueta: 'Restauración',
+        autor: 'Carlos R.'
+      },
+      {
+        id: 'comentario-3',
+        texto: '"Gran iniciativa social. El proceso de encargo es claro y la comunicación, rápida."',
+        etiqueta: 'Proyecto social',
+        autor: 'Elena P.'
+      }
+    ];
+
+    const existingComentarios = await prisma.page.findFirst({ 
+        where: { stage: 'inicio_comentarios' } 
+    });
+
+    if (existingComentarios) {
+        await prisma.page.update({ 
+            where: { id: existingComentarios.id }, 
+            data: { contentJson: comentariosData } 
+        });
+    } else {
+        await prisma.page.create({ 
+            data: { stage: 'inicio_comentarios', contentJson: comentariosData } 
+        });
+    }
+
+    console.log('✅ Datos configurados en Page.');
 }
 
 module.exports = { seedInicio };

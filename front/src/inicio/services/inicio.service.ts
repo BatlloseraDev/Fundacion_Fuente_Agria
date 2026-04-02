@@ -9,6 +9,20 @@ interface BackendActionArea {
     linkText: string;
 }
 
+export interface ComentarioItem {
+    id: string;
+    texto: string;
+    etiqueta: string;
+    autor: string;
+}
+
+interface BackendComentario {
+    id: string;
+    texto: string;
+    etiqueta: string;
+    autor: string;
+}
+
 export const getAreasInicio = async (): Promise<GridItem[]> => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const response = await fetch(`${apiUrl}/action-areas`);
@@ -48,5 +62,41 @@ export const updateAreaInicio = async (id: string, datos: Partial<BackendActionA
 
     if (!response.ok) {
         throw new Error('Error al guardar los cambios en la base de datos');
+    }
+};
+
+export const getComentariosInicio = async (): Promise<ComentarioItem[]> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/comentarios-inicio`);
+
+    if (!response.ok) {
+        throw new Error('No se pudieron cargar los comentarios');
+    }
+
+    const json = await response.json();
+    const datosArray = Array.isArray(json) ? json : json.data;
+
+    if (!Array.isArray(datosArray)) {
+        throw new Error('El backend no devolvió un array válido de comentarios');
+    }
+
+    return datosArray.map((item: BackendComentario) => ({
+        id: item.id,
+        texto: item.texto,
+        etiqueta: item.etiqueta,
+        autor: item.autor
+    }));
+};
+
+export const updateComentarioInicio = async (id: string, datos: Partial<BackendComentario>): Promise<void> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/comentarios-inicio/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al guardar los cambios del comentario');
     }
 };

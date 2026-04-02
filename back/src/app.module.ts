@@ -7,6 +7,7 @@ import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
 import { ActionAreasModule } from './action-areas/action-areas.module';
+import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { ActionAreasModule } from './action-areas/action-areas.module';
     RolesModule,
     AuthModule,
     ArticlesModule,
-    ActionAreasModule
+    ActionAreasModule,
+    ComentariosInicioModule
   ],
   providers: [PrismaService],
 })
