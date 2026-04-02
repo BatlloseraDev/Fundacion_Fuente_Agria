@@ -249,3 +249,15 @@ model Page{
   stage       String   @db.VarChar(100)
   contentJson Json
 }
+
+model ActionArea {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(100)
+  description String   @db.Text
+  icon        String   @db.VarChar(50)
+  themeColor  String   @db.VarChar(20)
+  linkText    String   @db.VarChar(100)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
