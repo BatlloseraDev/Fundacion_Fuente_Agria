@@ -2,6 +2,7 @@ require('dotenv/config');
 //import { PrismaClient } from '../../generated/prisma/client';
 const { PrismaClient } = require('@prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
+const { seedInicio } = require('./seeds/inicio.seed.cjs');
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -27,6 +28,8 @@ async function main() {
   const categorias = await seedCategoryArticles(prisma);
   const etiquetas = await seedLabels(prisma);
   await seedArticles(prisma, users, categorias, etiquetas);
+
+  await seedInicio(prisma);
 
   console.log('🏁 Seed completado correctamente.');
 }
