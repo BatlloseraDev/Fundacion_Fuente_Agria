@@ -3,9 +3,10 @@ import { ComponenteEditable } from './ComponenteEditable';
 
 interface GridItemProps extends GridItemType {
     modoEditor?: boolean;
+    onEdit?: (campoBD: string, valorActual: string) => void; 
 }
 
-export const GridItem = ({ titulo, descripcion, icono, colorTema, textoEnlace, modoEditor = false }: GridItemProps) => {
+export const GridItem = ({ titulo, descripcion, icono, colorTema, textoEnlace, modoEditor = false, onEdit }: GridItemProps) => {
     return (
         <div className="card h-100 border-0 shadow-sm rounded-4 p-4 transition-all">
             
@@ -18,22 +19,16 @@ export const GridItem = ({ titulo, descripcion, icono, colorTema, textoEnlace, m
 
             <ComponenteEditable 
                 modoEditor={modoEditor} 
-                onEditClick={() => alert('Editar el título')}
+                onEditClick={() => onEdit && onEdit('title', titulo)}
             >
-            
-            <h3 className="h4 fw-bold">{titulo}</h3>
-
+                <h3 className="h4 fw-bold">{titulo}</h3>
             </ComponenteEditable>
 
             <ComponenteEditable 
                 modoEditor={modoEditor} 
-                onEditClick={() => alert('Editar el texto')}
+                onEditClick={() => onEdit && onEdit('description', descripcion)}
             >
-            
-            <p className="text-secondary small">
-                {descripcion}
-            </p>
-
+                <p className="text-secondary small">{descripcion}</p>
             </ComponenteEditable>
             
             <a href="#" className={`mt-auto text-decoration-none fw-bold text-${colorTema} ${!modoEditor ? 'stretched-link' : ''}`}>

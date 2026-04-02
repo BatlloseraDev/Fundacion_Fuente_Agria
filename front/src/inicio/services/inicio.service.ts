@@ -17,9 +17,16 @@ export const getAreasInicio = async (): Promise<GridItem[]> => {
         throw new Error('No se pudieron cargar las áreas de acción');
     }
 
-    const json: BackendActionArea[] = await response.json();
+    const json = await response.json();
+    
+    const datosArray = Array.isArray(json) ? json : json.data;
 
-    return json.map((item) => ({
+    if (!Array.isArray(datosArray)) {
+        console.error("Respuesta inesperada del backend:", json);
+        throw new Error('El backend no devolvió un array válido');
+    }
+
+    return datosArray.map((item: BackendActionArea) => ({
         id: item.id,
         titulo: item.title,
         descripcion: item.description,
