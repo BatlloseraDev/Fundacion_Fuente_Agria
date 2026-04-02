@@ -1,38 +1,59 @@
-import { Injectable } from '@nestjs/common';
-import { CreateActionAreaDto } from './dto/create-action-area.dto';
-import { UpdateActionAreaDto } from './dto/update-action-area.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ActionAreasService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  create(createActionAreaDto: CreateActionAreaDto) {
-    return this.prisma.actionArea.create({
-      data: createActionAreaDto,
+  async findAll() {
+    const pageConfig = await this.prisma.page.findFirst({
+      where: { stage: 'action_areas' },
     });
+
+    if (!pageConfig || !pageConfig.contentJson) {
+      return [];
+    }
+
+    let parsedJson: any[];
+    try {
+      parsedJson = typeof pageConfig.contentJson === 'string'
+        ? JSON.parse(pageConfig.contentJson)
+        : pageConfig.contentJson;
+    } catch (e) {
+      console.log("Error parseando JSON, " + e);
+      return [];
+    }
+
+    return parsedJson;
   }
 
-  findAll() {
-    return this.prisma.actionArea.findMany();
-  }
-
-  findOne(id: number) {
-    return this.prisma.actionArea.findUnique({
-      where: { id },
+  async update(idElemento: string, updateData: any) {
+    const pageConfig = await this.prisma.page.findFirst({
+      where: { stage: 'action_areas' },
     });
-  }
 
-  update(id: number, updateActionAreaDto: UpdateActionAreaDto) {
-    return this.prisma.actionArea.update({
-      where: { id },
-      data: updateActionAreaDto,
-    });
-  }
+    if (!pageConfig) {
+      throw new NotFoundException('No se encontró el stage action_areas en la tabla Page');
+    }
 
-  remove(id: number) {
-    return this.prisma.actionArea.delete({
-      where: { id },
+    let parsedJson: any[];
+    try {
+      parsedJson = typeof pageConfig.contentJson === 'string'
+        ? JSON.parse(pageConfig.contentJson)
+        : pageConfig.contentJson;
+    } catch (e) {
+      throw new Error("Error parseando JSON en la actualización");
+    }
+
+    const updatedJson = parsedJson.map((item) =>
+      item.id === idElemento ? { ...item, ...updateData } : item
+    );
+
+    await this.prisma.page.update({
+      where: { id: pageConfig.id },
+      data: { contentJson: updatedJson },
     });
+
+    return { success: true, message: 'Área de acción actualizada correctamente' };
   }
 }

@@ -1,7 +1,7 @@
 import type { GridItem } from '../types/inicio.interface';
 
 interface BackendActionArea {
-    id: number;
+    id: string;
     title: string;
     description: string;
     icon: string;
@@ -9,27 +9,24 @@ interface BackendActionArea {
     linkText: string;
 }
 
-const mapBackendToGridItem = (area: BackendActionArea): GridItem => {
-    return {
-        id: String(area.id),
-        titulo: area.title,
-        descripcion: area.description,
-        icono: area.icon,
-        colorTema: area.themeColor,
-        textoEnlace: area.linkText
-    };
-};
-
 export const getAreasInicio = async (): Promise<GridItem[]> => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const response = await fetch(`${apiUrl}/action-areas`);
 
     if (!response.ok) {
-        throw new Error('No se pudieron cargar las áreas de inicio');
+        throw new Error('No se pudieron cargar las áreas de acción');
     }
 
-    const json = await response.json();
-    return json.map(mapBackendToGridItem);
+    const json: BackendActionArea[] = await response.json();
+
+    return json.map((item) => ({
+        id: item.id,
+        titulo: item.title,
+        descripcion: item.description,
+        icono: item.icon,
+        colorTema: item.themeColor,
+        textoEnlace: item.linkText
+    }));
 };
 
 export const updateAreaInicio = async (id: string, datos: Partial<BackendActionArea>): Promise<void> => {
