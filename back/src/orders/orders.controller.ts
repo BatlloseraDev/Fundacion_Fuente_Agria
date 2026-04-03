@@ -29,6 +29,16 @@ export class OrdersController {
     return this.ordersService.updatePageConfig(body.stage, body.ids);
   }
 
+  @Get('header')
+  async getHeaderConfig() {
+    return this.ordersService.getHeaderConfig();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('header')
+  async updateHeaderConfig(@Body() body: any) {
+    return this.ordersService.updateHeaderConfig(body);
+  }
 
 
   @Post()

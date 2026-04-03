@@ -7,7 +7,7 @@ type Props = {
 
 };
 
-export function EncargosPopusCard({ item, editMode, onRemove}: Props) {
+export function EncargosPopusCard({ item, editMode, onRemove }: Props) {
   return (
     <div className="card h-100 shadow-sm">
       {editMode && (
@@ -17,12 +17,35 @@ export function EncargosPopusCard({ item, editMode, onRemove}: Props) {
           </button>
         </div>
       )}
-      <img
-        src={item.imagenUrl}
-        className="card-img-top"
-        alt={item.nombre}
-        style={{ height: 170, objectFit: "cover" }}
-      />
+      <div
+        className="position-relative w-100 bg-dark d-flex justify-content-center align-items-center"
+        style={{ height: 170, overflow: "hidden" }}
+      >
+        {/* 1. Imagen de fondo estirada y desenfocada */}
+        <img
+          src={item.imagenUrl}
+          alt=""
+          className="position-absolute top-0 start-0 w-100 h-100"
+          style={{
+            objectFit: "cover",
+            filter: "blur(15px)", // Un poco menos de blur que en el carrusel porque la imagen es más pequeña
+            opacity: 0.5,
+            transform: "scale(1.1)"
+          }}
+        />
+
+        {/* 2. Imagen principal nítida encima */}
+        <img
+          src={item.imagenUrl}
+          className="position-relative h-100 w-100"
+          alt={item.nombre}
+          style={{
+            objectFit: "contain",
+            zIndex: 1
+          }}
+        />
+      </div>
+      {/* --- FIN DEL CONTENEDOR --- */}
       <div className="card-body d-flex flex-column gap-2">
         <h3 className="h6 mb-0">{item.nombre}</h3>
 

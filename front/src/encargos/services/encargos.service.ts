@@ -37,6 +37,16 @@ interface ApiCarruselResponse {
   data: BackendEncargoCarrusel[];
 }
 
+export interface EncargosHeaderData {
+    badge: string;
+    badgeStyle: string;
+    title: string;
+    titleStyle: string;
+    description: string;
+    descriptionStyle: string;
+}
+
+
 export const getEncargosPopulares = async (): Promise<EncargoPopular[]> => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const response = await fetch(`${apiUrl}/orders/popular`);
@@ -113,3 +123,30 @@ export const savePageConfig = async (stage: string, ids: string[]): Promise<void
     throw new Error('No se pudo guardar la configuración de ${stage}');
   }
 }
+
+export const getEncargosHeader = async (): Promise<EncargosHeaderData> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/orders/header`);
+    if (!response.ok) throw new Error('Error al cargar la cabecera');
+    
+    const json = await response.json();
+    return json.data || json; 
+};
+
+export const updateEncargosHeader = async (datos: EncargosHeaderData): Promise<void> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const token = localStorage.getItem('jwt_token');
+    
+    const response = await fetch(`${apiUrl}/orders/header`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(datos)
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al guardar la cabecera');
+    }
+};

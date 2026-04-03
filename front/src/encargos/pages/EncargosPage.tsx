@@ -86,7 +86,7 @@ export default function EncargosPage() {
         </div>
       )}
 
-      <EncargosHeader onSolicitar={() => setOpen(true)} />
+      <EncargosHeader onSolicitar={() => setOpen(true)} editMode={editMode} />
 
       <main className="container py-5 position-relative">
         {loading ? (

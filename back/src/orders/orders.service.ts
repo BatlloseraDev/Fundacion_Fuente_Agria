@@ -165,4 +165,47 @@ export class OrdersService {
       });
     }
   }
+
+
+  async getHeaderConfig(){
+    const pageConfig = await this.prisma.page.findFirst({
+      where: {stage:'orders_header'},
+    });
+
+    if(!pageConfig || !pageConfig.contentJson){
+      return {
+        badge: "TÚ LO IMAGINAS, NOSOTROS LO CREAMOS",
+        badgeStyle: "Normal",
+        title: "Encargos Personalizados",
+        titleStyle: "Destacado",
+        description: "¿Tienes una idea especial? En Fundación Fuente Agria realizamos trabajos a medida para bodas, eventos corporativos o regalos únicos. Cuéntanos tu idea y le daremos forma.",
+        descriptionStyle: "Normal"
+      };
+    }
+
+    return typeof pageConfig.contentJson === 'string' 
+      ? JSON.parse(pageConfig.contentJson) 
+      : pageConfig.contentJson;
+    
+  }
+
+  async updateHeaderConfig(data: any) {
+    const existingPage = await this.prisma.page.findFirst({
+      where: { stage: 'orders_header' },
+    });
+
+    if (existingPage) {
+      return this.prisma.page.update({
+        where: { id: existingPage.id },
+        data: { contentJson: data },
+      });
+    } else {
+      return this.prisma.page.create({
+        data: {
+          stage: 'orders_header',
+          contentJson: data,
+        },
+      });
+    }
+  }
 }

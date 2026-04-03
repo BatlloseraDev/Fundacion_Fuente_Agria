@@ -83,9 +83,11 @@ export function EncargosCarousel({ items, autoMs = 4500, editMode, onRemove }: P
                                 }}
                             />
                         </div>
-                        <div className="carousel-caption d-none d-md-block">
-                            <div className="bg-dark bg-opacity-50 rounded-3 px-3 py-2 d-inline-block">
-                                <p className="mb-0 fw-semibold">{it.titulo}</p>
+
+                        {/* El texto debe ir fuera del contenedor negro de las imágenes para que Bootstrap lo posicione bien */}
+                        <div className="carousel-caption d-none d-md-block z-3">
+                            <div className="bg-dark bg-opacity-75 rounded-3 px-3 py-2 d-inline-block shadow">
+                                <p className="mb-0 fw-semibold text-white">{it.titulo}</p>
                             </div>
                         </div>
                     </div>
