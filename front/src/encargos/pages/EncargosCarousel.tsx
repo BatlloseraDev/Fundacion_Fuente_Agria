@@ -5,20 +5,12 @@ type Props = {
     items: EncargoCarrusel[];
     autoMs?: number;
     editMode?: boolean;
-    onRemove?: (id: string) => void;
+    onRemove?: (id: string | number) => void;
 };
 
-export function EncargosCarousel({ items, autoMs = 4500, editMode, onRemove }: Props) {
-    const safeItems = useMemo(() => items || [], [items]);
+export function EncargosCarousel({ items, autoMs = 4500, editMode, onRemove}: Props) {
+    const safeItems = useMemo(() => items.slice(0, 4), [items]);
     const [idx, setIdx] = useState(0);
-
-    // Derivar un índice seguro para evitar que la vista "parpadee" en blanco si eliminamos el elemento actual
-    const activeIdx = safeItems.length > 0 && idx >= safeItems.length ? safeItems.length - 1 : idx;
-
-    // Ajustar el estado real de fondo si ha quedado desfasado tras borrar elementos
-    useEffect(() => {
-        if (idx !== activeIdx) setIdx(activeIdx);
-    }, [idx, activeIdx]);
 
     function prev() {
         setIdx((v) => (v - 1 + safeItems.length) % safeItems.length);
@@ -34,21 +26,13 @@ export function EncargosCarousel({ items, autoMs = 4500, editMode, onRemove }: P
         return () => window.clearInterval(t);
     }, [safeItems.length, autoMs]);
 
-    if (safeItems.length === 0) {
-        if (!editMode) return null;
-        return (
-            <div className="bg-light border rounded-4 d-flex flex-column align-items-center justify-content-center text-secondary" style={{ height: 360 }}>
-                <i className="bi bi-images fs-1 mb-2"></i>
-                <p className="mb-0">El carrusel está vacío. Añade encargos para mostrarlos aquí.</p>
-            </div>
-        );
-    }
+    if (safeItems.length === 0) return null;
 
     return (
         <div id="encargosCarousel" className="carousel slide position-relative" aria-label="Carrusel de encargos realizados">
             <div className="carousel-inner rounded-4 overflow-hidden border">
                 {safeItems.map((it, i) => (
-                    <div key={it.id} className={`carousel-item ${i === activeIdx ? "active" : ""}`}>
+                    <div key={it.id} className={`carousel-item ${i === idx ? "active" : ""}`}>
                         {editMode && (
                             <div className="position-absolute top-0 end-0 m-3 z-3">
                                 <button className="btn btn-danger btn-sm rounded-circle shadow" onClick={() => onRemove?.(it.id)}>
@@ -56,33 +40,15 @@ export function EncargosCarousel({ items, autoMs = 4500, editMode, onRemove }: P
                                 </button>
                             </div>
                         )}
-                        <div className="w-100 overflow-hidden bg-black position-relative d-flex justify-content-center align-items-center" style={{ height: 360 }}>
-
-                            {/* 1. Imagen de fondo estirada y desenfocada (Efecto Ambient) */}
-                            <img
-                                src={it.imagenUrl}
-                                alt=""
-                                className="position-absolute top-0 start-0 w-100 h-100"
-                                style={{
-                                    objectFit: "cover", // Estira para cubrir todo
-                                    filter: "blur(25px)", // Desenfoque alto
-                                    opacity: 0.5, // Medio transparente para que se funda con el negro
-                                    transform: "scale(1.1)" // Evita bordes blancos por el blur
-                                }}
-                            />
-
-                            {/* 2. Imagen principal nítida encima */}
+                        <div className="w-100 overflow-hidden bg-light" style={{ height: 360 }}>
                             <img
                                 src={it.imagenUrl}
                                 alt={it.alt}
-                                className="position-relative h-100 w-100"
-                                style={{
-                                    objectFit: "contain",
-                                    objectPosition: "center",
-                                    zIndex: 1
-                                }}
+                                className="w-100 h-100 d-block"
+                                style={{ objectFit: "cover", objectPosition: "center" }}
                             />
                         </div>
+
                         <div className="carousel-caption d-none d-md-block">
                             <div className="bg-dark bg-opacity-50 rounded-3 px-3 py-2 d-inline-block">
                                 <p className="mb-0 fw-semibold">{it.titulo}</p>
@@ -118,8 +84,8 @@ export function EncargosCarousel({ items, autoMs = 4500, editMode, onRemove }: P
                         key={it.id}
                         type="button"
                         aria-label={`Ir a ${i + 1}`}
-                        aria-current={i === activeIdx ? "true" : "false"}
-                        className={i === activeIdx ? "active" : ""}
+                        aria-current={i === idx ? "true" : "false"}
+                        className={i === idx ? "active" : ""}
                         onClick={() => setIdx(i)}
                     />
                 ))}

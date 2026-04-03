@@ -132,5 +132,37 @@ export class OrdersService {
     }).filter(Boolean);
   
   }
+  async findAllActive(){
+    return this.prisma.order.findMany({
+      where: {active:true},
+      select: {
+        id: true,
+        title: true,
+        imageAfter: true,
+        price: true,
+        timeInitial: true,
+        timeFinal: true,
+      },
+      orderBy: {id: 'desc'}
+    });
+  }
 
+  async updatePageConfig(stage: string, ids: number[]){
+    const jsonContent = ids.map(id=>({id}));
+
+    const existingPage = await this.prisma.page.findFirst({
+      where: {stage},
+    })
+
+    if(existingPage){
+      return this.prisma.page.update({
+        where: {id:existingPage.id},
+        data:{contentJson: jsonContent}
+      })
+    } else {
+      return this.prisma.page.create({
+        data:{stage, contentJson: jsonContent}
+      });
+    }
+  }
 }

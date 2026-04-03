@@ -1,10 +1,22 @@
 import type { EncargoPopular } from "../types/encargo.types";
 
-type Props = { item: EncargoPopular };
+type Props = {
+  item: EncargoPopular;
+  editMode?: boolean;
+  onRemove?: (id: string) => void;
 
-export function EncargosPopusCard({ item }: Props) {
+};
+
+export function EncargosPopusCard({ item, editMode, onRemove}: Props) {
   return (
     <div className="card h-100 shadow-sm">
+      {editMode && (
+        <div className="position-absolute top-0 end-0 m-2 z-3">
+          <button className="btn btn-danger btn-sm rounded-circle shadow" onClick={() => onRemove?.(item.id)}>
+            <i className="bi bi-trash"></i>
+          </button>
+        </div>
+      )}
       <img
         src={item.imagenUrl}
         className="card-img-top"

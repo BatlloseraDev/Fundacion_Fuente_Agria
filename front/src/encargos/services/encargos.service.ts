@@ -1,5 +1,13 @@
 import type { EncargoPopular, EncargoCarrusel } from "../types/encargo.types";
 
+export interface BackendOrderData {
+    id: number;
+    title: string;
+    imageAfter: string | null;
+    price: number | null;
+    timeInitial: number | string | null;
+    timeFinal: number | string | null;
+}
 
 interface BackendEncargoPopular {
     id: number;
@@ -78,3 +86,30 @@ export const getEncargosCarrusel = async (): Promise<EncargoCarrusel[]> => {
     alt: item.title, 
   }));
 };
+
+
+
+export const getAllOrders = async (): Promise<BackendOrderData[]> => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/orders/allActive`);
+  if(!response.ok) throw new Error ('No se pudieron cargar todos los encargos');
+  const json = await response.json();
+  return json.data;
+}
+
+export const savePageConfig = async (stage: string, ids: string[]): Promise<void> =>{
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const token = localStorage.getItem('jwt_token');
+  const response = await fetch(`${apiUrl}/orders/page-config`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({stage, ids: ids.map(Number)})
+  });
+
+  if(!response.ok){
+    throw new Error('No se pudo guardar la configuración de ${stage}');
+  }
+}

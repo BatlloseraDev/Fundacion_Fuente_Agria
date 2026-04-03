@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 
 interface FooterProps {
   editorToken: boolean;
@@ -7,6 +7,7 @@ interface FooterProps {
 
 export const Footer = ({ editorToken, adminToken }: FooterProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isAdmin = adminToken;
   const isEditor = editorToken;
@@ -35,7 +36,7 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
             </p>
           </div>
 
-          {/* Columna 2: Contacto Esta podría ser editabl, cada uno de los campos */}
+          {/* Columna 2: Contacto esta es editable desde admin */}
           <div className="col-lg-3">
             <h3 className="h6 fw-semibold">Contacto (genérico)</h3>
             <ul className="list-unstyled text-muted mb-0">
@@ -63,7 +64,7 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
                 {isEditor && (
                   <button 
                     className="btn btn-sm btn-primary w-100 shadow-sm rounded-pill" 
-                    onClick={() => navigate('/editor')}
+                    onClick={() => navigate(`${location.pathname}?edit=true`)}
                   >
                     Área editor
                   </button>

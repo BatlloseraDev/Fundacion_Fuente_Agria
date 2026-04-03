@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { JwtAuthGuard } from 'src/auth/jwt_strategy/jwt-auth.guard';
 
 @Controller('orders')
 export class OrdersController {
@@ -16,6 +17,18 @@ export class OrdersController {
   async getCarruselOrders() {
     return this.ordersService.getCarrusel();
   }
+
+  @Get('allActive')
+  async getAllActiveOrders() {
+    return this.ordersService.findAllActive();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('page-config')
+  async updatePageConfig(@Body() body: { stage: string, ids: number[] }) {
+    return this.ordersService.updatePageConfig(body.stage, body.ids);
+  }
+
 
 
   @Post()

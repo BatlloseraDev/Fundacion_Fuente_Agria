@@ -3,9 +3,11 @@ import { EncargosPopusCard } from "./EncargosPopusCard";
 
 type Props = {
   items: EncargoPopular[];
+  editMode?: boolean;
+  onRemove?: (id: string ) => void;
 };
-
-export function EncargosPopulares({ items }: Props) {
+export function EncargosPopulares({ items = [], editMode, onRemove 
+}: Props) {
   return (
     <section aria-label="Encargos populares" className="mt-4">
       <div className="d-flex align-items-center justify-content-between mb-3">
@@ -13,9 +15,9 @@ export function EncargosPopulares({ items }: Props) {
       </div>
 
       <div className="row g-3">
-        {items.map((it) => (
+        {items?.map((it) => (
           <div key={it.id} className="col-12 col-sm-6 col-lg-3">
-            <EncargosPopusCard item={it} />
+            <EncargosPopusCard item={it} editMode={editMode} onRemove={onRemove} />
           </div>
         ))}
       </div>
