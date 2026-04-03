@@ -17,6 +17,7 @@ export const InicioGrid = ({ modoEditor = false }: InicioGridProps) => {
         isOpen: false,
         tituloModal: '',
         valorInicial: '',
+        estiloInicial: 'Normal', 
         idElemento: '',
         campoBD: ''
     });
@@ -37,20 +38,29 @@ export const InicioGrid = ({ modoEditor = false }: InicioGridProps) => {
         fetchAreas();
     }, []);
 
-    const abrirModal = (titulo: string, valor: string, idElemento: string, campoBD: string) => {
-        setModal({ isOpen: true, tituloModal: titulo, valorInicial: valor, idElemento, campoBD });
+    const abrirModal = (titulo: string, valor: string, estilo: string, idElemento: string, campoBD: string) => {
+        setModal({ isOpen: true, tituloModal: titulo, valorInicial: valor, estiloInicial: estilo, idElemento, campoBD });
     };
 
     const cerrarModal = () => setModal({ ...modal, isOpen: false });
 
-    const handleGuardar = async (nuevoValor: string) => {
+    const handleGuardar = async (nuevoValor: string, nuevoEstilo: string) => {
         try {
-            await updateAreaInicio(modal.idElemento, { [modal.campoBD]: nuevoValor });
+            const campoEstilo = modal.campoBD + 'Style'; 
+
+            await updateAreaInicio(modal.idElemento, { 
+                [modal.campoBD]: nuevoValor,
+                [campoEstilo]: nuevoEstilo
+            });
             
             setAreas(areas.map(area => {
                 if (area.id === modal.idElemento) {
-                    const claveLocal = modal.campoBD === 'title' ? 'titulo' : 'descripcion';
-                    return { ...area, [claveLocal]: nuevoValor };
+                    const campoValor = modal.campoBD === 'title' ? 'titulo' : 'descripcion';
+                    return { 
+                        ...area, 
+                        [campoValor]: nuevoValor, 
+                        [campoEstilo]: nuevoEstilo 
+                    };
                 }
                 return area;
             }));
@@ -66,7 +76,6 @@ export const InicioGrid = ({ modoEditor = false }: InicioGridProps) => {
         <section className="container py-5 mb-5">
             <div className="text-center mb-5">
                 <h2 className="display-5 fw-bold mb-3">Nuestras Áreas de Acción</h2>
-
                 <p className="mb-3">Descubre el trabajo realizado en nuestros talleres y las actividades que compartimos con la comunidad.</p>
             </div>
             
@@ -84,7 +93,9 @@ export const InicioGrid = ({ modoEditor = false }: InicioGridProps) => {
                             <GridItem 
                                 {...item} 
                                 modoEditor={modoEditor} 
-                                onEdit={(campoBD, valorActual) => abrirModal(`Editar ${campoBD === 'title' ? 'Título' : 'Descripción'}`, valorActual, item.id, campoBD)}
+                                onEdit={(campoBD, valorActual, estiloActual) => 
+                                    abrirModal(`Editar ${campoBD === 'title' ? 'Título' : 'Descripción'}`, valorActual, estiloActual, item.id, campoBD)
+                                }
                             />
                         </div>
                     ))}
@@ -97,6 +108,7 @@ export const InicioGrid = ({ modoEditor = false }: InicioGridProps) => {
                 onSave={handleGuardar}
                 tituloModal={modal.tituloModal}
                 valorInicial={modal.valorInicial}
+                estiloInicial={modal.estiloInicial} 
             />
         </section>
     );
