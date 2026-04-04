@@ -1,5 +1,5 @@
 import type { NovedadItem } from '../types/inicio.interface';
-import { ComponenteEditable } from './ComponenteEditable';
+import { ComponenteEditable } from '../../components/ui/ComponenteEditable';
 
 interface NovedadCardProps extends NovedadItem {
     modoEditor?: boolean;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { GridItem } from './GridItem';
-import { ModalEdicion } from './ModalEdicion';
+import { ModalEdicion } from '../../components/ui/ModalEdicion';
 import { getAreasInicio, updateAreaInicio } from '../services/inicio.service';
 import type { GridItem as GridItemType } from '../types/inicio.interface';
 

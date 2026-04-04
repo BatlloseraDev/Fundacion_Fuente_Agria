@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ComentarioCard } from './ComentarioCard';
-import { ModalEdicion } from './ModalEdicion';
+import { ModalEdicion } from '../../components/ui/ModalEdicion';
 import { getComentariosInicio, updateComentarioInicio } from '../services/inicio.service';
 import type { ComentarioItem } from '../types/inicio.interface';
 

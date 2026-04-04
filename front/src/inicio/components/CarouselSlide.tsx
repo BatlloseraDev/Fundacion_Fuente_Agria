@@ -1,5 +1,5 @@
 import type { CarouselItem } from '../types/inicio.interface';
-import { ComponenteEditable } from './ComponenteEditable';
+import { ComponenteEditable } from '../../components/ui/ComponenteEditable';
 
 interface Props {
     item: CarouselItem;

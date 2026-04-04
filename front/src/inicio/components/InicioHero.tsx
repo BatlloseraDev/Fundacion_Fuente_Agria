@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { InicioCarousel } from './InicioCarousel';
-import { ComponenteEditable } from './ComponenteEditable';
-import { ModalEdicion } from './ModalEdicion';
+import { ComponenteEditable } from '../../components/ui/ComponenteEditable';
+import { ModalEdicion } from '../../components/ui/ModalEdicion';
 import { getHeroInicio, updateHeroInicio } from '../services/inicio.service';
 import type { HeroItem } from '../types/inicio.interface';
 

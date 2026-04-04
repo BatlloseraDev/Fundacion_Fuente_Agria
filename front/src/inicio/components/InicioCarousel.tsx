@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CarouselSlide } from './CarouselSlide';
-import { ModalDiapositiva } from './ModalDiapositiva';
-import type { DatosDiapositiva } from './ModalDiapositiva';
+import { ModalDiapositiva } from '../../components/ui/ModalDiapositiva';
+import type { DatosDiapositiva } from '../../components/ui/ModalDiapositiva';
 import { getCarouselInicio, updateCarouselInicio } from '../services/inicio.service';
 import type { CarouselItem } from '../types/inicio.interface';
 

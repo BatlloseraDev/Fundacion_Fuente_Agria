@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { NovedadCard } from './NovedadCard';
-import { ModalDiapositiva } from './ModalDiapositiva';
-import type { DatosDiapositiva } from './ModalDiapositiva';
+import { ModalDiapositiva } from '../../components/ui/ModalDiapositiva';
+import type { DatosDiapositiva } from '../../components/ui/ModalDiapositiva';
 import { getNovedadesInicio, updateNovedadInicio } from '../services/inicio.service';
 import type { NovedadItem } from '../types/inicio.interface';
 
