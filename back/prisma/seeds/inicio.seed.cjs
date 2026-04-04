@@ -184,6 +184,25 @@ async function seedInicio(prisma) {
         });
     }
 
+    const heroData = {
+      badge: 'BIENVENIDOS AL CATÁLOGO DE LA FUNDACIÓN',
+      titulo: 'Construyendo un futuro lleno de posibilidades.',
+      descripcion: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsam dolor cumque voluptatibus hic distinctio, obcaecati ab ratione vero repellendus. Explicabo quos adipisci eos dolores est.'
+    };
+
+    const existingHero = await prisma.page.findFirst({ 
+      where: { stage: 'inicio_hero' } 
+    });
+
+    if (existingHero) {
+        await prisma.page.update({ 
+          where: { id: existingHero.id }, 
+          data: { contentJson: heroData } });
+    } else {
+        await prisma.page.create({ 
+          data: { stage: 'inicio_hero', contentJson: heroData } });
+    }
+
     console.log('✅ Datos configurados en Page.');
 }
 
