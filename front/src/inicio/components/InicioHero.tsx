@@ -100,7 +100,7 @@ export const InicioHero = ({ modoEditor = false }: InicioHeroProps) => {
                     </div>
 
                     <div className="col-lg-6 p-0 bg-white rounded-5 shadow-lg text-center border">
-                        <InicioCarousel />
+                        <InicioCarousel modoEditor={modoEditor} />
                     </div>
 
                 </div>

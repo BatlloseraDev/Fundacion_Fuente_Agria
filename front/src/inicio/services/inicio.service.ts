@@ -1,4 +1,4 @@
-import type { GridItem, NovedadItem, HeroItem } from '../types/inicio.interface';
+import type { GridItem, NovedadItem, HeroItem, CarouselItem } from '../types/inicio.interface';
 
 interface BackendActionArea {
     id: string;
@@ -159,4 +159,27 @@ export const updateHeroInicio = async (datos: Partial<HeroItem>): Promise<void> 
     });
 
     if (!response.ok) throw new Error('Error al guardar los cambios del Hero');
+};
+
+export const getCarouselInicio = async (): Promise<CarouselItem[]> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/carousel-inicio`);
+
+    if (!response.ok) throw new Error('No se pudo cargar el carrusel');
+
+    const json = await response.json();
+    const datosArray = json.data || json;
+
+    return Array.isArray(datosArray) ? datosArray : [];
+};
+
+export const updateCarouselInicio = async (id: string, datos: Partial<CarouselItem>): Promise<void> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/carousel-inicio/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    });
+
+    if (!response.ok) throw new Error('Error al guardar los cambios de la diapositiva');
 };

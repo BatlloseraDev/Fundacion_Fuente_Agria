@@ -25,7 +25,6 @@ export const ModalDiapositiva = ({ isOpen, onClose, onSave, tituloModal, tipo, v
     
     const [titulo, setTitulo] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [textoAlt, setTextoAlt] = useState('');
     const [etiqueta, setEtiqueta] = useState('');
     const [fecha, setFecha] = useState('');
     const [enlace, setEnlace] = useState('');
@@ -36,7 +35,6 @@ export const ModalDiapositiva = ({ isOpen, onClose, onSave, tituloModal, tipo, v
             setImagenPista(null);
             setTitulo(valoresIniciales?.titulo || '');
             setDescripcion(valoresIniciales?.descripcion || '');
-            setTextoAlt(valoresIniciales?.textoAlt || '');
             setEtiqueta(valoresIniciales?.etiqueta || '');
             setFecha(valoresIniciales?.fecha || '');
             setEnlace(valoresIniciales?.enlace || '');
@@ -125,12 +123,6 @@ export const ModalDiapositiva = ({ isOpen, onClose, onSave, tituloModal, tipo, v
                                             </>
                                         )}
 
-                                        {tipo === 'carrusel' && (
-                                            <div className="col-12">
-                                                <label className="form-label text-secondary small fw-semibold mb-1">Texto Alternativo (Alt)</label>
-                                                <input type="text" className="form-control rounded-3" value={textoAlt} onChange={(e) => setTextoAlt(e.target.value)} />
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -138,7 +130,7 @@ export const ModalDiapositiva = ({ isOpen, onClose, onSave, tituloModal, tipo, v
                         
                         <div className="modal-footer border-top-0 pt-0 mt-2 d-flex gap-2 justify-content-end">
                             <button className="btn btn-light rounded-pill px-4 text-dark fw-medium border" onClick={onClose}>Cancelar</button>
-                            <button className="btn btn-primary rounded-pill px-4 fw-medium" onClick={() => onSave({ archivoImagen: archivo, titulo, descripcion, textoAlt, etiqueta, fecha, enlace })}>
+                            <button className="btn btn-primary rounded-pill px-4 fw-medium" onClick={() => onSave({ archivoImagen: archivo, titulo, descripcion, etiqueta, fecha, enlace })}>
                                 Guardar Cambios
                             </button>
                         </div>
