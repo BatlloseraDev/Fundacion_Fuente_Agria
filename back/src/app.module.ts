@@ -10,6 +10,7 @@ import { ActionAreasModule } from './action-areas/action-areas.module';
 import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio.module';
 import { NovedadesInicioModule } from './novedades-inicio/novedades-inicio.module';
 import { HeroInicioModule } from './hero-inicio/hero-inicio.module';
+import { CarouselInicioModule } from './carousel-inicio/carousel-inicio.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { HeroInicioModule } from './hero-inicio/hero-inicio.module';
     ActionAreasModule,
     ComentariosInicioModule,
     NovedadesInicioModule,
-    HeroInicioModule
+    HeroInicioModule,
+    CarouselInicioModule
   ],
   providers: [PrismaService],
 })
