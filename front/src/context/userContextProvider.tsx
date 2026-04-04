@@ -3,8 +3,6 @@ import {jwtDecode} from 'jwt-decode'
 import type{Role,User, AuthStatus} from './types/user.types'
 import { UserContext } from "./userContext";
 
-
-
 export const UserContextProvider = ({children}: PropsWithChildren) => {
     const [authStatus, setAuthStatus] = useState<AuthStatus>('checking');
     const [user, setUser] = useState<User | null>(null);
@@ -16,8 +14,8 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
             const decodedToken: any = jwtDecode(token);
             const loggedUser: User = {
                 id: decodedToken.sub,
-                username: decodedToken.username, //si creamos el token con username si no lo tenemos que cambiar
-                roles: decodedToken.roles
+                username: decodedToken.username || decodedToken.email, //si creamos el token con username si no lo tenemos que cambiar
+                roles: Array.isArray(decodedToken.roles) ? decodedToken.roles.map((r: string) => r.toLowerCase() as Role) : []
             }
 
             // //Mock provisional para testear
@@ -47,7 +45,7 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
         if(!user){
             return false;
         }
-        return allowedRoles.some(role => user.roles.includes(role));
+        return allowedRoles.some(role => user.roles.includes(role.toLowerCase() as Role));
     }
 
     useEffect(() =>{
@@ -61,7 +59,7 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
 
 
     return (
-        <UserContext value ={{
+        <UserContext.Provider value ={{
             authStatus,
             user,
             isAuthenticated: authStatus === 'authenticated',
@@ -70,7 +68,7 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
             hasRole
         }}>
             {children}
-        </UserContext>
+        </UserContext.Provider>
     );
 
 };

@@ -15,8 +15,8 @@ export const AppLayout = () =>{
                 <Outlet/>{/*AQUI SE INYECTAN LAS PAGINAS EN EL NUEVO ROUTER QUE HE IMPLEMENTADO */}
             </div>
             <Footer 
-                editorToken={hasRole(['EDITOR','ADMIN'])}
-                adminToken={hasRole(['ADMIN'])}
+                editorToken={hasRole(['editor'])}
+                adminToken={hasRole(['admin'])}
             />
         </div>
     )

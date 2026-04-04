@@ -1,32 +1,27 @@
-import { useState } from 'react';
+import { useContext } from 'react'; // Cambiamos useState por useContext
 import { InicioHero } from '../components/InicioHero';
 import { InicioGrid } from '../components/InicioGrid';
 import { InicioNovedades } from '../components/InicioNovedades';
 import { InicioComentarios } from '../components/InicioComentarios';
+import { EditorBar } from '../../components/ui/EditorBar'; 
+import { EditorContext } from '../../context/editorContext'; 
 
 export const InicioPage = () => {
 
-    const [modoEditor, setModoEditor] = useState(false);
+    const { modoEditor } = useContext(EditorContext);
 
     return (
         <main className="w-100">
+            
+            {modoEditor && <EditorBar />}
+
             <InicioHero modoEditor={modoEditor} />
 
             <InicioNovedades modoEditor={modoEditor} />
-            
+
             <InicioGrid modoEditor={modoEditor} />
 
             <InicioComentarios />
-
-            <div className="container text-center py-5 mt-5">
-                <button 
-                    className={`btn ${modoEditor ? 'btn-danger' : 'btn-success'} rounded-pill shadow-sm px-4`}
-                    onClick={() => setModoEditor(!modoEditor)}
-                >
-                    <i className={`bi ${modoEditor ? 'bi-x-circle' : 'bi-pencil'} me-2`}></i>
-                    {modoEditor ? 'Desactivar Área Editor' : 'Área Editor'}
-                </button>
-            </div>
 
         </main>
     );
