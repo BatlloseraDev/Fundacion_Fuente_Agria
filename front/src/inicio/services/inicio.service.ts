@@ -1,4 +1,4 @@
-import type { GridItem } from '../types/inicio.interface';
+import type { GridItem, NovedadItem } from '../types/inicio.interface';
 
 interface BackendActionArea {
     id: string;
@@ -102,5 +102,39 @@ export const updateComentarioInicio = async (id: string, datos: Partial<BackendC
 
     if (!response.ok) {
         throw new Error('Error al guardar los cambios del comentario');
+    }
+};
+
+export const getNovedadesInicio = async (): Promise<NovedadItem[]> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/novedades-inicio`);
+
+    if (!response.ok) {
+        throw new Error('No se pudieron cargar las novedades');
+    }
+
+    const json = await response.json();
+    const datosArray = Array.isArray(json) ? json : json.data;
+
+    if (!Array.isArray(datosArray)) {
+        console.error("Respuesta inesperada del backend:", json);
+        throw new Error('El backend no devolvió un array válido');
+    }
+
+    return datosArray;
+};
+
+export const updateNovedadInicio = async (id: string, datos: Partial<NovedadItem>): Promise<void> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/novedades-inicio/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datos)
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al guardar los cambios de la novedad');
     }
 };

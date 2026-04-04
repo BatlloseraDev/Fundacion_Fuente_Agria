@@ -12,7 +12,7 @@ export const InicioPage = () => {
         <main className="w-100">
             <InicioHero />
 
-            <InicioNovedades />
+            <InicioNovedades modoEditor={modoEditor} />
             
             <InicioGrid modoEditor={modoEditor} />
 

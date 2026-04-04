@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-export type TipoEdicion = 'texto' | 'imagen' | 'diapositiva';
+export type TipoEdicion = 'texto' | 'diapositiva';
 
 interface ComponenteEditableProps {
     children: ReactNode;
@@ -16,11 +16,7 @@ export const ComponenteEditable = ({ children, modoEditor, onEditClick, tipo = '
     if (!modoEditor) return <>{children}</>;
 
     const getIcono = () => {
-        switch (tipo) {
-            case 'imagen': return 'bi-image';
-            case 'diapositiva': return 'bi-plus-circle-fill';
-            default: return 'bi-pencil-fill'; 
-        }
+        return 'bi-pencil-fill'; 
     };
 
     return (
