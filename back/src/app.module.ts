@@ -9,6 +9,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { ActionAreasModule } from './action-areas/action-areas.module';
 import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio.module';
 import { NovedadesInicioModule } from './novedades-inicio/novedades-inicio.module';
+import { HeroInicioModule } from './hero-inicio/hero-inicio.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { NovedadesInicioModule } from './novedades-inicio/novedades-inicio.modul
     ArticlesModule,
     ActionAreasModule,
     ComentariosInicioModule,
-    NovedadesInicioModule
+    NovedadesInicioModule,
+    HeroInicioModule
   ],
   providers: [PrismaService],
 })
