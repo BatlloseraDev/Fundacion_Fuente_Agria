@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
 import { ActionAreasModule } from './action-areas/action-areas.module';
 import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio.module';
+import { NovedadesInicioModule } from './novedades-inicio/novedades-inicio.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio
     AuthModule,
     ArticlesModule,
     ActionAreasModule,
-    ComentariosInicioModule
+    ComentariosInicioModule,
+    NovedadesInicioModule
   ],
   providers: [PrismaService],
 })
