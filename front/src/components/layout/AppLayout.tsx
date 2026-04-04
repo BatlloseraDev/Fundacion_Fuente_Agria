@@ -18,7 +18,7 @@ export const AppLayout = () =>{
                 <Outlet/>
             </div>
             <Footer 
-                editorToken={hasRole(['editor'])}
+                editorToken={hasRole(['editor', 'admin'])}
                 adminToken={hasRole(['admin'])}
             />
         </div>
