@@ -32,3 +32,12 @@ export interface ComentarioItem {
   etiqueta: string;
   autor: string;
 }
+
+export interface HeroItem {
+    badge: string;
+    titulo: string;
+    descripcion: string;
+    badgeStyle?: string;
+    tituloStyle?: string;
+    descripcionStyle?: string;
+}

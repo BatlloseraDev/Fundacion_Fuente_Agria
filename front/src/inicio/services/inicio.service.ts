@@ -1,4 +1,4 @@
-import type { GridItem, NovedadItem } from '../types/inicio.interface';
+import type { GridItem, NovedadItem, HeroItem } from '../types/inicio.interface';
 
 interface BackendActionArea {
     id: string;
@@ -137,4 +137,26 @@ export const updateNovedadInicio = async (id: string, datos: Partial<NovedadItem
     if (!response.ok) {
         throw new Error('Error al guardar los cambios de la novedad');
     }
+};
+
+export const getHeroInicio = async (): Promise<HeroItem> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/hero-inicio`);
+
+    if (!response.ok) throw new Error('No se pudo cargar el Hero');
+
+    const json = await response.json();
+    
+    return json.data; 
+};
+
+export const updateHeroInicio = async (datos: Partial<HeroItem>): Promise<void> => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/hero-inicio`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+    });
+
+    if (!response.ok) throw new Error('Error al guardar los cambios del Hero');
 };
