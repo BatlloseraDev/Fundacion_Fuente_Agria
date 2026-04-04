@@ -12,6 +12,8 @@ export interface GridItem {
   icono: string;        
   colorTema: string;   
   textoEnlace: string;  
+  titleStyle?: string;       
+  descriptionStyle?: string; 
 }
 
 export interface NovedadItem {

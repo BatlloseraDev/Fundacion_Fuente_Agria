@@ -7,6 +7,8 @@ interface BackendActionArea {
     icon: string;
     themeColor: string;
     linkText: string;
+    titleStyle?: string;       
+    descriptionStyle?: string;
 }
 
 export interface ComentarioItem {
@@ -46,7 +48,9 @@ export const getAreasInicio = async (): Promise<GridItem[]> => {
         descripcion: item.description,
         icono: item.icon,
         colorTema: item.themeColor,
-        textoEnlace: item.linkText
+        textoEnlace: item.linkText,
+        titleStyle: item.titleStyle || 'Normal',      
+        descriptionStyle: item.descriptionStyle || 'Normal' 
     }));
 };
 
