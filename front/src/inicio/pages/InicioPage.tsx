@@ -3,7 +3,6 @@ import { InicioHero } from '../components/InicioHero';
 import { InicioGrid } from '../components/InicioGrid';
 import { InicioNovedades } from '../components/InicioNovedades';
 import { InicioComentarios } from '../components/InicioComentarios';
-import { EditorBar } from '../../components/ui/EditorBar'; 
 import { EditorContext } from '../../context/editorContext'; 
 
 export const InicioPage = () => {
@@ -13,8 +12,6 @@ export const InicioPage = () => {
     return (
         <main className="w-100">
             
-            {modoEditor && <EditorBar />}
-
             <InicioHero modoEditor={modoEditor} />
 
             <InicioNovedades modoEditor={modoEditor} />
