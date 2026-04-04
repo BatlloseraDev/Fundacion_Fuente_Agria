@@ -55,13 +55,24 @@ export const InicioNovedades = ({ modoEditor = false }: InicioNovedadesProps) =>
 
     const handleGuardar = async (datosModificados: DatosDiapositiva) => {
         try {
-            
+            let nuevaImagenUrl = modal.valoresIniciales.imagenUrl;
+
+            if (datosModificados.archivoImagen) {
+                nuevaImagenUrl = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(datosModificados.archivoImagen!); 
+                });
+            }
+
             const datosAActualizar: Partial<NovedadItem> = {
                 titulo: datosModificados.titulo,
                 descripcion: datosModificados.descripcion,
                 etiqueta: datosModificados.etiqueta,
                 fecha: datosModificados.fecha,
                 enlace: datosModificados.enlace,
+                imagenUrl: nuevaImagenUrl, 
             };
 
             await updateNovedadInicio(modal.idElemento, datosAActualizar);
