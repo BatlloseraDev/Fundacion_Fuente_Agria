@@ -1,5 +1,4 @@
-import { useState, useEffect, use } from "react";
-import { useSearchParams } from "react-router";
+import { useState, useEffect, useCallback, use } from "react";
 import { EncargosCarousel } from "../componentes/EncargosCarousel";
 import { EncargosPopulares } from "../componentes/EncargosPopulares";
 import { SolicitarEncargoModal } from "../componentes/SolicitarEncargoModal";
@@ -7,19 +6,20 @@ import { EncargosHeader } from "../componentes/EncargosHeader";
 import { SeleccionarEncargosModal } from "../componentes/SeleccionarEncargosModal";
 import type { EncargoPopular, EncargoCarrusel } from "../types/encargo.types";
 import { getEncargosPopulares, getEncargosCarrusel, savePageConfig, type BackendOrderData } from "../services/encargos.service";
-import { UserContext } from "../../context/userContext";
+
+// IMPORTAMOS EL CONTEXTO GLOBAL
+import { EditorContext } from "../../context/editorContext";
 
 export default function EncargosPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { hasRole } = use(UserContext);
-  
-  const isEditorURL = searchParams.get("edit") === "true";
-  const editMode = isEditorURL && hasRole(["EDITOR", "ADMIN"]);
+  // Obtenemos el modo edición y la función para pasar nuestra acción de guardado
+  const editorContext = use(EditorContext);
+  const editMode = editorContext?.editMode ?? false;
+  const setSaveAction = editorContext?.setSaveAction ?? (() => {});
+
   const [open, setOpen] = useState(false);
   const [populares, setPopulares] = useState<EncargoPopular[]>([]);
   const [carrusel, setCarrusel] = useState<EncargoCarrusel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   // Estados para modales de añadir
   const [addCarruselModal, setAddCarruselModal] = useState(false);
@@ -50,42 +50,30 @@ export default function EncargosPage() {
     }]);
   };
 
-  // Guardar en base de datos
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      const idsCarrusel = carrusel.map(c => c.id);
-      const idsPopulares = populares.map(p => p.id);
-      
-      await savePageConfig('orders_carousel', idsCarrusel);
-      await savePageConfig('orders_popular', idsPopulares);
-      
-      alert("¡Cambios guardados con éxito!");
-      setSearchParams({}); // Salir del modo edición
-    } catch (e) {
-      alert("Error al guardar los cambios.");
-    } finally {
-      setSaving(false);
+
+  const handleSavePage = useCallback(async () => {
+    const idsCarrusel = carrusel.map(c => c.id);
+    const idsPopulares = populares.map(p => p.id);
+    
+    // Las peticiones al backend
+    await savePageConfig('orders_carousel', idsCarrusel);
+    await savePageConfig('orders_popular', idsPopulares);
+  }, [carrusel, populares]);
+
+
+  useEffect(() => {
+    if (editMode) {
+      setSaveAction((() => handleSavePage) as any);
+    } else {
+      setSaveAction(null);
     }
-  };
+    
+    // Limpieza al salir de la página
+    return () => setSaveAction(null);
+  }, [editMode, handleSavePage, setSaveAction]);
 
   return (
     <>
-      {editMode && (
-        <div className="bg-dark text-white py-2 px-3 d-flex justify-content-between align-items-center sticky-top" style={{ zIndex: 1040 }}>
-            <div>
-              <i className="bi bi-pencil-square me-2"></i>
-              <small className="fw-bold text-uppercase">Modo Edición Activado</small>
-            </div>
-            <div>
-              <button className="btn btn-sm btn-success rounded-pill px-3 me-2" onClick={handleSave} disabled={saving}>
-                {saving ? "Guardando..." : "Guardar Cambios"}
-              </button>
-              <button className="btn btn-sm btn-outline-light rounded-pill px-3" onClick={() => setSearchParams({})}>Salir</button>
-            </div>
-        </div>
-      )}
-
       <EncargosHeader onSolicitar={() => setOpen(true)} editMode={editMode} />
 
       <main className="container py-5 position-relative">
