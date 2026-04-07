@@ -66,7 +66,8 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
                     className="btn btn-sm btn-primary w-100 shadow-sm rounded-pill" 
                     onClick={() => navigate(`${location.pathname}?edit=true`)}
                   >
-                    Área editor
+                    <i className={`bi ${modoEditor ? 'bi-x-circle' : 'bi-pencil'} me-2`}></i>
+                    {modoEditor ? 'Desactivar Área Editor' : 'Área Editor'}
                   </button>
                 )}
 

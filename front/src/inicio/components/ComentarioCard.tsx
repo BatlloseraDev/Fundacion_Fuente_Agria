@@ -1,27 +1,29 @@
-import type { ComentarioItem } from '../types/inicio.interface';
+import type { ComentarioItem } from '../services/inicio.service';
 
-export const ComentarioCard = ({ texto, etiqueta, autor }: ComentarioItem) => {
+interface ComentarioCardProps extends ComentarioItem {
+    modoEditor?: boolean;
+    onEdit?: (campoBD: string, valorActual: string) => void;
+}
+
+export const ComentarioCard = ({ texto, etiqueta, autor}: ComentarioCardProps) => {
     return (
-        <div className="card h-100 border shadow-sm rounded-4 transition-all">
-            <div className="card-body d-flex flex-column p-4">
+        <div className="card h-100 border-0 shadow-sm rounded-4 p-4">
+            
+            <p className="text-secondary mb-4 fst-italic">
+                {texto}
+            </p>
+            
+            <div className="mt-auto d-flex align-items-center gap-2">
                 
-                <p className="card-text mb-4 flex-grow-1" style={{ color: '#4a5568', fontSize: '15px' }}>
-                    {texto}
-                </p>
+                <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                    {etiqueta}
+                </span>
                 
-                <div className="d-flex align-items-center mt-auto">
-                    <span 
-                        className="badge rounded-2 fw-semibold px-2 py-1 me-2" 
-                        style={{ color: '#6f42c1', backgroundColor: '#f3e8ff' }}
-                    >
-                        {etiqueta}
-                    </span>
-                    <span className="text-secondary small">
-                        {autor}
-                    </span>
-                </div>
-
+                <span className="text-secondary small ms-auto fw-semibold">
+                    {autor}
+                </span>
             </div>
+
         </div>
     );
 };

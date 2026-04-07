@@ -1,6 +1,16 @@
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useContext } from 'react';
+import { UserContext } from '../../context/userContext';
 
 export const Header = () => {
+  const { isAuthenticated, logout } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top" aria-label="Barra de navegación">
       <div className="container">
@@ -35,9 +45,20 @@ export const Header = () => {
           
           {/* Botón de Login mantenido de la lógica anterior */}
           <div className="ms-lg-3 d-flex align-items-center">
-            <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
-              Iniciar sesión
-            </Link>
+            {isAuthenticated ? (
+              <div className="d-flex align-items-center gap-3">
+                <button 
+                  className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                  onClick={handleLogout}
+                >
+                Cerrar sesión
+                </button>
+              </div>
+            ) : (
+              <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
+                Iniciar sesión
+              </Link>
+            )}
           </div>
         </div>
       </div>
