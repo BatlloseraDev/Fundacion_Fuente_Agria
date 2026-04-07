@@ -1,4 +1,6 @@
+import { useContext } from 'react';
 import { useNavigate } from 'react-router';
+import { EditorContext } from '../../context/editorContext';
 
 interface FooterProps {
   editorToken: boolean;
@@ -7,6 +9,7 @@ interface FooterProps {
 
 export const Footer = ({ editorToken, adminToken }: FooterProps) => {
   const navigate = useNavigate();
+  const { modoEditor, setModoEditor } = useContext(EditorContext);
 
   const isAdmin = adminToken;
   const isEditor = editorToken;
@@ -62,10 +65,11 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
               <div className="d-flex flex-column gap-2 mt-2">
                 {isEditor && (
                   <button 
-                    className="btn btn-sm btn-primary w-100 shadow-sm rounded-pill" 
-                    onClick={() => navigate('/editor')}
+                    className={`btn btn-sm ${modoEditor ? 'btn-danger' : 'btn-primary'} w-100 shadow-sm rounded-pill`}
+                    onClick={() => setModoEditor(!modoEditor)}
                   >
-                    Área editor
+                    <i className={`bi ${modoEditor ? 'bi-x-circle' : 'bi-pencil'} me-2`}></i>
+                    {modoEditor ? 'Desactivar Área Editor' : 'Área Editor'}
                   </button>
                 )}
 
