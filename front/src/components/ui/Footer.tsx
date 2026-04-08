@@ -1,18 +1,20 @@
-import { useContext } from 'react';
+import { use } from 'react';
 import { useNavigate } from 'react-router';
 import { EditorContext } from '../../context/editorContext';
+import { UserContext } from '../../context/userContext';
 
-interface FooterProps {
-  editorToken: boolean;
-  adminToken: boolean;
-}
-
-export const Footer = ({ editorToken, adminToken }: FooterProps) => {
+export const Footer = () => {
   const navigate = useNavigate();
-  const { modoEditor, setModoEditor } = useContext(EditorContext);
+  
+  
+  const editorContext = use(EditorContext);
+  const { hasRole } = use(UserContext);
 
-  const isAdmin = adminToken;
-  const isEditor = editorToken;
+  const editMode = editorContext?.editMode ?? false;
+  const setEditMode = editorContext?.setEditMode ?? (() => {});
+
+  const isEditor = hasRole(['EDITOR', 'ADMIN']); 
+  const isAdmin = hasRole(['ADMIN']);
 
   return (
     <footer className="border-top bg-white">
@@ -32,13 +34,13 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
                 <div className="text-muted small">Asociación matriz</div>
               </div>
             </div>
-            {/*ESta de aqui podría ser editable */}
+            {/* Esta de aqui podría ser editable en el futuro */}
             <p className="text-muted mb-0">
               Encargos de artesanía y servicio de reparación y restauración de muebles de madera.
             </p>
           </div>
 
-          {/* Columna 2: Contacto Esta podría ser editabl, cada uno de los campos */}
+          {/* Columna 2: Contacto esta es editable desde admin */}
           <div className="col-lg-3">
             <h3 className="h6 fw-semibold">Contacto (genérico)</h3>
             <ul className="list-unstyled text-muted mb-0">
@@ -49,7 +51,7 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
             </ul>
           </div>
 
-          {/* Columna 3: Entidades colaboradoras, esto se editaría desde panel de admin*/}
+         
           <div className="col-lg-3">
             <h3 className="h6 fw-semibold">Entidades colaboradoras</h3>
             <div className="d-flex flex-wrap gap-3 align-items-center footer-logos">
@@ -58,19 +60,27 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
             </div>
           </div>
 
-          {/* Columna 4 (Condicional): Accesos  */}
+          
           {(isEditor || isAdmin) && (
             <div className="col-lg-2">
               <h3 className="h6 fw-semibold">Gestión</h3>
               <div className="d-flex flex-column gap-2 mt-2">
-                {isEditor && (
+                
+                {/* Lógica del Botón de Edición Global */}
+                {isEditor && !editMode && (
                   <button 
-                    className={`btn btn-sm ${modoEditor ? 'btn-danger' : 'btn-primary'} w-100 shadow-sm rounded-pill`}
-                    onClick={() => setModoEditor(!modoEditor)}
+                    className="btn btn-sm btn-primary w-100 shadow-sm rounded-pill" 
+                    onClick={() => setEditMode(true)}
                   >
-                    <i className={`bi ${modoEditor ? 'bi-x-circle' : 'bi-pencil'} me-2`}></i>
-                    {modoEditor ? 'Desactivar Área Editor' : 'Área Editor'}
+                    Área editor
                   </button>
+                )}
+
+                {/* Si ya está activo, mostramos un badge */}
+                {isEditor && editMode && (
+                  <span className="badge bg-success w-100 py-2 rounded-pill shadow-sm">
+                    Modo Edición Activo
+                  </span>
                 )}
 
                 {isAdmin && (
@@ -89,7 +99,7 @@ export const Footer = ({ editorToken, adminToken }: FooterProps) => {
 
         <hr className="my-4" />
 
-        {/* Fila final: Copyright dinámico */}
+
         <div className="d-flex flex-wrap justify-content-between gap-2 text-muted small">
           <span>© <span id="yearNow">{new Date().getFullYear()}</span> Fundación Fuente Agria</span>
           <span>Accesible · Responsive · Bootstrap 5.3</span>
