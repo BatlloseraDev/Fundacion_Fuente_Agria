@@ -6,6 +6,11 @@ import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
+import { ActionAreasModule } from './action-areas/action-areas.module';
+import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio.module';
+import { NovedadesInicioModule } from './novedades-inicio/novedades-inicio.module';
+import { HeroInicioModule } from './hero-inicio/hero-inicio.module';
+import { CarouselInicioModule } from './carousel-inicio/carousel-inicio.module';
 import { OrdersModule } from './orders/orders.module';
 import { ChatsModule } from './chats/chats.module';
 
@@ -20,6 +25,11 @@ import { ChatsModule } from './chats/chats.module';
     RolesModule,
     AuthModule,
     ArticlesModule,
+    ActionAreasModule,
+    ComentariosInicioModule,
+    NovedadesInicioModule,
+    HeroInicioModule,
+    CarouselInicioModule,
     OrdersModule,
     ChatsModule,
   ],

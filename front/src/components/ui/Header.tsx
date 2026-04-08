@@ -1,9 +1,10 @@
+import { Link, useNavigate } from 'react-router';
 import { use } from 'react';
-import { Link } from 'react-router';
 import { UserContext } from '../../context/userContext';
 
 export const Header = () => {
   const { isAuthenticated, hasRole, logout } = use(UserContext);
+
   const isAdmin = hasRole(['ADMIN']);
 
   return (
