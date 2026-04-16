@@ -10,6 +10,7 @@ import { CatalogoHeader } from '../components/CatalogoHeader';
 import { ProductoCard } from '../components/ProductoCard';
 import { ProductoModal } from '../components/ProductoModal';
 import ProductoEditorModal from '../components/ProductoEditorModal';
+import { ComponenteEditable } from '../../components/ui/ComponenteEditable';
 import {
     fetchCatalogo,
     createProducto,
@@ -42,23 +43,27 @@ export function CatalogoPage() {
 
     const guardandoRef = useRef(false);
 
-    useEffect(() => {
-        const cargarCatalogo = async () => {
-            try {
-                setLoading(true);
-                setError('');
-                const data = await fetchCatalogo();
-                setProductos(data);
-            } catch (err) {
-                console.error(err);
-                setError('No se pudo cargar el catalogo en este momento.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        cargarCatalogo();
+    const cargarCatalogo = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError('');
+            const data = await fetchCatalogo();
+            setProductos(data);
+        } catch (err) {
+            console.error(err);
+            setError('No se pudo cargar el catalogo en este momento.');
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        cargarCatalogo();
+    }, [cargarCatalogo]);
+
+    useEffect(() => {
+        setVisibles(ITEMS_POR_PAGINA);
+    }, [searchTerm, categoriaSeleccionada]);
 
     useEffect(() => {
         if (isEditor) return;
@@ -69,6 +74,8 @@ export function CatalogoPage() {
                 setProductos(data);
                 setIdsEliminados([]);
                 setIdsModificados([]);
+                setProductoEditando(null);
+                setModalEditorAbierto(false);
             } catch (err) {
                 console.error(err);
             }
@@ -76,10 +83,6 @@ export function CatalogoPage() {
 
         recargar();
     }, [isEditor]);
-
-    useEffect(() => {
-        setVisibles(ITEMS_POR_PAGINA);
-    }, [searchTerm, categoriaSeleccionada]);
 
     const categorias = useMemo(
         () => [...new Set(productos.map((p) => p.categoria).filter(Boolean))],
@@ -136,10 +139,10 @@ export function CatalogoPage() {
                 prev.map((producto) =>
                     producto.id === productoEditando.id
                         ? {
-                            ...producto,
-                            ...data,
-                            id: producto.id,
-                        }
+                              ...producto,
+                              ...data,
+                              id: producto.id,
+                          }
                         : producto
                 )
             );
@@ -286,24 +289,25 @@ export function CatalogoPage() {
                                         {productosVisibles.map((producto) => (
                                             <div className="col" key={producto.id}>
                                                 <div className="h-100 d-flex flex-column">
-                                                    <ProductoCard
-                                                        producto={producto}
-                                                        onVerDetalles={setProductoSeleccionado}
-                                                    />
+                                                    <ComponenteEditable
+                                                        modoEditor={isEditor}
+                                                        tipo="texto"
+                                                        onEditClick={() =>
+                                                            abrirEditarProducto(producto)
+                                                        }
+                                                    >
+                                                        <ProductoCard
+                                                            producto={producto}
+                                                            onVerDetalles={
+                                                                isEditor
+                                                                    ? () => {}
+                                                                    : setProductoSeleccionado
+                                                            }
+                                                        />
+                                                    </ComponenteEditable>
 
                                                     {isEditor && (
                                                         <div className="d-flex gap-2 mt-3">
-                                                            <button
-                                                                type="button"
-                                                                className="btn btn-outline-primary btn-sm flex-fill rounded-pill"
-                                                                onClick={() =>
-                                                                    abrirEditarProducto(producto)
-                                                                }
-                                                            >
-                                                                <i className="bi bi-pencil-square me-1"></i>
-                                                                Editar
-                                                            </button>
-
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-outline-danger btn-sm flex-fill rounded-pill"
@@ -365,7 +369,7 @@ export function CatalogoPage() {
             </section>
 
             <ProductoModal
-                producto={productoSeleccionado}
+                producto={isEditor ? null : productoSeleccionado}
                 onClose={() => setProductoSeleccionado(null)}
             />
 
