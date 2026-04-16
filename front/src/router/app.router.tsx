@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { AppLayout } from '../components/layout/AppLayout';
 
 import InicioPage from '../inicio/pages/InicioPage';
-import { CatalogoPage } from '../catalogo/pages/CatalogoPage';
+import {CatalogoPage} from "../catalogo/pages/CatalogoPage";
 import EncargosPage from '../encargos/pages/EncargosPage';
 import { ActividadesPage } from '../actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from '../actividades/pages/ActividadDetailPage';
