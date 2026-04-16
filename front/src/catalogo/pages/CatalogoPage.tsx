@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState, use } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    use,
+} from 'react';
 import { CatalogoHeader } from '../components/CatalogoHeader';
 import { ProductoCard } from '../components/ProductoCard';
 import { ProductoModal } from '../components/ProductoModal';
@@ -18,7 +25,7 @@ export function CatalogoPage() {
     const editorContext = use(EditorContext);
 
     const isEditor = editorContext?.editMode ?? false;
-    const setSaveAction = editorContext?.setSaveAction;
+    const setSaveActionRaw = editorContext?.setSaveAction;
 
     const [productos, setProductos] = useState<Producto[]>([]);
     const [loading, setLoading] = useState(true);
@@ -52,6 +59,23 @@ export function CatalogoPage() {
 
         cargarCatalogo();
     }, []);
+
+    useEffect(() => {
+        if (isEditor) return;
+
+        const recargar = async () => {
+            try {
+                const data = await fetchCatalogo();
+                setProductos(data);
+                setIdsEliminados([]);
+                setIdsModificados([]);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        recargar();
+    }, [isEditor]);
 
     useEffect(() => {
         setVisibles(ITEMS_POR_PAGINA);
@@ -112,10 +136,10 @@ export function CatalogoPage() {
                 prev.map((producto) =>
                     producto.id === productoEditando.id
                         ? {
-                              ...producto,
-                              ...data,
-                              id: producto.id,
-                          }
+                            ...producto,
+                            ...data,
+                            id: producto.id,
+                        }
                         : producto
                 )
             );
@@ -144,65 +168,72 @@ export function CatalogoPage() {
         setProductos((prev) => [nuevoProducto, ...prev]);
     };
 
-    useEffect(() => {
-        if (!setSaveAction) return;
+    const guardarCambiosCatalogo = useCallback(async () => {
+        if (guardandoRef.current) {
+            return;
+        }
 
-        setSaveAction(async () => {
-            if (guardandoRef.current) {
+        guardandoRef.current = true;
+
+        try {
+            const productosNuevos = productos.filter((producto) =>
+                producto.id.startsWith('temp-')
+            );
+
+            const productosModificados = productos.filter(
+                (producto) =>
+                    !producto.id.startsWith('temp-') &&
+                    idsModificados.includes(producto.id) &&
+                    !idsEliminados.includes(producto.id)
+            );
+
+            const hayCambios =
+                idsEliminados.length > 0 ||
+                productosNuevos.length > 0 ||
+                productosModificados.length > 0;
+
+            if (!hayCambios) {
                 return;
             }
 
-            guardandoRef.current = true;
-
-            try {
-                const productosNuevos = productos.filter((producto) =>
-                    producto.id.startsWith('temp-')
-                );
-
-                const productosModificados = productos.filter(
-                    (producto) =>
-                        !producto.id.startsWith('temp-') &&
-                        idsModificados.includes(producto.id) &&
-                        !idsEliminados.includes(producto.id)
-                );
-
-                const hayCambios =
-                    idsEliminados.length > 0 ||
-                    productosNuevos.length > 0 ||
-                    productosModificados.length > 0;
-
-                if (!hayCambios) {
-                    return;
-                }
-
-                for (const id of idsEliminados) {
-                    await deleteProducto(id);
-                }
-
-                for (const producto of productosNuevos) {
-                    await createProducto(producto);
-                }
-
-                for (const producto of productosModificados) {
-                    await updateProducto(producto.id, producto);
-                }
-
-                const data = await fetchCatalogo();
-                setProductos(data);
-                setIdsEliminados([]);
-                setIdsModificados([]);
-            } catch (err) {
-                console.error(err);
-                throw err;
-            } finally {
-                guardandoRef.current = false;
+            for (const id of idsEliminados) {
+                await deleteProducto(id);
             }
-        });
+
+            for (const producto of productosNuevos) {
+                await createProducto(producto);
+            }
+
+            for (const producto of productosModificados) {
+                await updateProducto(producto.id, producto);
+            }
+
+            const data = await fetchCatalogo();
+            setProductos(data);
+            setIdsEliminados([]);
+            setIdsModificados([]);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            guardandoRef.current = false;
+        }
+    }, [productos, idsEliminados, idsModificados]);
+
+    useEffect(() => {
+        if (!setSaveActionRaw) return;
+
+        const setSaveAction =
+            setSaveActionRaw as unknown as React.Dispatch<
+                React.SetStateAction<(() => Promise<void>) | null>
+            >;
+
+        setSaveAction(() => guardarCambiosCatalogo);
 
         return () => {
-            setSaveAction(null);
+            setSaveAction(() => null);
         };
-    }, [productos, idsEliminados, idsModificados, setSaveAction]);
+    }, [guardarCambiosCatalogo, setSaveActionRaw]);
 
     return (
         <>
