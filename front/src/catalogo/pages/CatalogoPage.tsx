@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, use } from 'react';
+import { useEffect, useMemo, useRef, useState, use } from 'react';
 import { CatalogoHeader } from '../components/CatalogoHeader';
 import { ProductoCard } from '../components/ProductoCard';
 import { ProductoModal } from '../components/ProductoModal';
@@ -32,6 +32,8 @@ export function CatalogoPage() {
 
     const [idsEliminados, setIdsEliminados] = useState<string[]>([]);
     const [idsModificados, setIdsModificados] = useState<string[]>([]);
+
+    const guardandoRef = useRef(false);
 
     useEffect(() => {
         const cargarCatalogo = async () => {
@@ -146,6 +148,12 @@ export function CatalogoPage() {
         if (!setSaveAction) return;
 
         setSaveAction(async () => {
+            if (guardandoRef.current) {
+                return;
+            }
+
+            guardandoRef.current = true;
+
             try {
                 const productosNuevos = productos.filter((producto) =>
                     producto.id.startsWith('temp-')
@@ -186,6 +194,8 @@ export function CatalogoPage() {
             } catch (err) {
                 console.error(err);
                 throw err;
+            } finally {
+                guardandoRef.current = false;
             }
         });
 

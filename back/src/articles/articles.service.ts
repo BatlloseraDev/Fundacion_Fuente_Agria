@@ -47,79 +47,104 @@ export class ArticlesService {
   }
 
   async create(dto: CreateArticleDto, user: any) {
-    console.log('USER EN ARTICLES:', JSON.stringify(user, null, 2));
-    if (!this.userHasEditorRole(user)) {
-      throw new ForbiddenException('No tienes permisos para crear articulos');
-    }
+  console.log('CREATE DTO:', dto);
+  console.log('USER EN ARTICLES:', JSON.stringify(user, null, 2));
 
-    const article = await this.prisma.article.create({
-      data: {
-        name: dto.name,
-        description: dto.description,
-        longDescription: dto.longDescription,
-        price: dto.price,
-        available: dto.available,
-        image: dto.image,
-        userId: user.id,
+  if (!this.userHasEditorRole(user)) {
+    throw new ForbiddenException('No tienes permisos para crear articulos');
+  }
+
+  const article = await this.prisma.article.create({
+    data: {
+      name: dto.name,
+      description: dto.description,
+      longDescription: dto.longDescription,
+      price: dto.price,
+      available: dto.available,
+      image: dto.image,
+      userId: user.id,
+    },
+  });
+
+  console.log('ARTICULO CREADO:', article);
+
+  if (dto.categoria) {
+    console.log('ANTES CATEGORIA');
+    const category = await this.prisma.categoryArticle.upsert({
+      where: { name: dto.categoria },
+      update: {
+        color: dto.colorCategoria ?? 'primary',
+      },
+      create: {
+        name: dto.categoria,
+        color: dto.colorCategoria ?? 'primary',
       },
     });
 
-    if (dto.categoria) {
-      const category = await this.prisma.categoryArticle.upsert({
-        where: { name: dto.categoria },
-        update: {
-          color: dto.colorCategoria ?? 'primary',
-        },
-        create: {
-          name: dto.categoria,
-          color: dto.colorCategoria ?? 'primary',
-        },
-      });
+    console.log('CATEGORIA OK:', category);
 
-      await this.prisma.articleCat.create({
-        data: {
+    await this.prisma.articleCat.createMany({
+      data: [
+        {
           articleId: article.id,
           categoryArticleId: category.id,
         },
+      ],
+      skipDuplicates: true,
+    });
+
+    console.log('RELACION CATEGORIA OK');
+  }
+
+  if (dto.etiquetas?.length) {
+    const etiquetasUnicas = [...new Set(dto.etiquetas.filter(Boolean))];
+
+    for (const etiqueta of etiquetasUnicas) {
+      console.log('ANTES ETIQUETA:', etiqueta);
+
+      const label = await this.prisma.label.upsert({
+        where: { name: etiqueta },
+        update: {},
+        create: {
+          name: etiqueta,
+          color: 'primary',
+        },
       });
-    }
 
-    if (dto.etiquetas?.length) {
-      for (const etiqueta of dto.etiquetas) {
-        const label = await this.prisma.label.upsert({
-          where: { name: etiqueta },
-          update: {},
-          create: {
-            name: etiqueta,
-            color: 'primary',
-          },
-        });
+      console.log('LABEL OK:', label);
 
-        await this.prisma.articleLabel.create({
-          data: {
+      await this.prisma.articleLabel.createMany({
+        data: [
+          {
             articleId: article.id,
             labelId: label.id,
           },
-        });
-      }
-    }
+        ],
+        skipDuplicates: true,
+      });
 
-    return this.prisma.article.findUnique({
-      where: { id: article.id },
-      include: {
-        categories: {
-          include: {
-            categoryArticle: true,
-          },
-        },
-        labels: {
-          include: {
-            label: true,
-          },
+      console.log('RELACION ETIQUETA OK:', etiqueta);
+    }
+  }
+
+  console.log('ANTES RETURN FINAL');
+
+  return this.prisma.article.findUnique({
+    where: { id: article.id },
+    include: {
+      categories: {
+        include: {
+          categoryArticle: true,
         },
       },
-    });
-  }
+      labels: {
+        include: {
+          label: true,
+        },
+      },
+    },
+  });
+}
 
   async update(id: number, dto: UpdateArticleDto, user: any) {
     if (!this.userHasEditorRole(user)) {
