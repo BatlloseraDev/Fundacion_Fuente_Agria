@@ -1,73 +1,150 @@
-import type { Producto } from '../types/producto.interface';
+import type { Producto } from "../types/producto.interface";
 
-interface BackendCategory {
-    id: number;
-    name: string;
-    color?: string | null;
-}
+const API_URL = "http://localhost:3000";
 
-interface BackendLabel {
-    id: number;
-    name: string;
-    color?: string | null;
-}
-
-interface BackendArticle {
-    id: number;
-    name: string;
-    description: string;
-    longDescription?: string | null;
-    price: number;
-    available: boolean;
-    image?: string | null;
-    categories?: BackendCategory[];
-    labels?: BackendLabel[];
-}
-
-interface CatalogoResponse {
-    success: boolean;
-    message: string;
-    data: BackendArticle[];
-}
-
-const formatearPrecio = (precio: number): string => {
-    return new Intl.NumberFormat('es-ES', {
-        style: 'currency',
-        currency: 'EUR'
-    }).format(precio);
-};
-
-const mapArticleToProducto = (article: BackendArticle): Producto => {
-    const categoriaPrincipal = article.categories?.[0];
-
-    return {
-        id: String(article.id),
-        nombre: article.name,
-        descripcion: article.description,
-        descripcionDetallada: article.longDescription || article.description,
-        precio: formatearPrecio(article.price),
-        precioDesde: false,
-        categoria: categoriaPrincipal?.name || 'Sin categoria',
-        colorCategoria: categoriaPrincipal?.color || 'secondary',
-        imageUrl: article.image || '/imgs/img-placeholder.jpg',
-        disponible: article.available,
-        etiquetas: article.labels?.map((item) => item.name) || []
+interface ArticleApi {
+  id: number;
+  name: string;
+  description: string;
+  longDescription?: string | null;
+  price: number;
+  available: boolean;
+  image?: string | null;
+  categories?: Array<{
+    categoryArticle: {
+      id: number;
+      name: string;
+      color?: string | null;
     };
-};
+  }>;
+  labels?: Array<{
+    label: {
+      id: number;
+      name: string;
+      color?: string | null;
+    };
+  }>;
+}
 
-export const getCatalogo = async (): Promise<Producto[]> => {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const response = await fetch(`${apiUrl}/articles/catalogo`);
+interface CreateOrUpdateArticlePayload {
+  name: string;
+  description: string;
+  longDescription?: string;
+  price: number;
+  available: boolean;
+  image?: string;
+  categoria?: string;
+  colorCategoria?: string;
+  etiquetas?: string[];
+}
 
-    if (!response.ok) {
-        throw new Error('No se pudo cargar el catalogo');
+function getToken(): string | null {
+  return localStorage.getItem("jwt_token");
+}
+
+function apiToProducto(article: ArticleApi): Producto {
+  const categoria = article.categories?.[0]?.categoryArticle?.name ?? "";
+  const colorCategoria = article.categories?.[0]?.categoryArticle?.color ?? "primary";
+
+  return {
+    id: String(article.id),
+    nombre: article.name,
+    descripcion: article.description,
+    descripcionDetallada: article.longDescription ?? "",
+    precio: String(article.price),
+    precioDesde: false,
+    categoria,
+    colorCategoria,
+    imageUrl: article.image ?? "",
+    disponible: article.available,
+    etiquetas: article.labels?.map((item) => item.label.name) ?? []
+  };
+}
+
+function productoToApi(producto: Partial<Producto>): CreateOrUpdateArticlePayload {
+  return {
+    name: producto.nombre ?? "",
+    description: producto.descripcion ?? "",
+    longDescription: producto.descripcionDetallada ?? "",
+    price: Number(producto.precio ?? 0),
+    available: producto.disponible ?? true,
+    image: producto.imageUrl ?? "",
+    categoria: producto.categoria ?? "",
+    colorCategoria: producto.colorCategoria ?? "primary",
+    etiquetas: producto.etiquetas ?? []
+  };
+}
+
+export async function fetchCatalogo(): Promise<Producto[]> {
+  const res = await fetch(`${API_URL}/articles/catalogo`);
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error cargando catalogo: ${errorText}`);
+  }
+
+  const response = await res.json();
+  console.log("RESPUESTA CATALOGO:", response);
+
+  const listado = Array.isArray(response)
+    ? response
+    : Array.isArray(response?.data)
+    ? response.data
+    : [];
+
+  return listado.map(apiToProducto);
+}
+
+export async function createProducto(producto: Partial<Producto>) {
+  const payload = productoToApi(producto);
+
+  const res = await fetch(`${API_URL}/articles`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error creando producto: ${errorText}`);
+  }
+
+  return res.json();
+}
+
+export async function updateProducto(id: string, producto: Partial<Producto>) {
+  const payload = productoToApi(producto);
+
+  const res = await fetch(`${API_URL}/articles/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error actualizando producto: ${errorText}`);
+  }
+
+  return res.json();
+}
+
+export async function deleteProducto(id: string) {
+  const res = await fetch(`${API_URL}/articles/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`
     }
+  });
 
-    const json: CatalogoResponse = await response.json();
-
-    if (!Array.isArray(json.data)) {
-        throw new Error('La respuesta del backend no contiene un array en data');
-    }
-
-    return json.data.map(mapArticleToProducto);
-};
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error eliminando producto: ${errorText}`);
+  }
+}
