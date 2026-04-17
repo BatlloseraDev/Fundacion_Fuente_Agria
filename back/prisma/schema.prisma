@@ -30,7 +30,8 @@ model User {
   address  String? @db.VarChar(150)
   dni      String? @unique @db.VarChar(9)
   avatarUrl String? @db.VarChar(500)
-  
+  inactiveAt DateTime? // null = activo, con valor = baja (soft delete)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

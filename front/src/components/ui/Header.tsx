@@ -1,15 +1,11 @@
 import { Link, useNavigate } from 'react-router';
-import { useContext } from 'react';
+import { use } from 'react';
 import { UserContext } from '../../context/userContext';
 
 export const Header = () => {
-  const { isAuthenticated, logout } = useContext(UserContext);
-  const navigate = useNavigate();
+  const { isAuthenticated, hasRole, logout } = use(UserContext);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  const isAdmin = hasRole(['ADMIN']);
 
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top" aria-label="Barra de navegación">
@@ -41,19 +37,20 @@ export const Header = () => {
             <li className="nav-item">
               <Link className="nav-link" to="/actividades">Actividades</Link>
             </li>
+            {isAdmin && (
+              <li className="nav-item">
+                <Link className="nav-link d-flex align-items-center gap-1" to="/admin">
+                  <span>Panel de administrador</span>
+                </Link>
+              </li>
+            )}
           </ul>
-          
-          {/* Botón de Login mantenido de la lógica anterior */}
-          <div className="ms-lg-3 d-flex align-items-center">
+
+          <div className="ms-lg-3 d-flex align-items-center gap-2">
             {isAuthenticated ? (
-              <div className="d-flex align-items-center gap-3">
-                <button 
-                  className="btn btn-outline-danger btn-sm rounded-pill px-3"
-                  onClick={handleLogout}
-                >
+              <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={logout}>
                 Cerrar sesión
-                </button>
-              </div>
+              </button>
             ) : (
               <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
                 Iniciar sesión

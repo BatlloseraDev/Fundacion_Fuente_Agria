@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -38,7 +39,9 @@ export class UsersService {
       throw new ConflictException('El email ya está registrado');
     }
 
-    const { roleIds, ...userData } = createUserDto;
+    const { roleIds, password, ...userData } = createUserDto;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const rolesData =
       roleIds && roleIds.length > 0
@@ -52,14 +55,32 @@ export class UsersService {
     return this.prisma.user.create({
       data: {
         ...userData,
+        password: hashedPassword,
         roles: rolesData,
       },
       select: this.userSelect,
     });
   }
 
+  private readonly activeFilter = { inactiveAt: null } as const;
+
   findAll() {
     return this.prisma.user.findMany({
+      where: this.activeFilter,
+      select: this.userSelect,
+    });
+  }
+
+  findByRole(roleName: string) {
+    return this.prisma.user.findMany({
+      where: {
+        ...this.activeFilter,
+        roles: {
+          some: {
+            role: { name: roleName },
+          },
+        },
+      },
       select: this.userSelect,
     });
   }
@@ -129,15 +150,16 @@ export class UsersService {
   async remove(id: number) {
     const exists = await this.prisma.user.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, inactiveAt: true },
     });
 
     if (!exists) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    return this.prisma.user.delete({
+    return this.prisma.user.update({
       where: { id },
+      data: { inactiveAt: new Date() },
       select: { id: true },
     });
   }
