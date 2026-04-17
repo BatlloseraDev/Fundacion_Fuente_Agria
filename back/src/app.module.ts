@@ -12,8 +12,8 @@ import { ComentariosInicioModule } from './comentarios-inicio/comentarios-inicio
 import { NovedadesInicioModule } from './novedades-inicio/novedades-inicio.module';
 import { HeroInicioModule } from './hero-inicio/hero-inicio.module';
 import { CarouselInicioModule } from './carousel-inicio/carousel-inicio.module';
-import { OrdersModule } from './orders/orders.module';
 import { ChatsModule } from './chats/chats.module';
+import { ActividadesModule } from './actividades/actividades.module';
 
 @Module({
   imports: [
@@ -26,7 +26,6 @@ import { ChatsModule } from './chats/chats.module';
     RolesModule,
     AuthModule,
     ArticlesModule,
-    OrdersModule,
     ActionAreasModule,
     ComentariosInicioModule,
     NovedadesInicioModule,
@@ -34,6 +33,7 @@ import { ChatsModule } from './chats/chats.module';
     CarouselInicioModule,
     OrdersModule,
     ChatsModule,
+    ActividadesModule,
   ],
   providers: [PrismaService],
 })
