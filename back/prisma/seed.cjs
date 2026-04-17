@@ -21,6 +21,7 @@ async function main() {
   const { seedCategoryArticles } = require('./seeds/category-articles.seed.cjs');
   const { seedLabels } = require('./seeds/labels.seed.cjs');
   const { seedArticles } = require('./seeds/articles.seed.cjs');
+  const { seedOrders } = require('./seeds/orders.seed.cjs');
 
   const roles = await seedRoles(prisma);
   const users = await seedUsers(prisma, roles);
@@ -29,7 +30,9 @@ async function main() {
   const etiquetas = await seedLabels(prisma);
   await seedArticles(prisma, users, categorias, etiquetas);
 
+  await seedOrders(prisma, users);
   await seedInicio(prisma);
+  
 
   console.log('🏁 Seed completado correctamente.');
 }

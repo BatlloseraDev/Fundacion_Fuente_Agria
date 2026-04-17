@@ -1,25 +1,37 @@
-import { useContext } from 'react'; // Cambiamos useState por useContext
+import { use, useEffect } from 'react'; // Cambiamos useState por useContext
 import { InicioHero } from '../components/InicioHero';
 import { InicioGrid } from '../components/InicioGrid';
 import { InicioNovedades } from '../components/InicioNovedades';
 import { InicioComentarios } from '../components/InicioComentarios';
-import { EditorContext } from '../../context/editorContext'; 
+import { EditorContext } from '../../context/editorContext';
 
 export const InicioPage = () => {
 
-    const { modoEditor } = useContext(EditorContext);
+    const editorContext = use(EditorContext);
+    const editMode = editorContext?.editMode ?? false;
+    const setSaveAction = editorContext?.setSaveAction ?? (() => {});
 
-    return (
+    useEffect(() => {
+        if (editMode) {
+            setSaveAction((() => async () => {
+                console.log("Cambios de inicio confirmados");
+            }) as any);
+        } else {
+            setSaveAction(null);
+        }
+        return () => setSaveAction(null);
+    }, [editMode, setSaveAction]);
+
+return (
         <main className="w-100">
-            
-            <InicioHero modoEditor={modoEditor} />
+           
+            <InicioHero modoEditor={editMode} />
 
-            <InicioNovedades modoEditor={modoEditor} />
+            <InicioNovedades modoEditor={editMode} />
 
-            <InicioGrid modoEditor={modoEditor} />
+            <InicioGrid modoEditor={editMode} />
 
             <InicioComentarios />
-
         </main>
     );
 };

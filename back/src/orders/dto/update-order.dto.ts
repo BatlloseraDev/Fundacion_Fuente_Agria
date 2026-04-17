@@ -21,3 +21,7 @@ export class UpdateOrderDto {
   @IsOptional()
   active?: boolean;
 }
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateOrderDto } from './create-order.dto';
+
+export class UpdateOrderDto extends PartialType(CreateOrderDto) {}

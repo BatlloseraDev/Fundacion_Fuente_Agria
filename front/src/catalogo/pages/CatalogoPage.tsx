@@ -1,44 +1,93 @@
-import { useEffect, useState } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    use,
+} from 'react';
 import { CatalogoHeader } from '../components/CatalogoHeader';
 import { ProductoCard } from '../components/ProductoCard';
 import { ProductoModal } from '../components/ProductoModal';
-import { getCatalogo } from '../services/catalogo.service';
+import ProductoEditorModal from '../components/ProductoEditorModal';
+import { ComponenteEditable } from '../../components/ui/ComponenteEditable';
+import {
+    fetchCatalogo,
+    createProducto,
+    updateProducto,
+    deleteProducto,
+} from '../services/catalogo.service';
 import type { Producto } from '../types/producto.interface';
+import { EditorContext } from '../../context/editorContext';
 
 const ITEMS_POR_PAGINA = 8;
 
-export const CatalogoPage = () => {
+export function CatalogoPage() {
+    const editorContext = use(EditorContext);
+
+    const isEditor = editorContext?.editMode ?? false;
+    const setSaveActionRaw = editorContext?.setSaveAction;
+
     const [productos, setProductos] = useState<Producto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todas');
     const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
+    const [productoEditando, setProductoEditando] = useState<Producto | null>(null);
+    const [modalEditorAbierto, setModalEditorAbierto] = useState(false);
     const [visibles, setVisibles] = useState(ITEMS_POR_PAGINA);
 
-    useEffect(() => {
-        const cargarCatalogo = async () => {
-            try {
-                setLoading(true);
-                setError('');
-                const data = await getCatalogo();
-                setProductos(data);
-            } catch (err) {
-                console.error(err);
-                setError('No se pudo cargar el catalogo en este momento.');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const [idsEliminados, setIdsEliminados] = useState<string[]>([]);
+    const [idsModificados, setIdsModificados] = useState<string[]>([]);
 
-        cargarCatalogo();
+    const guardandoRef = useRef(false);
+
+    const cargarCatalogo = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError('');
+            const data = await fetchCatalogo();
+            setProductos(data);
+        } catch (err) {
+            console.error(err);
+            setError('No se pudo cargar el catalogo en este momento.');
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        cargarCatalogo();
+    }, [cargarCatalogo]);
 
     useEffect(() => {
         setVisibles(ITEMS_POR_PAGINA);
     }, [searchTerm, categoriaSeleccionada]);
 
-    const categorias = [...new Set(productos.map((p) => p.categoria))];
+    useEffect(() => {
+        if (isEditor) return;
+
+        const recargar = async () => {
+            try {
+                const data = await fetchCatalogo();
+                setProductos(data);
+                setIdsEliminados([]);
+                setIdsModificados([]);
+                setProductoEditando(null);
+                setModalEditorAbierto(false);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        recargar();
+    }, [isEditor]);
+
+    const categorias = useMemo(
+        () => [...new Set(productos.map((p) => p.categoria).filter(Boolean))],
+        [productos]
+    );
 
     const productosFiltrados = productos.filter((p) => {
         const coincideBusqueda =
@@ -61,6 +110,134 @@ export const CatalogoPage = () => {
         setVisibles((prev) => prev + ITEMS_POR_PAGINA);
     };
 
+    const abrirNuevoProducto = () => {
+        setProductoEditando(null);
+        setModalEditorAbierto(true);
+    };
+
+    const abrirEditarProducto = (producto: Producto) => {
+        setProductoEditando(producto);
+        setModalEditorAbierto(true);
+    };
+
+    const eliminarProductoLocal = (id: string) => {
+        if (!id.startsWith('temp-')) {
+            setIdsEliminados((prev) => [...new Set([...prev, id])]);
+            setIdsModificados((prev) => prev.filter((item) => item !== id));
+        }
+
+        setProductos((prev) => prev.filter((producto) => producto.id !== id));
+
+        if (productoSeleccionado?.id === id) {
+            setProductoSeleccionado(null);
+        }
+    };
+
+    const guardarProductoEnLocal = (data: Partial<Producto>) => {
+        if (productoEditando) {
+            setProductos((prev) =>
+                prev.map((producto) =>
+                    producto.id === productoEditando.id
+                        ? {
+                              ...producto,
+                              ...data,
+                              id: producto.id,
+                          }
+                        : producto
+                )
+            );
+
+            if (!productoEditando.id.startsWith('temp-')) {
+                setIdsModificados((prev) => [...new Set([...prev, productoEditando.id])]);
+            }
+
+            return;
+        }
+
+        const nuevoProducto: Producto = {
+            id: `temp-${Date.now()}`,
+            nombre: data.nombre ?? '',
+            descripcion: data.descripcion ?? '',
+            descripcionDetallada: data.descripcionDetallada ?? '',
+            precio: data.precio ?? '',
+            precioDesde: data.precioDesde ?? false,
+            categoria: data.categoria ?? '',
+            colorCategoria: data.colorCategoria ?? 'primary',
+            imageUrl: data.imageUrl ?? '',
+            disponible: data.disponible ?? true,
+            etiquetas: data.etiquetas ?? [],
+        };
+
+        setProductos((prev) => [nuevoProducto, ...prev]);
+    };
+
+    const guardarCambiosCatalogo = useCallback(async () => {
+        if (guardandoRef.current) {
+            return;
+        }
+
+        guardandoRef.current = true;
+
+        try {
+            const productosNuevos = productos.filter((producto) =>
+                producto.id.startsWith('temp-')
+            );
+
+            const productosModificados = productos.filter(
+                (producto) =>
+                    !producto.id.startsWith('temp-') &&
+                    idsModificados.includes(producto.id) &&
+                    !idsEliminados.includes(producto.id)
+            );
+
+            const hayCambios =
+                idsEliminados.length > 0 ||
+                productosNuevos.length > 0 ||
+                productosModificados.length > 0;
+
+            if (!hayCambios) {
+                return;
+            }
+
+            for (const id of idsEliminados) {
+                await deleteProducto(id);
+            }
+
+            for (const producto of productosNuevos) {
+                await createProducto(producto);
+            }
+
+            for (const producto of productosModificados) {
+                await updateProducto(producto.id, producto);
+            }
+
+            const data = await fetchCatalogo();
+            setProductos(data);
+            setIdsEliminados([]);
+            setIdsModificados([]);
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            guardandoRef.current = false;
+        }
+    }, [productos, idsEliminados, idsModificados]);
+
+    useEffect(() => {
+        if (!setSaveActionRaw) return;
+
+        const setSaveAction =
+            setSaveActionRaw as unknown as React.Dispatch<
+                React.SetStateAction<(() => Promise<void>) | null>
+            >;
+
+        setSaveAction(() => guardarCambiosCatalogo);
+
+        return () => {
+            setSaveAction(() => null);
+        };
+    }, [guardarCambiosCatalogo, setSaveActionRaw]);
+
     return (
         <>
             <CatalogoHeader
@@ -73,6 +250,18 @@ export const CatalogoPage = () => {
 
             <section className="py-4 bg-white">
                 <div className="container">
+                    {isEditor && (
+                        <div className="d-flex justify-content-end mb-4">
+                            <button
+                                className="btn btn-primary rounded-pill px-4 py-2 fw-semibold"
+                                onClick={abrirNuevoProducto}
+                            >
+                                <i className="bi bi-plus-lg me-2"></i>
+                                Anadir producto
+                            </button>
+                        </div>
+                    )}
+
                     {loading && (
                         <div className="text-center py-5">
                             <div className="spinner-border text-primary" role="status" />
@@ -99,10 +288,39 @@ export const CatalogoPage = () => {
                                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
                                         {productosVisibles.map((producto) => (
                                             <div className="col" key={producto.id}>
-                                                <ProductoCard
-                                                    producto={producto}
-                                                    onVerDetalles={setProductoSeleccionado}
-                                                />
+                                                <div className="h-100 d-flex flex-column">
+                                                    <ComponenteEditable
+                                                        modoEditor={isEditor}
+                                                        tipo="texto"
+                                                        onEditClick={() =>
+                                                            abrirEditarProducto(producto)
+                                                        }
+                                                    >
+                                                        <ProductoCard
+                                                            producto={producto}
+                                                            onVerDetalles={
+                                                                isEditor
+                                                                    ? () => {}
+                                                                    : setProductoSeleccionado
+                                                            }
+                                                        />
+                                                    </ComponenteEditable>
+
+                                                    {isEditor && (
+                                                        <div className="d-flex gap-2 mt-3">
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-outline-danger btn-sm flex-fill rounded-pill"
+                                                                onClick={() =>
+                                                                    eliminarProductoLocal(producto.id)
+                                                                }
+                                                            >
+                                                                <i className="bi bi-trash me-1"></i>
+                                                                Eliminar
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -151,9 +369,20 @@ export const CatalogoPage = () => {
             </section>
 
             <ProductoModal
-                producto={productoSeleccionado}
+                producto={isEditor ? null : productoSeleccionado}
                 onClose={() => setProductoSeleccionado(null)}
             />
+
+            {modalEditorAbierto && (
+                <ProductoEditorModal
+                    producto={productoEditando ?? undefined}
+                    onClose={() => {
+                        setModalEditorAbierto(false);
+                        setProductoEditando(null);
+                    }}
+                    onSave={guardarProductoEnLocal}
+                />
+            )}
         </>
     );
-};
+}

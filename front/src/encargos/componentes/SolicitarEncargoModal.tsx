@@ -109,7 +109,7 @@ export function SolicitarEncargoModal({ isOpen, onClose }: Props) {
                     <ol className="text-muted small mb-0 ps-3">
                       <li className="mb-2">Describe tu pedido y el uso (regalo, evento corporativo, boda, etc).</li>
                       <li className="mb-2">Indica la cantidad aproximada y la fecha límite si la tienes.</li>
-                      <li>Nos pondremos en contacto contigo para confirmar detalles y enviarte presupuesto.</li>
+                      <li>Nos pondremos en contacto contigo para confirmar detalles con una copía de tu petición para que nos puedas adjuntar archivos y poder enviarte presupuesto.</li>
                     </ol>
                   </div>
                 </div>
@@ -153,7 +153,16 @@ export function SolicitarEncargoModal({ isOpen, onClose }: Props) {
                       ></textarea>
                     </div>
 
+
                     <div className="mb-4">
+                      <label htmlFor="archivoAdjunto" className="form-label fw-semibold">Archivos de Referencia</label>
+   
+                      <div className="form-text">
+                        {"Los archivos adicionales que nos quieras proporcionar tendrán que ser a traves del correo electrónico autogenerado que recibirar en tu email"}
+                      </div>
+                    </div>
+
+                    {/* <div className="mb-4">
                       <label htmlFor="archivoAdjunto" className="form-label fw-semibold">Archivos de Referencia (Opcional)</label>
                       <input 
                         className="form-control rounded-3" 
@@ -165,7 +174,7 @@ export function SolicitarEncargoModal({ isOpen, onClose }: Props) {
                       <div className="form-text">
                         {imagen ? `Seleccionada: ${imagen.name}` : "Puedes adjuntar bocetos o fotos de inspiración (max 4MB)."}
                       </div>
-                    </div>
+                    </div> */}
 
                     {error && <div className="alert alert-danger mb-3">{error}</div>}
 

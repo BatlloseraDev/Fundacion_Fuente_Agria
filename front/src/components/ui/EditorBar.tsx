@@ -1,14 +1,47 @@
-export const EditorBar = () => {
+import { use } from 'react';
+import { EditorContext } from '../../context/editorContext';
+
+export function EditorBar() {
+    const context = use(EditorContext);
+    if (!context || !context.editMode) return null;
+
+    const handleSave = async () => {
+        if (context.saveAction) {
+            context.setIsSaving(true);
+            try {
+                await context.saveAction();
+                alert("¡Cambios guardados con éxito!");
+                context.setEditMode(false);
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                alert("Error al guardar los cambios.");
+            } finally {
+                context.setIsSaving(false);
+            }
+        }
+    };
+
     return (
-        <div className="bg-dark text-white py-2 px-3 shadow-sm w-100" style={{ zIndex: 9999, position: 'sticky', top: 0 }}>
-            <div className="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
-                <div className="d-flex align-items-center gap-2 small fw-bold">
-                    <span className="tracking-wide">MODO EDITOR ACTIVADO</span>
-                </div>
-                <div className="badge bg-warning text-dark rounded-pill px-3 py-2 fw-medium shadow-sm">
-                    Estás editando la página
-                </div>
+        <div className="bg-dark text-white py-2 px-3 d-flex justify-content-between align-items-center sticky-top" style={{ zIndex: 1040 }}>
+            <div>
+                <i className="bi bi-pencil-square me-2"></i>
+                <small className="fw-bold text-uppercase">Modo Edición Activado</small>
+            </div>
+            <div>
+                <button 
+                    className="btn btn-sm btn-success rounded-pill px-3 me-2" 
+                    onClick={handleSave} 
+                    disabled={!context.saveAction || context.isSaving}
+                >
+                    {context.isSaving ? "Guardando..." : "Guardar Cambios"}
+                </button>
+                <button 
+                    className="btn btn-sm btn-outline-light rounded-pill px-3" 
+                    onClick={() => context.setEditMode(false)}
+                >
+                    Salir
+                </button>
             </div>
         </div>
     );
-};
+}

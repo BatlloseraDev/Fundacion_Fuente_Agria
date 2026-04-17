@@ -1,26 +1,21 @@
-import { Outlet } from "react-router";
-import { Header } from "../ui/Header";
-import { Footer } from "../ui/Footer";
-import { use } from "react";
-import { UserContext } from "../../context/userContext";
-import { EditorContext } from "../../context/editorContext";
-import { EditorBar } from "../ui/EditorBar";
+import { Outlet } from 'react-router';
+import { Header } from '../ui/Header';
+import { Footer } from '../ui/Footer';
+import { EditorBar } from '../ui/EditorBar';
+import { EditorContextProvider } from '../../context/editorContextProvider';
 
-export const AppLayout = () =>{
-    const { hasRole } = use(UserContext);
-    const { modoEditor } = use(EditorContext);
-
-    return(
-        <div className='d-flex flex-column min-vh-100'>
-            {modoEditor && <EditorBar />}
-            <Header/>
-            <div className="flex-grow-1 container-fluid px-0" style={{ minHeight: '60vh' }}>
-                <Outlet/>
+export function AppLayout() {
+    return (
+      
+        <EditorContextProvider>
+            <div className="d-flex flex-column min-vh-100">
+                <EditorBar />
+                <Header />
+                <main className="flex-grow-1">
+                    <Outlet />
+                </main>
+                <Footer />
             </div>
-            <Footer 
-                editorToken={hasRole(['editor', 'admin'])}
-                adminToken={hasRole(['admin'])}
-            />
-        </div>
-    )
+        </EditorContextProvider>
+    );
 }
