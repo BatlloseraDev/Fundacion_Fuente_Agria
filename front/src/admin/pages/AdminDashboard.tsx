@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { ColaboradoresPanel } from '../componentes/ColaboradoresPanel';
 import { EditoresPanel } from '../componentes/EditoresPanel';
+import { ActividadesPanel } from '../componentes/ActividadesPanel';
 
-type Tab = 'colaboradores' | 'editores' | 'encargos' | 'chat-soporte' | 'chat-ventas' | 'pie-pagina';
+type Tab = 'colaboradores' | 'editores' | 'actividades' | 'encargos' | 'chat-soporte' | 'chat-ventas' | 'pie-pagina';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'colaboradores', label: 'Colaboradores',  icon: 'bi-people-fill'            },
   { id: 'editores',      label: 'Usuarios',       icon: 'bi-person-badge-fill'      },
+  { id: 'actividades',   label: 'Actividades',    icon: 'bi-calendar-event-fill'    },
   { id: 'encargos',      label: 'Encargos',       icon: 'bi-clipboard2-check-fill'  },
   { id: 'chat-soporte',  label: 'Chat soporte',   icon: 'bi-chat-dots-fill'         },
   { id: 'chat-ventas',   label: 'Chat ventas',    icon: 'bi-bag-heart-fill'         },
@@ -85,6 +87,7 @@ export const AdminDashboard = () => {
         >
           {activeTab === 'colaboradores' && <ColaboradoresPanel />}
           {activeTab === 'editores'      && <EditoresPanel />}
+          {activeTab === 'actividades'   && <ActividadesPanel />}
           {activeTab === 'encargos'      && <ProximamentePanel label="Encargos" />}
           {activeTab === 'chat-soporte'  && <ProximamentePanel label="Chat soporte" />}
           {activeTab === 'chat-ventas'   && <ProximamentePanel label="Chat ventas" />}

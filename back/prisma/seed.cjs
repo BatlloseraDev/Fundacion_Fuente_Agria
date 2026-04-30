@@ -32,7 +32,9 @@ async function main() {
 
   await seedOrders(prisma, users);
   await seedInicio(prisma);
-  
+
+  const { seedActividades } = require('./seeds/actividades.seed.cjs');
+  await seedActividades(prisma);
 
   console.log('🏁 Seed completado correctamente.');
 }

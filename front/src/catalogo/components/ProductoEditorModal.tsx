@@ -1,5 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Producto } from '../types/producto.interface';
+
+function fileToBase64(file: File): Promise<string> {
+    return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result as string);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+    });
+}
 
 interface Props {
     producto?: Producto;
@@ -22,11 +31,14 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
     });
 
     const [etiquetasTexto, setEtiquetasTexto] = useState('');
+    const [imagenModo, setImagenModo] = useState<'archivo' | 'url'>('archivo');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (producto) {
             setForm(producto);
             setEtiquetasTexto((producto.etiquetas ?? []).join(', '));
+            setImagenModo(producto.imageUrl?.startsWith('data:') ? 'archivo' : 'url');
         } else {
             setForm({
                 nombre: '',
@@ -41,6 +53,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                 etiquetas: [],
             });
             setEtiquetasTexto('');
+            setImagenModo('archivo');
         }
     }, [producto]);
 
@@ -54,6 +67,13 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
         }));
+    }
+
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const base64 = await fileToBase64(file);
+        setForm((prev) => ({ ...prev, imageUrl: base64 }));
     }
 
     function handleEtiquetasChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -172,14 +192,73 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                                     </div>
 
                                     <div className="col-12">
-                                        <label className="form-label">URL de la imagen</label>
-                                        <input
-                                            type="text"
-                                            name="imageUrl"
-                                            className="form-control"
-                                            value={form.imageUrl ?? ''}
-                                            onChange={handleChange}
-                                        />
+                                        <label className="form-label">Imagen</label>
+                                        <div className="d-flex gap-2 mb-2">
+                                            <button
+                                                type="button"
+                                                className={`btn btn-sm rounded-pill px-3 ${imagenModo === 'archivo' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                                                onClick={() => setImagenModo('archivo')}
+                                            >
+                                                <i className="bi bi-upload me-1" />Subir archivo
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={`btn btn-sm rounded-pill px-3 ${imagenModo === 'url' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                                                onClick={() => setImagenModo('url')}
+                                            >
+                                                <i className="bi bi-link-45deg me-1" />URL
+                                            </button>
+                                        </div>
+
+                                        {imagenModo === 'archivo' ? (
+                                            <div>
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="d-none"
+                                                    onChange={handleFileChange}
+                                                />
+                                                <div
+                                                    className="rounded-3 d-flex flex-column align-items-center justify-content-center py-3"
+                                                    style={{ border: '2px dashed #dee2e6', cursor: 'pointer', minHeight: 90 }}
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                >
+                                                    {form.imageUrl && form.imageUrl.startsWith('data:') ? (
+                                                        <div className="position-relative">
+                                                            <img
+                                                                src={form.imageUrl}
+                                                                alt="Vista previa"
+                                                                className="rounded-3 img-fluid"
+                                                                style={{ maxHeight: 120, maxWidth: '100%', objectFit: 'cover' }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                className="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                                                style={{ width: 24, height: 24, transform: 'translate(40%,-40%)' }}
+                                                                onClick={(e) => { e.stopPropagation(); setForm((p) => ({ ...p, imageUrl: '' })); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                                                            >
+                                                                <i className="bi bi-x" style={{ fontSize: 14 }} />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <i className="bi bi-cloud-arrow-up text-muted" style={{ fontSize: '1.8rem' }} />
+                                                            <span className="text-muted small mt-1">Haz clic para seleccionar una imagen</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                name="imageUrl"
+                                                className="form-control"
+                                                placeholder="https://..."
+                                                value={(!form.imageUrl?.startsWith('data:') ? form.imageUrl : '') ?? ''}
+                                                onChange={handleChange}
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="col-12">

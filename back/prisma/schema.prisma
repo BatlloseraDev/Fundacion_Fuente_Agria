@@ -250,3 +250,29 @@ model Page{
   stage       String   @db.VarChar(100)
   contentJson Json
 }
+
+// Actividades
+
+model CategoriaActividad {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(100)
+  color     String?   @db.VarChar(20)
+  deletedAt DateTime?
+
+  actividades Actividad[]
+}
+
+model Actividad {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  date        DateTime
+  coverImage  String?  @db.LongText
+  categoryId  Int?
+  contentJson Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category CategoriaActividad? @relation(fields: [categoryId], references: [id])
+}
