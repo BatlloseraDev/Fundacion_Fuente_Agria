@@ -2,18 +2,18 @@ import type { Videotutorial } from '../types/videotutorial.interface.ts';
 
 export const videotutorialesMock: Videotutorial[] = [
   {
-    id: 'como-hacer-pedido',
-    titulo: '¿Cómo hacer un pedido?',
+    id: 'como-hacer-encargo',
+    titulo: '¿Cómo hacer un encargo?',
     descripcion:
       'Aprende paso a paso cómo realizar un encargo personalizado en nuestra fundación. Desde seleccionar el producto hasta confirmar tu solicitud, este tutorial te guiará por todo el proceso de forma sencilla.',
     pasos: [
-      'Navega al catálogo de productos y selecciona el artículo que deseas.',
-      'Pulsa el botón "Ver detalles" para consultar la descripción completa y precio.',
-      'Haz clic en "Encargar" para abrir el formulario de solicitud.',
-      'Rellena los campos: título del encargo, descripción breve y detalles del proyecto.',
-      'Pulsa "Enviar Solicitud" y recibirás un correo de confirmación con los siguientes pasos.',
+      'Navega a la sección "Encargos".',
+      'Pulsa el botón "Solicitar presupuesto" para abrir el formulario de solicitud.',
+      'Rellena todos los campos, ya que son necesarios para realizar el encargo',
+      'Dale a "Enviar Solicitud"',
+      'Recibirás un correo de confirmación con los siguientes pasos.',
     ],
-    videoId: 'dQw4w9WgXcQ',
+    videoId: 'WfWCryDDQ9s',
     icono: 'bi-bag-check',
   },
   {
