@@ -3,3 +3,4 @@
 postgres_data/
 .vscode
 nginx/ssl/
+gemini.md
