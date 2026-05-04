@@ -28,7 +28,7 @@ export const videotutorialesMock: Videotutorial[] = [
       'Acepta los permisos necesarios para acceder a la plataforma.',
       'Serás redirigido automáticamente a tu página de inicio con la sesión activa.',
     ],
-    videoId: 'qxiXrMWnfH8',
+    videoId: 'x5j0XBvGwEw',
     icono: 'bi-google',
   },
   {
@@ -40,9 +40,9 @@ export const videotutorialesMock: Videotutorial[] = [
       'Pulsa "Iniciar sesión" en la barra de navegación superior.',
       'Haz clic en el enlace "¿No tienes cuenta? Registrarse".',
       'Completa el formulario con tu nombre, apellidos, email y contraseña.',
-      'Acepta los términos y condiciones y pulsa "Crear cuenta".',
+      'Una vez registrado el usuario, se debe de iniciar sesión con dicha cuenta.',
     ],
-    videoId: 'dQw4w9WgXcQ',
+    videoId: 'DaL-v5J3TZQ',
     icono: 'bi-person-plus',
   },
 
