@@ -3,6 +3,7 @@ import { Header } from '../ui/Header';
 import { Footer } from '../ui/Footer';
 import { EditorBar } from '../ui/EditorBar';
 import { EditorContextProvider } from '../../context/editorContextProvider';
+import { FloatingChat } from '../chat/FloatingChat';
 
 export function AppLayout() {
     return (
@@ -15,6 +16,7 @@ export function AppLayout() {
                     <Outlet />
                 </main>
                 <Footer />
+                <FloatingChat />
             </div>
         </EditorContextProvider>
     );
