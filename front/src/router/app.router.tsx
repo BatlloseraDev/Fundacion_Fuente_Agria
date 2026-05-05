@@ -7,6 +7,7 @@ import EncargosPage from '../encargos/pages/EncargosPage';
 import { ActividadesPage } from '../actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from '../actividades/pages/ActividadDetailPage';
 import { AdminDashboard } from '../admin/pages/AdminDashboard';
+import {VideotutorialesPage} from "../videotutoriales/pages/videotutorialesPage";
 
 import { PrivateRoute } from './PrivateRoute';
 
@@ -28,7 +29,9 @@ export const appRouter = createBrowserRouter([
       { path: '/encargos', element: <EncargosPage /> },
       { path: '/actividades', element: <ActividadesPage /> },
       { path: '/actividades/:id', element: <ActividadDetailPage /> },
-
+      { path: '/videotutoriales', element: <VideotutorialesPage /> },
+      { path: '/login', element: <LoginPage /> },
+      { path: '/register', element: <RegisterPage /> },
       {
         path: '/perfil',
         element: <PrivateRoute element={<div>Pagina de Perfil (Solo Login)</div>} />,
@@ -46,6 +49,5 @@ export const appRouter = createBrowserRouter([
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
-  { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
+
 ]);

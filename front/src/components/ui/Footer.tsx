@@ -48,6 +48,7 @@ export const Footer = () => {
               <li>📞 Tel: +34 900 000 000</li>
               <li>✉️ Email: contacto@fundacion-ejemplo.org</li>
               <li>🕒 Horario: L–V 9:00–14:00</li>
+              <li style={{ cursor: 'pointer' }} onClick={() => navigate('/videotutoriales')}>🎥 Videotutoriales</li>
             </ul>
           </div>
 
