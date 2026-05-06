@@ -1,17 +1,22 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { Ollama, OllamaEmbeddings } from '@langchain/ollama';
-import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { MemoryVectorStore } from '@langchain/classic/vectorstores/memory';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { createStuffDocumentsChain } from '@langchain/classic/chains/combine_documents';
 import { createRetrievalChain } from '@langchain/classic/chains/retrieval';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import { Document } from '@langchain/core/documents';
 import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class LangchainService implements OnModuleInit {
   private readonly logger = new Logger(LangchainService.name);
   private chain: any;
+
+  // Historial de conversación por socket (efímero, como la conexión)
+  private sessionHistories = new Map<string, Array<HumanMessage | AIMessage>>();
 
   async onModuleInit() {
     await this.initializeRAG();
@@ -20,58 +25,51 @@ export class LangchainService implements OnModuleInit {
   private async initializeRAG() {
     this.logger.log('Inicializando RAG en memoria...');
     try {
-      // 1. Cargar el documento PDF estático
-      const pdfPath = path.join(process.cwd(), 'src', 'chat', 'data', 'conocimiento.pdf'); 
-      const loader = new PDFLoader(pdfPath);
-      const docs = await loader.load();
+      const mdPath = path.join(process.cwd(), 'src', 'chat', 'data', 'conocimiento.md');
+      const textContent = fs.readFileSync(mdPath, 'utf8');
+      const docs = [new Document({ pageContent: textContent })];
 
-      // 2. Dividir el texto en fragmentos (chunks)
+      // chunkOverlap más alto para no perder ideas que cruzan fragmentos
       const textSplitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
-        chunkOverlap: 200,
+        chunkOverlap: 300, // subido de 200 → 300
       });
       const splitDocs = await textSplitter.splitDocuments(docs);
 
-      // 3. Crear Vector Store en memoria usando Embeddings de Ollama
-      // el contenedor de ollama http://ollama:11434 (desde el back en Docker) 
       const embeddings = new OllamaEmbeddings({
-        model: 'nomic-embed-text', 
+        model: 'nomic-embed-text',
         baseUrl: 'http://ollama:11434',
       });
-      
-      const vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings);
-      const retriever = vectorStore.asRetriever({ k: 3 }); // Recupera los 3 fragmentos más relevantes
 
-      // 4. Configurar el LLM (Ej: phi3, llama3 o el que hayas elegido)
+      const vectorStore = await MemoryVectorStore.fromDocuments(splitDocs, embeddings);
+      // k=5 para dar más contexto al modelo sin disparar el tiempo de respuesta
+      const retriever = vectorStore.asRetriever({ k: 5 });
+
       const llm = new Ollama({
         baseUrl: 'http://ollama:11434',
-        model: 'phi3', 
-        temperature: 2, 
+        model: 'phi3',
+        temperature: 0.1,  // CLAVE: bajo para RAG. 2.0 era el motivo de las invenciones
       });
 
-      // 5. System Prompt Estricto
-      const prompt = ChatPromptTemplate.fromTemplate(`
-Eres un asistente virtual de la Fundación Fuente Agria.
-Tu único propósito es responder preguntas basándote EXCLUSIVAMENTE en el contexto proporcionado a continuación.
-
-REGLAS ESTRICTAS:
-1. NUNCA inventes información.
-2. Si la respuesta a la pregunta del usuario no se encuentra dentro del contexto, debes responder EXACTAMENTE con la siguiente frase, sin añadir nada más: "Lo siento, no tengo esa información. Por favor, contacta directamente con la Fundación Fuente Agria. Pero puedes hablar de información que está dentro del contexto SIN INVENTARTE NADA"
-3. Sé amable pero directo y conciso.
-4. Puedes contestar de lo que se te permite hablar
+      // Prompt limpio sin contradicciones internas
+      const prompt = ChatPromptTemplate.fromMessages([
+        [
+          'system',
+          `Eres el asistente virtual de la Fundación Fuente Agria. 
+Responde ÚNICAMENTE con información del siguiente contexto. 
+Si la pregunta no tiene respuesta en el contexto, di exactamente: 
+"Lo siento, no tengo esa información. Contacta directamente con la Fundación Fuente Agria."
+No añadas nada más en ese caso. Sé amable y conciso.
 
 Contexto:
-{context}
+{context}`,
+        ],
+        // Historial de la conversación (últimas N rondas)
+        new MessagesPlaceholder('chat_history'),
+        ['human', '{input}'],
+      ]);
 
-Pregunta del usuario: {input}
-Respuesta:`);
-
-      // 6. Crear las cadenas (Chains)
-      const documentChain = await createStuffDocumentsChain({
-        llm,
-        prompt,
-      });
-
+      const documentChain = await createStuffDocumentsChain({ llm, prompt });
       this.chain = await createRetrievalChain({
         combineDocsChain: documentChain,
         retriever,
@@ -79,23 +77,68 @@ Respuesta:`);
 
       this.logger.log('RAG inicializado correctamente.');
     } catch (error) {
-      this.logger.error('Error al inicializar RAG (¿existe el PDF?):', error);
+      this.logger.error('Error al inicializar RAG:', error);
     }
   }
 
-  async askQuestion(question: string): Promise<string> {
+  // Limpia el historial cuando el socket se desconecta
+  clearSession(socketId: string) {
+    this.sessionHistories.delete(socketId);
+  }
+
+  async askQuestion(
+    question: string,
+    socketId: string,
+    onChunk?: (chunk: string) => void,
+  ): Promise<string> {
     if (!this.chain) {
-      return 'El sistema de chat aún se está inicializando o hubo un error al cargar el conocimiento.';
+      const errorMsg = 'El sistema aún se está inicializando, inténtalo en unos segundos.';
+      if (onChunk) onChunk(errorMsg);
+      return errorMsg;
     }
 
+    // Recupera o crea el historial de esta sesión
+    if (!this.sessionHistories.has(socketId)) {
+      this.sessionHistories.set(socketId, []);
+    }
+    const history = this.sessionHistories.get(socketId)!;
+
+    // Limita el historial a las últimas 6 rondas (12 mensajes) para no sobrecargar el contexto
+    const recentHistory = history.slice(-12);
+
     try {
-      const response = await this.chain.invoke({
-        input: question,
-      });
-      return response.answer;
+      let finalAnswer = '';
+
+      if (onChunk) {
+        const stream = await this.chain.stream({
+          input: question,
+          chat_history: recentHistory,
+        });
+
+        for await (const chunk of stream) {
+          if (chunk.answer !== undefined && chunk.answer !== null) {
+            finalAnswer += chunk.answer;
+            onChunk(chunk.answer);
+          }
+        }
+      } else {
+        const response = await this.chain.invoke({
+          input: question,
+          chat_history: recentHistory,
+        });
+        finalAnswer = response.answer;
+      }
+
+      // Guarda la ronda actual en el historial
+      history.push(new HumanMessage(question));
+      history.push(new AIMessage(finalAnswer));
+
+      return finalAnswer;
     } catch (error) {
       this.logger.error('Error al procesar la pregunta:', error);
-      return 'Hubo un error al procesar tu consulta. Inténtalo de nuevo más tarde.';
+      const errorMsg = 'Hubo un error al procesar tu consulta. Inténtalo de nuevo más tarde.';
+      if (onChunk) onChunk(errorMsg);
+      return errorMsg;
     }
   }
 }

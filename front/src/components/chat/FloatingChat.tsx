@@ -30,9 +30,31 @@ export function FloatingChat() {
       const socket = io(backendUrl);
       socketRef.current = socket;
 
-      socket.on('receiveMessage', (data: { text: string; sender: 'bot' }) => {
-        setMessages((prev) => [...prev, { id: Date.now().toString(), text: data.text, sender: data.sender }]);
+      socket.on('messageChunk', (data: { text: string }) => {
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          const lastMsg = newMessages.length > 0 ? newMessages[newMessages.length - 1] : null;
+          
+          if (lastMsg && lastMsg.sender === 'bot') {
+            // Append to the current bot message
+            newMessages[newMessages.length - 1] = {
+              ...lastMsg,
+              text: lastMsg.text + data.text
+            };
+          } else {
+            // Start a new bot message
+            newMessages.push({
+              id: Date.now().toString(),
+              text: data.text,
+              sender: 'bot'
+            });
+          }
+          return newMessages;
+        });
       });
+
+      // Ignoramos 'receiveMessage' ya que la respuesta se construye con los chunks
+      socket.on('receiveMessage', () => {});
 
       socket.on('typing', (typing: boolean) => {
         setIsTyping(typing);

@@ -11,9 +11,7 @@ import { LangchainService } from './langchain.service';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*', //TODO: En producción hay que ajustar esto 
-  },
+  cors: { origin: '*' }, // TODO: ajustar en producción
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(ChatGateway.name);
@@ -25,8 +23,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Cliente desconectado: ${client.id}. Se libera el estado de su conexión efímera.`);
-    // Al desconectarse, perdemos la referencia del socket y con él su "historial de red"
+    this.logger.log(`Cliente desconectado: ${client.id}`);
+    // Libera el historial de conversación de esta sesión
+    this.langchainService.clearSession(client.id);
   }
 
   @SubscribeMessage('sendMessage')
@@ -34,15 +33,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: { text: string },
     @ConnectedSocket() client: Socket,
   ) {
-    this.logger.log(`Pregunta recibida del cliente ${client.id}: ${payload.text}`);
-    
-    // Le decimos al cliente que estamos escribiendo
+    this.logger.log(`Pregunta de ${client.id}: ${payload.text}`);
+
     client.emit('typing', true);
 
-    const answer = await this.langchainService.askQuestion(payload.text);
+    // Llamamos a askQuestion pasando el callback para el streaming real de LangChain
+    const answer = await this.langchainService.askQuestion(
+      payload.text,
+      client.id,
+      (chunk: string) => {
+        // Por cada token/fragmento que genera Ollama, lo enviamos al cliente
+        client.emit('messageChunk', { text: chunk });
+      }
+    );
 
-    // Detenemos el estado de "escribiendo" y enviamos la respuesta
     client.emit('typing', false);
+
+    // Opcional: enviar la respuesta completa al final por si el cliente la necesita
+    // (Depende de cómo gestione tu frontend los chunks vs el mensaje final)
     client.emit('receiveMessage', { text: answer, sender: 'bot' });
   }
 }
