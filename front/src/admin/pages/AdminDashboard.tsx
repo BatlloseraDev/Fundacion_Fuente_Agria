@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ColaboradoresPanel } from '../componentes/ColaboradoresPanel';
 import { EditoresPanel } from '../componentes/EditoresPanel';
 import { ActividadesPanel } from '../componentes/ActividadesPanel';
+import { ChatSoportePanel } from '../componentes/ChatSoportePanel'; 
 
 type Tab = 'colaboradores' | 'editores' | 'actividades' | 'encargos' | 'chat-soporte' | 'chat-ventas' | 'pie-pagina';
 
@@ -89,7 +90,7 @@ export const AdminDashboard = () => {
           {activeTab === 'editores'      && <EditoresPanel />}
           {activeTab === 'actividades'   && <ActividadesPanel />}
           {activeTab === 'encargos'      && <ProximamentePanel label="Encargos" />}
-          {activeTab === 'chat-soporte'  && <ProximamentePanel label="Chat soporte" />}
+          {activeTab === 'chat-soporte'  && <ChatSoportePanel />}
           {activeTab === 'chat-ventas'   && <ProximamentePanel label="Chat ventas" />}
           {activeTab === 'pie-pagina'    && <ProximamentePanel label="Pie de página" />}
         </div>

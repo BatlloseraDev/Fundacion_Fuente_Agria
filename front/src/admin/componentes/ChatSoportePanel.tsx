@@ -1,170 +1,181 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, use } from 'react';
 import type { AdminChat, AdminMessage } from '../types/admin.types';
 import { getChats, getChatMessages } from '../services/admin.service';
+import { UserContext } from '../../context/userContext';
+import { io, Socket } from 'socket.io-client';
 
-const AVATAR_COLORS = [
-  '#4361ee','#3a0ca3','#7209b7','#f72585','#4cc9f0',
-  '#06d6a0','#118ab2','#ef476f','#ffd166','#073b4c',
-];
+const AVATAR_COLORS = ['#4361ee','#3a0ca3','#7209b7','#f72585','#4cc9f0','#06d6a0','#118ab2','#ef476f','#ffd166','#073b4c'];
 function avatarColor(id: number) { return AVATAR_COLORS[id % AVATAR_COLORS.length]; }
 
 export const ChatSoportePanel = () => {
+  const { user } = use(UserContext); 
   const [chats, setChats] = useState<AdminChat[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selectedChat, setSelectedChat] = useState<AdminChat | null>(null);
   const [messages, setMessages] = useState<AdminMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const socketRef = useRef<Socket | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null); 
+  const selectedChatIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     getChats()
       .then((data) => {
-        setChats(data);
-        if (data.length > 0) handleSelect(data[0]);
+        const sortedChats = data.sort((a, b) => {
+          const dateA = a.messages?.[0] ? new Date(a.messages[0].createdAt).getTime() : 0;
+          const dateB = b.messages?.[0] ? new Date(b.messages[0].createdAt).getTime() : 0;
+          return dateB - dateA; 
+        });
+        setChats(sortedChats);
+        if (sortedChats.length > 0) handleSelect(sortedChats[0]);
       })
-      .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+
+    const token = localStorage.getItem('jwt_token');
+    const apiUrl = import.meta.env.VITE_API_URL?.replace('/api', '');
+    
+    socketRef.current = io(apiUrl, { extraHeaders: { Authorization: `Bearer ${token}` } });
+    socketRef.current.emit('joinAdmins');
+
+    socketRef.current.on('newMessage', (nuevoMensaje: any) => {
+      if (String(nuevoMensaje.chatId) === String(selectedChatIdRef.current)) {
+        setMessages((prev) => [...prev, nuevoMensaje]);
+      }
+      
+      setChats(currentChats => {
+        const chatToUpdate = currentChats.find(c => String(c.id) === String(nuevoMensaje.chatId));
+        if (chatToUpdate) {
+            const otherChats = currentChats.filter(c => String(c.id) !== String(nuevoMensaje.chatId));
+            return [{ ...chatToUpdate, messages: [nuevoMensaje] }, ...otherChats];
+        } else {
+            return [{ id: nuevoMensaje.chatId, user: nuevoMensaje.user, messages: [nuevoMensaje] }, ...currentChats];
+        }
+      });
+    });
+
+    return () => { socketRef.current?.disconnect(); };
   }, []);
 
   const handleSelect = async (chat: AdminChat) => {
     setSelectedChat(chat);
+    selectedChatIdRef.current = chat.id;
     setLoadingMessages(true);
-    try { setMessages(await getChatMessages(chat.id)); }
+    try { 
+        setMessages(await getChatMessages(chat.id)); 
+        socketRef.current?.emit('joinChat', { chatId: chat.id });
+    }
     catch { setMessages([]); }
     finally { setLoadingMessages(false); }
   };
 
-  if (loading) return <div className="text-center py-5"><div className="spinner-border" style={{ color: '#1a1f36' }} /></div>;
-  if (error) return <div className="alert alert-danger rounded-3">{error}</div>;
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
-  if (chats.length === 0) {
-    return (
-      <div className="text-center py-5">
-        <div className="mb-3" style={{ fontSize: '3rem', opacity: .25 }}><i className="bi bi-chat-dots" /></div>
-        <div className="fw-semibold text-muted">Sin conversaciones todavía</div>
-      </div>
-    );
-  }
+  const adminSendMessage = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!inputText.trim() || !selectedChat || !user) return;
+
+    socketRef.current?.emit('sendMessage', {
+      chatId: selectedChat.id,
+      userId: Number(user.id),
+      message: inputText
+    });
+    
+    setInputText('');
+  };
+
+  if (loading) return <div className="text-center py-5"><div className="spinner-border text-primary" /></div>;
 
   return (
-    <div>
+    <div className="container-fluid px-0">
       <div className="mb-4">
-        <div className="fw-bold fs-5">Chat soporte</div>
-        <div className="text-muted small">{chats.length} conversaciones</div>
+        <h5 className="fw-bold mb-1">Chat de soporte</h5>
       </div>
 
-      <div
-        className="rounded-4 overflow-hidden"
-        style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: 500, boxShadow: '0 2px 12px rgba(0,0,0,.08)' }}
-      >
-        {/* ── Lista de chats ─────────────────────────────────────── */}
-        <div style={{ background: '#1a1f36', overflowY: 'auto' }}>
-          <div className="px-3 pt-3 pb-2">
-            <div className="text-white fw-semibold small text-uppercase" style={{ letterSpacing: '.08em', opacity: .6 }}>Conversaciones</div>
+      <div className="row g-0 rounded-4 shadow-sm border bg-white overflow-hidden" style={{ height: '650px' }}>
+        
+        <div className="col-12 col-md-4 col-lg-3 bg-dark d-flex flex-column h-100">
+          <div className="p-3 text-white-50 fw-semibold small text-uppercase border-bottom border-secondary">
+            Conversaciones
           </div>
-          {chats.map((chat) => {
-            const isSelected = selectedChat?.id === chat.id;
-            const lastMsg = chat.messages[0];
-            const color = avatarColor(chat.user.id);
-            return (
-              <button
-                key={chat.id}
-                onClick={() => handleSelect(chat)}
-                className="w-100 border-0 text-start px-3 py-3 d-flex align-items-center gap-3"
-                style={{
-                  background: isSelected ? 'rgba(255,255,255,0.12)' : 'transparent',
-                  borderLeft: isSelected ? '3px solid #4cc9f0' : '3px solid transparent',
-                  cursor: 'pointer',
-                  transition: 'background .15s',
-                }}
-              >
-                <div
-                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-white"
-                  style={{ width: 38, height: 38, fontSize: 13, background: color }}
+          <div className="list-group list-group-flush overflow-auto flex-grow-1">
+            {chats.map((chat) => {
+              const isSelected = selectedChat?.id === chat.id;
+              const lastMsg = chat.messages?.[0];
+              return (
+                <button 
+                  key={chat.id} 
+                  onClick={() => handleSelect(chat)} 
+                  className={`list-group-item list-group-item-action d-flex align-items-center gap-3 p-3 border-bottom border-secondary ${isSelected ? 'active bg-primary border-primary' : 'bg-dark text-white'}`}
                 >
-                  {chat.user.avatarUrl
-                    ? <img src={chat.user.avatarUrl} alt="" className="rounded-circle" style={{ width: 38, height: 38, objectFit: 'cover' }} />
-                    : chat.user.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="overflow-hidden flex-grow-1">
-                  <div className="small fw-semibold text-truncate" style={{ color: '#fff' }}>
-                    {chat.user.name} {chat.user.subname}
+                  <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-light text-dark shadow-sm" style={{ width: '42px', height: '42px' }}>
+                    {chat.user?.avatarUrl ? <img src={chat.user.avatarUrl} alt="" className="rounded-circle w-100 h-100 object-fit-cover" /> : chat.user?.name?.charAt(0).toUpperCase()}
                   </div>
-                  <div className="text-truncate" style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
-                    {lastMsg ? lastMsg.message : 'Sin mensajes'}
+                  <div className="overflow-hidden flex-grow-1 text-start">
+                    <div className="fw-semibold text-truncate">{chat.user?.name} {chat.user?.subname}</div>
+                    <div className={`text-truncate small ${isSelected ? 'text-white-50' : 'text-secondary'}`}>
+                      {lastMsg ? lastMsg.message : 'Sin mensajes'}
+                    </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* ── Conversación ───────────────────────────────────────── */}
-        <div style={{ background: '#f8f9fb', display: 'flex', flexDirection: 'column' }}>
+        <div className="col-12 col-md-8 col-lg-9 bg-light d-flex flex-column h-100">
           {selectedChat ? (
             <>
-              {/* Cabecera */}
-              <div className="px-4 py-3 d-flex align-items-center gap-3 border-bottom" style={{ background: '#fff' }}>
-                <div
-                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-white"
-                  style={{ width: 40, height: 40, fontSize: 14, background: avatarColor(selectedChat.user.id) }}
-                >
-                  {selectedChat.user.avatarUrl
-                    ? <img src={selectedChat.user.avatarUrl} alt="" className="rounded-circle" style={{ width: 40, height: 40, objectFit: 'cover' }} />
-                    : selectedChat.user.name.charAt(0).toUpperCase()}
+              <div className="p-3 d-flex align-items-center gap-3 border-bottom bg-white shadow-sm z-1">
+                <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style={{ width: '45px', height: '45px', background: avatarColor(selectedChat.user?.id || 0) }}>
+                  {selectedChat.user?.avatarUrl ? <img src={selectedChat.user.avatarUrl} alt="" className="rounded-circle w-100 h-100 object-fit-cover" /> : selectedChat.user?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div className="fw-semibold">{selectedChat.user.name} {selectedChat.user.subname}</div>
-                  <div className="text-muted" style={{ fontSize: '0.78rem' }}>{selectedChat.user.email}</div>
+                  <div className="fw-bold fs-6 text-dark">{selectedChat.user?.name} {selectedChat.user?.subname}</div>
+                  <div className="text-muted small">{selectedChat.user?.email}</div>
                 </div>
               </div>
 
-              {/* Mensajes */}
-              <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3" style={{ maxHeight: 420 }}>
+              <div className="flex-grow-1 overflow-auto p-4 d-flex flex-column gap-3" ref={chatContainerRef}>
                 {loadingMessages ? (
-                  <div className="text-center py-4"><div className="spinner-border spinner-border-sm text-secondary" /></div>
+                  <div className="text-center py-4"><div className="spinner-border text-primary" /></div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center text-muted small mt-4">
-                    <i className="bi bi-chat d-block mb-2" style={{ fontSize: '2rem', opacity: .3 }} />
-                    Sin mensajes en esta conversación
+                  <div className="text-center text-muted mt-5">
+                    <i className="bi bi-chat-dots d-block mb-2 text-muted opacity-50" style={{ fontSize: '3rem' }} />
+                    Sin historial de mensajes
                   </div>
                 ) : messages.map((msg) => {
-                  const isOwn = msg.user.id === selectedChat.user.id;
+                  const isOwn = String(msg.user?.id) === String(user?.id);
                   return (
-                    <div key={msg.id} className={`d-flex ${isOwn ? 'justify-content-start' : 'justify-content-end'}`}>
-                      {isOwn && (
-                        <div
-                          className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white fw-bold me-2"
-                          style={{ width: 30, height: 30, fontSize: 11, background: avatarColor(msg.user.id), alignSelf: 'flex-end' }}
-                        >
-                          {msg.user.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div
-                        className="rounded-4 px-3 py-2 small"
-                        style={{
-                          maxWidth: '70%',
-                          background: isOwn ? '#fff' : '#1a1f36',
-                          color: isOwn ? '#212529' : '#fff',
-                          boxShadow: '0 1px 3px rgba(0,0,0,.08)',
-                          borderBottomLeftRadius: isOwn ? '4px' : undefined,
-                          borderBottomRightRadius: isOwn ? undefined : '4px',
-                        }}
-                      >
+                    <div key={msg.id} className={`d-flex ${isOwn ? 'justify-content-end' : 'justify-content-start'}`}>
+                      <div className={`rounded-4 px-3 py-2 shadow-sm w-75 ${isOwn ? 'bg-primary text-white' : 'bg-white text-dark border'}`}>
                         <div style={{ whiteSpace: 'pre-wrap' }}>{msg.message}</div>
-                        <div className="text-end mt-1" style={{ fontSize: '0.68rem', opacity: .55 }}>
-                          {new Date(msg.createdAt).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        <div className={`text-end mt-1 small ${isOwn ? 'text-white-50' : 'text-muted'}`} style={{ fontSize: '0.70rem' }}>
+                          {new Date(msg.createdAt).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
+
+              <div className="p-3 border-top bg-white">
+                <form onSubmit={adminSendMessage} className="input-group">
+                  <input type="text" className="form-control bg-light rounded-start-pill border-end-0 py-2 px-3" placeholder="Escribe tu respuesta..." value={inputText} onChange={(e) => setInputText(e.target.value)} />
+                  <button type="submit" className="btn btn-primary rounded-end-pill px-4 fw-semibold" disabled={!inputText.trim()}>
+                    <i className="bi bi-send-fill me-2"></i> Enviar
+                  </button>
+                </form>
+              </div>
             </>
           ) : (
-            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted gap-2">
-              <i className="bi bi-chat-dots" style={{ fontSize: '2.5rem', opacity: .25 }} />
-              <span className="small">Selecciona una conversación</span>
+            <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted">
+              <i className="bi bi-chat-left-dots mb-3 text-muted opacity-25" style={{ fontSize: '4rem' }} />
+              <span className="fs-5 fw-semibold">Selecciona un chat en la lista</span>
             </div>
           )}
         </div>
