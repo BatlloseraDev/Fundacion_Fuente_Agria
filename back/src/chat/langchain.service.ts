@@ -46,7 +46,7 @@ export class LangchainService implements OnModuleInit {
       const llm = new Ollama({
         baseUrl: 'http://ollama:11434',
         model: 'phi3', 
-        temperature: 1, 
+        temperature: 2, 
       });
 
       // 5. System Prompt Estricto
@@ -56,7 +56,7 @@ Tu único propósito es responder preguntas basándote EXCLUSIVAMENTE en el cont
 
 REGLAS ESTRICTAS:
 1. NUNCA inventes información.
-2. Si la respuesta a la pregunta del usuario no se encuentra CLARAMENTE dentro del contexto, debes responder EXACTAMENTE con la siguiente frase, sin añadir nada más: "Lo siento, no tengo esa información. Por favor, contacta directamente con la Fundación Fuente Agria."
+2. Si la respuesta a la pregunta del usuario no se encuentra dentro del contexto, debes responder EXACTAMENTE con la siguiente frase, sin añadir nada más: "Lo siento, no tengo esa información. Por favor, contacta directamente con la Fundación Fuente Agria. Pero puedes hablar de información que está dentro del contexto SIN INVENTARTE NADA"
 3. Sé amable pero directo y conciso.
 4. Puedes contestar de lo que se te permite hablar
 
