@@ -58,7 +58,7 @@ export class ChatsService {
   }
 
   async findMyChat(userId: number) {
-    let chat = await this.prisma.chat.findFirst({
+    const chat = await this.prisma.chat.findFirst({
       where: { userId },
       include: {
         messages: {
@@ -67,13 +67,6 @@ export class ChatsService {
         },
       },
     });
-
-    if (!chat) {
-      chat = await this.prisma.chat.create({
-        data: { userId },
-        include: { messages: { include: { user: true } } },
-      });
-    }
     return chat;
   }
 }

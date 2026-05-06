@@ -8,7 +8,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Injectable, Logger, UseGuards } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { WebsocketsService } from './websockets.service';
 
 @WebSocketGateway({
@@ -36,27 +36,34 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
 
   @SubscribeMessage('joinChat')
   handleJoinChat(@MessageBody() data: { chatId: number }, @ConnectedSocket() client: Socket) {
-    const roomName = `chat_${data.chatId}`;
-    client.join(roomName);
+    if (data.chatId) {
+      client.join(`chat_${data.chatId}`);
+    }
+    return { status: 'ok' };
+  }
 
-    this.logger.debug(`Cliente unido a la sala: ${roomName}`);
-    return { status: 'ok', room: roomName };
+  @SubscribeMessage('joinAdmins')
+  handleJoinAdmins(@ConnectedSocket() client: Socket) {
+    client.join('admin_room');
+    return { status: 'ok' };
   }
 
   @SubscribeMessage('sendMessage')
   async handleMessage(
-    @MessageBody() data: { chatId: number; userId: number; message: string },
+    @MessageBody() data: { chatId?: number; userId: number; message: string },
     @ConnectedSocket() client: Socket,
   ) {
     try {
       const savedMessage = await this.websocketsService.saveMessage(data);
+      const roomName = `chat_${savedMessage.chatId}`;
 
-      const roomName = `chat_${data.chatId}`;
-      this.io.to(roomName).emit('newMessage', savedMessage);
+      client.join(roomName);
+
+      this.io.to(roomName).to('admin_room').emit('newMessage', savedMessage);
 
       return { success: true };
     } catch (error) {
-      this.logger.error(`Error guardando mensaje del chat ${data.chatId}:`, error);
+      this.logger.error(`Error guardando mensaje:`, error);
       return { success: false, error: 'No se pudo procesar el mensaje' };
     }
   }

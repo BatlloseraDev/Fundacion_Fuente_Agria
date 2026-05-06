@@ -5,10 +5,20 @@ import { PrismaService } from '../prisma/prisma.service';
 export class WebsocketsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async saveMessage(data: { chatId: number; userId: number; message: string }) {
+  async saveMessage(data: { chatId?: number; userId: number; message: string }) {
+    let finalChatId = data.chatId;
+
+    if (!finalChatId) {
+      let chat = await this.prisma.chat.findFirst({ where: { userId: data.userId } });
+      if (!chat) {
+        chat = await this.prisma.chat.create({ data: { userId: data.userId } });
+      }
+      finalChatId = chat.id;
+    }
+
     return this.prisma.message.create({
       data: {
-        chatId: data.chatId,
+        chatId: finalChatId,
         userId: data.userId,
         message: data.message,
       },
