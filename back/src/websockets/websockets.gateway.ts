@@ -10,7 +10,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { WebsocketsService } from './websockets.service';
-import { JwtAuthGuard } from '../auth/jwt_strategy/jwt-auth.guard';
 
 @WebSocketGateway({
   cors: {
@@ -35,7 +34,6 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
     this.logger.verbose('Un cliente se ha desconectado.');
   }
 
-  @UseGuards(JwtAuthGuard)
   @SubscribeMessage('joinChat')
   handleJoinChat(@MessageBody() data: { chatId: number }, @ConnectedSocket() client: Socket) {
     const roomName = `chat_${data.chatId}`;
@@ -45,7 +43,6 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
     return { status: 'ok', room: roomName };
   }
 
-  @UseGuards(JwtAuthGuard)
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody() data: { chatId: number; userId: number; message: string },
