@@ -56,4 +56,24 @@ export class ChatsService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async findMyChat(userId: number) {
+    let chat = await this.prisma.chat.findFirst({
+      where: { userId },
+      include: {
+        messages: {
+          include: { user: { select: { id: true, name: true, subname: true, avatarUrl: true } } },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!chat) {
+      chat = await this.prisma.chat.create({
+        data: { userId },
+        include: { messages: { include: { user: true } } },
+      });
+    }
+    return chat;
+  }
 }
