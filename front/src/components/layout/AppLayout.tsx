@@ -4,6 +4,7 @@ import { Footer } from '../ui/Footer';
 import { EditorBar } from '../ui/EditorBar';
 import { EditorContextProvider } from '../../context/editorContextProvider';
 import { FloatingChat } from '../chat/FloatingChat';
+import { ChatWidget } from '../ui/ChatWidget';
 
 export function AppLayout() {
     return (
@@ -17,6 +18,7 @@ export function AppLayout() {
                 </main>
                 <Footer />
                 <FloatingChat />
+                <ChatWidget />
             </div>
         </EditorContextProvider>
     );
