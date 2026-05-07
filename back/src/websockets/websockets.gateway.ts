@@ -54,6 +54,11 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
     @ConnectedSocket() client: Socket,
   ) {
     try {
+      if (!data?.userId || !data?.message?.trim()) {
+        this.logger.warn(`Mensaje de soporte invalido recibido de ${client.id}`);
+        return { success: false, error: 'Mensaje invalido' };
+      }
+
       const savedMessage = await this.websocketsService.saveMessage(data);
       const roomName = `chat_${savedMessage.chatId}`;
 
