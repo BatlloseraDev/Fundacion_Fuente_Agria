@@ -25,7 +25,6 @@ export function FloatingChat() {
 
   useEffect(() => {
     if (isOpen) {
-      // Usar variable de entorno si existe, o localhost:3000 por defecto
       const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
       const socket = io(backendUrl);
       socketRef.current = socket;
@@ -53,7 +52,7 @@ export function FloatingChat() {
         });
       });
 
-      // Ignoramos 'receiveMessage' ya que la respuesta se construye con los chunks
+      
       socket.on('receiveMessage', () => {});
 
       socket.on('typing', (typing: boolean) => {
@@ -92,7 +91,7 @@ export function FloatingChat() {
           className="btn btn-primary rounded-circle shadow d-flex align-items-center justify-content-center"
           style={{ width: '60px', height: '60px' }}
         >
-          <i className="bi bi-chat-dots-fill fs-3"></i>
+          <i className="bi bi-robot fs-3"></i>
         </button>
       )}
 

@@ -36,7 +36,7 @@ import { WebsocketsModule } from './websockets/websockets.module';
     OrdersModule,
     ChatsModule,
     ActividadesModule,
-    ChatModule
+    ChatModule,
     WebsocketsModule,
   ],
   providers: [PrismaService],
