@@ -32,7 +32,7 @@ export class LangchainService implements OnModuleInit {
       // chunkOverlap más alto para no perder ideas que cruzan fragmentos
       const textSplitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
-        chunkOverlap: 300, // subido de 200 → 300
+        chunkOverlap: 300, 
       });
       const splitDocs = await textSplitter.splitDocuments(docs);
 
@@ -89,7 +89,7 @@ Contexto:
   async askQuestion(
     question: string,
     socketId: string,
-    onChunk?: (chunk: string) => void,
+    onChunk?: (chunk: string) => void | boolean,
   ): Promise<string> {
     if (!this.chain) {
       const errorMsg = 'El sistema aún se está inicializando, inténtalo en unos segundos.';
@@ -118,7 +118,10 @@ Contexto:
         for await (const chunk of stream) {
           if (chunk.answer !== undefined && chunk.answer !== null) {
             finalAnswer += chunk.answer;
-            onChunk(chunk.answer);
+            const shouldContinue = onChunk(chunk.answer);
+            if (shouldContinue === false) {
+              break;
+            }
           }
         }
       } else {
