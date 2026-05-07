@@ -109,7 +109,7 @@ export function FloatingChat() {
           <div className="card-body overflow-auto flex-grow-1" style={{ backgroundColor: '#f8f9fa' }}>
             {messages.length === 0 && (
               <div className="text-center text-muted mt-3">
-                <small>¡Hola! Soy el asistente de la Fundación. ¿En qué puedo ayudarte hoy?</small>
+                <small>¡Hola! Soy el asistente de la Fundación. ¿En qué puedo ayudarte hoy? (ten en cuenta que soy una IA, puedo cometer errores)</small>
               </div>
             )}
             {messages.map((msg) => (
