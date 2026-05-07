@@ -76,7 +76,7 @@ export const ChatWidget = () => {
     if (!isAuthenticated || isAdminOrEditor || !user) return null;
 
     return (
-        <div className="position-fixed bottom-0 end-0 mb-4 me-4 shadow-lg rounded-top z-3" style={{ width: '350px' }}>
+        <div className="position-fixed bottom-0 start-0 mb-4 ms-4 shadow-lg rounded-top z-3" style={{ width: '350px' }}>
             
             <div className="bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top" role="button" onClick={() => setIsOpen(!isOpen)}>
                 <span className="fw-bold d-flex align-items-center gap-2">

@@ -99,8 +99,21 @@ services:
     networks:
       - app-network
 
+  # --- OLLAMA ---
+  ollama:
+    image: ollama/ollama:latest
+    container_name: fuenteagria_ollama
+    restart: unless-stopped
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-network
+
 volumes:
   mysql_data:
+  ollama_data: # Añadido para persistir los modelos descargados de Ollama
 
 
 networks:

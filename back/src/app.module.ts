@@ -14,6 +14,7 @@ import { HeroInicioModule } from './hero-inicio/hero-inicio.module';
 import { CarouselInicioModule } from './carousel-inicio/carousel-inicio.module';
 import { ChatsModule } from './chats/chats.module';
 import { ActividadesModule } from './actividades/actividades.module';
+import { ChatModule } from './chat/chat.module';
 import { WebsocketsModule } from './websockets/websockets.module';
 
 @Module({
@@ -35,6 +36,7 @@ import { WebsocketsModule } from './websockets/websockets.module';
     OrdersModule,
     ChatsModule,
     ActividadesModule,
+    ChatModule,
     WebsocketsModule,
   ],
   providers: [PrismaService],
