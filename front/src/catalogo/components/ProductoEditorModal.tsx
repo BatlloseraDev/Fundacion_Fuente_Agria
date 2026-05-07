@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Producto } from '../types/producto.interface';
-
-function fileToBase64(file: File): Promise<string> {
-    return new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload = () => res(r.result as string);
-        r.onerror = rej;
-        r.readAsDataURL(file);
-    });
-}
+import { uploadArticleImage } from '../services/catalogo.service';
 
 interface Props {
     producto?: Producto;
@@ -32,13 +24,15 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
 
     const [etiquetasTexto, setEtiquetasTexto] = useState('');
     const [imagenModo, setImagenModo] = useState<'archivo' | 'url'>('archivo');
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [imageError, setImageError] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (producto) {
             setForm(producto);
             setEtiquetasTexto((producto.etiquetas ?? []).join(', '));
-            setImagenModo(producto.imageUrl?.startsWith('data:') ? 'archivo' : 'url');
+            setImagenModo(producto.imageUrl?.includes('/uploads/') ? 'archivo' : 'url');
         } else {
             setForm({
                 nombre: '',
@@ -55,6 +49,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
             setEtiquetasTexto('');
             setImagenModo('archivo');
         }
+        setImageError('');
     }, [producto]);
 
     function handleChange(
@@ -72,8 +67,31 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
     async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
-        const base64 = await fileToBase64(file);
-        setForm((prev) => ({ ...prev, imageUrl: base64 }));
+
+        setImageError('');
+
+        if (!file.type.startsWith('image/')) {
+            setImageError('El archivo debe ser una imagen.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > 4 * 1024 * 1024) {
+            setImageError('La imagen no puede superar los 4 MB.');
+            e.target.value = '';
+            return;
+        }
+
+        try {
+            setUploadingImage(true);
+            const imageUrl = await uploadArticleImage(file);
+            setForm((prev) => ({ ...prev, imageUrl }));
+        } catch (err) {
+            setImageError(err instanceof Error ? err.message : 'No se pudo subir la imagen.');
+            e.target.value = '';
+        } finally {
+            setUploadingImage(false);
+        }
     }
 
     function handleEtiquetasChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -224,7 +242,12 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                                                     style={{ border: '2px dashed #dee2e6', cursor: 'pointer', minHeight: 90 }}
                                                     onClick={() => fileInputRef.current?.click()}
                                                 >
-                                                    {form.imageUrl && form.imageUrl.startsWith('data:') ? (
+                                                    {uploadingImage ? (
+                                                        <>
+                                                            <div className="spinner-border spinner-border-sm text-primary" role="status" />
+                                                            <span className="text-muted small mt-2">Subiendo imagen...</span>
+                                                        </>
+                                                    ) : form.imageUrl ? (
                                                         <div className="position-relative">
                                                             <img
                                                                 src={form.imageUrl}
@@ -248,6 +271,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                                                         </>
                                                     )}
                                                 </div>
+                                                {imageError && <div className="text-danger small mt-2">{imageError}</div>}
                                             </div>
                                         ) : (
                                             <input
@@ -255,7 +279,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                                                 name="imageUrl"
                                                 className="form-control"
                                                 placeholder="https://..."
-                                                value={(!form.imageUrl?.startsWith('data:') ? form.imageUrl : '') ?? ''}
+                                                value={(!form.imageUrl?.includes('/uploads/') ? form.imageUrl : '') ?? ''}
                                                 onChange={handleChange}
                                             />
                                         )}

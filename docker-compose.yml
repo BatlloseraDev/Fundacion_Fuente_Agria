@@ -57,7 +57,10 @@ services:
     volumes:
       - ./back:/app
     depends_on:
-      - mysql
+      mysql:
+        condition: service_started
+      ollama-models:
+        condition: service_completed_successfully
     networks:
       - app-network
     command: sh -c "yarn prisma generate && yarn start:dev"
@@ -110,6 +113,27 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - app-network
+
+  # --- MODELOS DE OLLAMA (se descargan solo si faltan) ---
+  ollama-models:
+    image: ollama/ollama:latest
+    container_name: fuenteagria_ollama_models
+    restart: "no"
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      - ollama
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        until ollama list >/dev/null 2>&1; do
+          echo 'Esperando a Ollama...';
+          sleep 2;
+        done;
+        ollama pull nomic-embed-text;
+        ollama pull qwen2.5:1.5b;
+      "
 
 volumes:
   mysql_data:
