@@ -42,6 +42,12 @@ function getToken(): string | null {
   return localStorage.getItem("jwt_token");
 }
 
+function resolveImageUrl(image?: string | null): string {
+  if (!image) return "";
+  if (image.startsWith("/uploads/")) return `${API_URL}${image}`;
+  return image;
+}
+
 function apiToProducto(article: ArticleApi): Producto {
   const categoria = article.categories?.[0]?.categoryArticle?.name ?? "";
   const colorCategoria = article.categories?.[0]?.categoryArticle?.color ?? "primary";
@@ -55,7 +61,7 @@ function apiToProducto(article: ArticleApi): Producto {
     precioDesde: false,
     categoria,
     colorCategoria,
-    imageUrl: article.image ?? "",
+    imageUrl: resolveImageUrl(article.image),
     disponible: article.available,
     etiquetas: article.labels?.map((item) => item.label.name) ?? []
   };
@@ -113,6 +119,33 @@ export async function createProducto(producto: Partial<Producto>) {
   }
 
   return res.json();
+}
+
+export async function uploadArticleImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`${API_URL}/articles/upload-image`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    },
+    body: formData
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error subiendo imagen: ${errorText}`);
+  }
+
+  const response = await res.json();
+  const imageUrl = response?.data?.imageUrl ?? response?.imageUrl;
+
+  if (!imageUrl) {
+    throw new Error("La subida de imagen no devolvio una URL valida");
+  }
+
+  return resolveImageUrl(imageUrl);
 }
 
 export async function updateProducto(id: string, producto: Partial<Producto>) {

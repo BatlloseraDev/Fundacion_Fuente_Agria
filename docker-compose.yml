@@ -15,6 +15,11 @@ services:
       - '3360:3306'
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     networks:
       - app-network
 
@@ -30,7 +35,8 @@ services:
     ports:
       - '5050:80' # Mantenemos el puerto 5050 que usabas para pgadmin
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -56,11 +62,15 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     volumes:
       - ./back:/app
+      - back_node_modules:/app/node_modules
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+      ollama-models:
+        condition: service_completed_successfully
     networks:
       - app-network
-    command: sh -c "yarn prisma generate && yarn start:dev"
+    command: sh -c "yarn prisma generate && yarn prisma migrate deploy && yarn seed --if-empty && yarn start:dev"
 
   # --- FRONTEND (Vite + React) ---
   front:
@@ -73,9 +83,11 @@ services:
       - '5173:5173'
     volumes:
       - ./front:/app
-      - /app/node_modules
+      - front_node_modules:/app/node_modules
     environment:
-      - CHOKIDAR_USEPOLLING=true
+      CHOKIDAR_USEPOLLING: "true"
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     networks:
       - app-network
     #user: "${UID:-1000}:${GID:-1000}"
@@ -111,9 +123,33 @@ services:
     networks:
       - app-network
 
+  # --- MODELOS DE OLLAMA (se descargan solo si faltan) ---
+  ollama-models:
+    image: ollama/ollama:latest
+    container_name: fuenteagria_ollama_models
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      - ollama
+    networks:
+      - app-network
+    command: >
+      "
+        until ollama list >/dev/null 2>&1; do
+          echo 'Esperando a Ollama...';
+          sleep 2;
+        done;
+        ollama pull nomic-embed-text;
+        ollama pull qwen2.5:1.5b;
+      "
+
 volumes:
   mysql_data:
   ollama_data: # Añadido para persistir los modelos descargados de Ollama
+  back_node_modules:
+  front_node_modules:
 
 
 networks:
