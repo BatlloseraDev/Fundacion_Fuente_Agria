@@ -1,4 +1,4 @@
-import type { AdminUser, AdminOrder, AdminChat, AdminMessage, AdminRole } from '../types/admin.types';
+import type { AdminUser, AdminOrder, AdminChat, AdminMessage, AdminRole, OrderStatus } from '../types/admin.types';
 
 const apiUrl = () => import.meta.env.VITE_API_URL as string;
 const token = () => localStorage.getItem('jwt_token') ?? '';
@@ -98,6 +98,7 @@ export const updateOrder = (
     timeInitial?: string;
     timeFinal?: string;
     active?: boolean;
+    status?: OrderStatus;
   },
 ): Promise<AdminOrder> =>
   fetch(`${apiUrl()}/orders/${id}`, {

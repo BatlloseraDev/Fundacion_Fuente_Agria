@@ -1,35 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { WebsocketsGateway } from '../websockets/websockets.gateway';
 
+const USER_SELECT = { id: true, name: true, subname: true, email: true };
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
-
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly wsGateway: WebsocketsGateway,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto) {
-    return this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: createOrderDto,
+      include: { user: { select: USER_SELECT } },
     });
-    
+    this.wsGateway.emitNewOrder(order);
+    return order;
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  async findAll() {
+    return this.prisma.order.findMany({
+      include: { user: { select: USER_SELECT } },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: number) {
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: { user: { select: USER_SELECT } },
+    });
+    if (!order) throw new NotFoundException(`Encargo #${id} no encontrado`);
+    return order;
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(id: number, updateOrderDto: UpdateOrderDto) {
+    const order = await this.prisma.order.update({
+      where: { id },
+      data: updateOrderDto,
+      include: { user: { select: USER_SELECT } },
+    });
+    this.wsGateway.emitOrderUpdated(order);
+    return order;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async remove(id: number) {
+    return this.prisma.order.delete({ where: { id } });
   }
 
 

@@ -48,6 +48,20 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
     return { status: 'ok' };
   }
 
+  @SubscribeMessage('joinOrders')
+  handleJoinOrders(@ConnectedSocket() client: Socket) {
+    client.join('orders_room');
+    return { status: 'ok' };
+  }
+
+  emitNewOrder(order: any) {
+    this.io.to('orders_room').emit('newOrder', order);
+  }
+
+  emitOrderUpdated(order: any) {
+    this.io.to('orders_room').emit('orderUpdated', order);
+  }
+
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody() data: { chatId?: number; userId: number; message: string },

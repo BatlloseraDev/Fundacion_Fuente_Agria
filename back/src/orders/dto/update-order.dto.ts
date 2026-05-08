@@ -1,4 +1,11 @@
-import { IsBoolean, IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
 
 export class UpdateOrderDto {
   @IsNumber()
@@ -20,4 +27,8 @@ export class UpdateOrderDto {
   @IsBoolean()
   @IsOptional()
   active?: boolean;
+
+  @IsEnum(OrderStatus)
+  @IsOptional()
+  status?: OrderStatus;
 }

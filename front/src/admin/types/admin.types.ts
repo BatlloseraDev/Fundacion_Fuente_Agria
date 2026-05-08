@@ -17,6 +17,8 @@ export interface AdminUser {
   roles: AdminUserRole[];
 }
 
+export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+
 export interface AdminOrder {
   id: number;
   title: string;
@@ -25,9 +27,11 @@ export interface AdminOrder {
   imageBefore?: string | null;
   imageAfter?: string | null;
   active: boolean;
+  status: OrderStatus;
   price?: number | null;
   timeInitial?: string | null;
   timeFinal?: string | null;
+  createdAt: string;
   user: {
     id: number;
     name: string;
