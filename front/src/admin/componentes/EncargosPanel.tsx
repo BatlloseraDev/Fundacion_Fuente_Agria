@@ -3,9 +3,22 @@ import { io, type Socket } from 'socket.io-client';
 import type { AdminOrder, OrderStatus } from '../types/admin.types';
 import { getOrders, updateOrder } from '../services/admin.service';
 
+const MAX_MB = 5;
+const MAX_BYTES = MAX_MB * 1024 * 1024;
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 interface EditForm {
   price: string;
-  imageAfter: string;
+  imageAfter: string;       // base64 o URL ya guardada
+  imageAfterFile: File | null; // archivo nuevo a subir
   timeInitial: string;
   timeFinal: string;
   status: OrderStatus;
@@ -44,10 +57,34 @@ interface ModalProps {
 }
 
 const EncargoModal = ({ order, form, onChange, onSubmit, onClose, saving, error }: ModalProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [imgError, setImgError] = useState('');
+
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
+
+  function processFile(file: File) {
+    setImgError('');
+    if (!file.type.startsWith('image/')) { setImgError('El archivo debe ser una imagen.'); return; }
+    if (file.size > MAX_BYTES) { setImgError(`La imagen supera los ${MAX_MB} MB.`); return; }
+    const preview = URL.createObjectURL(file);
+    onChange({ ...form, imageAfterFile: file, imageAfter: preview });
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault(); setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  }
+
+  function removeImageAfter() {
+    if (form.imageAfterFile) URL.revokeObjectURL(form.imageAfter);
+    onChange({ ...form, imageAfter: '', imageAfterFile: null });
+    setImgError('');
+  }
 
   return (
     <>
@@ -154,15 +191,79 @@ const EncargoModal = ({ order, form, onChange, onSubmit, onClose, saving, error 
                   <label className="form-label small fw-semibold text-muted text-uppercase" style={{ letterSpacing: '.05em' }}>Fecha fin</label>
                   <input type="date" className="form-control rounded-3" value={form.timeFinal} onChange={(e) => onChange({ ...form, timeFinal: e.target.value })} />
                 </div>
-                <div className="col-sm-6">
-                  <label className="form-label small fw-semibold text-muted text-uppercase" style={{ letterSpacing: '.05em' }}>URL imagen resultado</label>
-                  <input type="url" className="form-control rounded-3" placeholder="https://…" value={form.imageAfter} onChange={(e) => onChange({ ...form, imageAfter: e.target.value })} />
+
+                {/* Imagen resultado */}
+                <div className="col-12">
+                  <label className="form-label small fw-semibold text-muted text-uppercase" style={{ letterSpacing: '.05em' }}>
+                    Imagen del resultado
+                  </label>
+
+                  {form.imageAfter ? (
+                    <div className="rounded-3 overflow-hidden position-relative" style={{ border: '2px solid #e5e7eb' }}>
+                      <img
+                        src={form.imageAfter}
+                        alt="Resultado"
+                        style={{ width: '100%', maxHeight: 220, objectFit: 'contain', background: '#f8f9fa', display: 'block' }}
+                      />
+                      <div className="position-absolute bottom-0 start-0 end-0 px-3 py-2 d-flex align-items-center justify-content-between"
+                        style={{ background: 'rgba(0,0,0,.55)', backdropFilter: 'blur(4px)' }}>
+                        <span className="text-white small">
+                          <i className="bi bi-image me-1" />
+                          {form.imageAfterFile ? form.imageAfterFile.name : 'Imagen guardada'}
+                          {form.imageAfterFile && ` · ${(form.imageAfterFile.size / 1024 / 1024).toFixed(1)} MB`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={removeImageAfter}
+                          className="btn btn-sm border-0 d-flex align-items-center gap-1"
+                          style={{ background: 'rgba(239,68,68,.85)', color: '#fff', borderRadius: 6, padding: '2px 10px', fontSize: '.78rem' }}
+                        >
+                          <i className="bi bi-trash3" /> Quitar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="rounded-3 d-flex flex-column align-items-center justify-content-center gap-2"
+                      style={{
+                        border: `2px dashed ${dragging ? '#1a1f36' : '#dee2e6'}`,
+                        background: dragging ? '#f0f1f5' : '#f8f9fa',
+                        padding: '1.75rem 1rem',
+                        cursor: 'pointer',
+                        transition: 'all .18s',
+                      }}
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                      onDragLeave={() => setDragging(false)}
+                      onDrop={handleDrop}
+                    >
+                      <div className="d-flex align-items-center justify-content-center rounded-circle"
+                        style={{ width: 44, height: 44, background: dragging ? '#e2e4ee' : '#eee' }}>
+                        <i className="bi bi-cloud-arrow-up" style={{ fontSize: '1.3rem', color: dragging ? '#1a1f36' : '#9ca3af' }} />
+                      </div>
+                      <div className="text-center">
+                        <span className="small fw-semibold" style={{ color: dragging ? '#1a1f36' : '#374151' }}>
+                          {dragging ? 'Suelta la imagen aquí' : 'Arrastra o haz clic para subir'}
+                        </span>
+                        <div className="small mt-1" style={{ color: '#9ca3af' }}>JPG, PNG, WEBP · máx. {MAX_MB} MB</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {imgError && (
+                    <div className="small mt-1" style={{ color: '#dc2626' }}>
+                      <i className="bi bi-exclamation-circle me-1" />{imgError}
+                    </div>
+                  )}
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="d-none"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f); e.target.value = ''; }}
+                  />
                 </div>
-                {form.imageAfter && (
-                  <div className="col-12">
-                    <img src={form.imageAfter} alt="Resultado" className="img-fluid rounded-3 border" style={{ maxHeight: 160 }} />
-                  </div>
-                )}
               </div>
             </div>
 
@@ -198,7 +299,7 @@ export const EncargosPanel = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<AdminOrder | null>(null);
-  const [form, setForm] = useState<EditForm>({ price: '', imageAfter: '', timeInitial: '', timeFinal: '', status: 'PENDING' });
+  const [form, setForm] = useState<EditForm>({ price: '', imageAfter: '', imageAfterFile: null, timeInitial: '', timeFinal: '', status: 'PENDING' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -236,6 +337,7 @@ export const EncargosPanel = () => {
     setForm({
       price: o.price != null ? String(o.price) : '',
       imageAfter: o.imageAfter ?? '',
+      imageAfterFile: null,
       timeInitial: toInputDate(o.timeInitial),
       timeFinal: toInputDate(o.timeFinal),
       status: o.status ?? 'PENDING',
@@ -252,9 +354,15 @@ export const EncargosPanel = () => {
     setSaving(true);
     setFormError('');
     try {
+      let imageAfter: string | undefined;
+      if (form.imageAfterFile) {
+        imageAfter = await fileToBase64(form.imageAfterFile);
+      } else if (form.imageAfter) {
+        imageAfter = form.imageAfter;
+      }
       const updated = await updateOrder(editTarget.id, {
         price: form.price !== '' ? Number(form.price) : undefined,
-        imageAfter: form.imageAfter || undefined,
+        imageAfter,
         timeInitial: form.timeInitial || undefined,
         timeFinal: form.timeFinal || undefined,
         status: form.status,
