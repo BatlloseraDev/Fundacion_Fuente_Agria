@@ -124,6 +124,21 @@ export const savePageConfig = async (stage: string, ids: string[]): Promise<void
   }
 }
 
+export const crearEncargo = async (data: {
+  title: string;
+  text: string;
+  userId: number;
+  imageBefore?: string;
+}): Promise<void> => {
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('No se pudo enviar el encargo');
+};
+
 export const getEncargosHeader = async (): Promise<EncargosHeaderData> => {
     const apiUrl = import.meta.env.VITE_API_URL;
     const response = await fetch(`${apiUrl}/orders/header`);

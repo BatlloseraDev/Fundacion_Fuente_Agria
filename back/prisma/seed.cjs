@@ -16,6 +16,15 @@ const prisma = new PrismaClient({
 async function main() {
   console.log('🚀 Iniciando seed con Prisma 7 + Adapter...');
 
+  if (process.argv.includes('--if-empty')) {
+    const userCount = await prisma.user.count();
+
+    if (userCount > 0) {
+      console.log('Base de datos con datos existentes. Seed omitido.');
+      return;
+    }
+  }
+
   const { seedRoles } = require('./seeds/roles.seed.cjs');
   const { seedUsers } = require('./seeds/users.seed.cjs');
   const { seedCategoryArticles } = require('./seeds/category-articles.seed.cjs');

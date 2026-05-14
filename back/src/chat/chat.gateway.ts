@@ -28,7 +28,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.langchainService.clearSession(client.id);
   }
 
-  @SubscribeMessage('sendMessage')
+  @SubscribeMessage('sendBotMessage')
   async handleMessage(
     @MessageBody() payload: { text: string },
     @ConnectedSocket() client: Socket,

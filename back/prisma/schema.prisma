@@ -189,17 +189,26 @@ model PurchaseArticle {
   article  Article  @relation(fields: [articleId], references: [id])
 }
 
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 model Order {
-  id          Int     @id @default(autoincrement())
-  title       String  @db.VarChar(255)
-  text        String  @db.Text
+  id          Int         @id @default(autoincrement())
+  title       String      @db.VarChar(255)
+  text        String      @db.Text
   quantity    Int?
-  imageBefore String? @db.Text
-  imageAfter  String? @db.Text
-  active      Boolean @default(true)
+  imageBefore String?     @db.Text
+  imageAfter  String?     @db.Text
+  active      Boolean     @default(true)
+  status      OrderStatus @default(PENDING)
   price       Float?
   timeInitial DateTime?
   timeFinal   DateTime?
+  createdAt   DateTime    @default(now())
 
   userId      Int
 

@@ -79,7 +79,7 @@ export function FloatingChat() {
     const newMsg: Message = { id: Date.now().toString(), text: input, sender: 'user' };
     setMessages((prev) => [...prev, newMsg]);
     
-    socketRef.current.emit('sendMessage', { text: input });
+    socketRef.current.emit('sendBotMessage', { text: input });
     setInput('');
   };
 
