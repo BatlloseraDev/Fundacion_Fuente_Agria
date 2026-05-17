@@ -3,6 +3,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { WebsocketsGateway } from '../websockets/websockets.gateway';
+import { MailService } from '../mail/mail.service';
 
 const USER_SELECT = { id: true, name: true, subname: true, email: true };
 
@@ -11,6 +12,7 @@ export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly wsGateway: WebsocketsGateway,
+    private mailService: MailService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto) {
@@ -18,6 +20,11 @@ export class OrdersService {
       data: createOrderDto,
       include: { user: { select: USER_SELECT } },
     });
+
+    if (order.user?.email) {
+      this.mailService.sendOrderConfirmation(order.user.email, order);
+    }
+
     this.wsGateway.emitNewOrder(order);
     return order;
   }
@@ -39,11 +46,33 @@ export class OrdersService {
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
+    const orderExists = await this.prisma.order.findUnique({ where: { id } });
+
+    const dataToUpdate: any = { ...updateOrderDto };
+
+    if (dataToUpdate.timeInitial) {
+      dataToUpdate.timeInitial = new Date(dataToUpdate.timeInitial).toISOString();
+    }
+    if (dataToUpdate.timeFinal) {
+      dataToUpdate.timeFinal = new Date(dataToUpdate.timeFinal).toISOString();
+    }
+
     const order = await this.prisma.order.update({
       where: { id },
-      data: updateOrderDto,
+      data: dataToUpdate,
       include: { user: { select: USER_SELECT } },
     });
+
+    if (
+      updateOrderDto.status && 
+      String(updateOrderDto.status) === 'COMPLETED' &&
+      String((orderExists as any)?.status) !== 'COMPLETED'
+    ) {
+      if (order.user?.email) {
+        this.mailService.sendOrderReady(order.user.email, order);
+      }
+    }
+
     this.wsGateway.emitOrderUpdated(order);
     return order;
   }

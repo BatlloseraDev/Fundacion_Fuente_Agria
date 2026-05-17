@@ -60,6 +60,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: ${MAIL_FROM}
     volumes:
       - ./back:/app
       - back_node_modules:/app/node_modules

@@ -3,9 +3,10 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { WebsocketsModule } from 'src/websockets/websockets.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [PrismaModule, WebsocketsModule],
+  imports: [PrismaModule, WebsocketsModule, MailModule],
   controllers: [OrdersController],
   providers: [OrdersService],
   exports: [OrdersService],
