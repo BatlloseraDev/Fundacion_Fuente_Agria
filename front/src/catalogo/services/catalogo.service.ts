@@ -39,7 +39,7 @@ interface CreateOrUpdateArticlePayload {
 }
 
 function getToken(): string | null {
-  return localStorage.getItem("jwt_token");
+  return localStorage.getItem("jwt_token") ?? localStorage.getItem("accessToken");
 }
 
 function resolveImageUrl(image?: string | null): string {

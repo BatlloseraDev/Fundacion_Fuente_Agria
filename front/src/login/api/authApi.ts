@@ -45,11 +45,13 @@ export async function registerApi(body: RegisterRequest) {
 
 export function saveAuth(accessToken: string, user: unknown) {
   localStorage.setItem('accessToken', accessToken);
+  localStorage.setItem('jwt_token', accessToken);
   localStorage.setItem('user', JSON.stringify(user));
 }
 
 export function clearAuth() {
   localStorage.removeItem('accessToken');
+  localStorage.removeItem('jwt_token');
   localStorage.removeItem('user');
 }
 

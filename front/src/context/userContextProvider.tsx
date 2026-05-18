@@ -38,6 +38,7 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
         setUser(null);
         setAuthStatus('not-authenticated');
         localStorage.removeItem('jwt_token');
+        localStorage.removeItem('accessToken');
     }
 
     const hasRole = (allowedRoles: Role[]) => {
@@ -49,7 +50,7 @@ export const UserContextProvider = ({children}: PropsWithChildren) => {
     }
 
     useEffect(() =>{
-        const token = localStorage.getItem('jwt_token');
+        const token = localStorage.getItem('jwt_token') ?? localStorage.getItem('accessToken');
         if(token){
             handleLogin(token);
         }else{
