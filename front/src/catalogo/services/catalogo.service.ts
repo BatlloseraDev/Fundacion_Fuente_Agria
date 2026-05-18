@@ -48,6 +48,18 @@ function resolveImageUrl(image?: string | null): string {
   return image;
 }
 
+function parsePrice(precio?: string): number {
+  if (!precio) return 0;
+
+  const normalizedPrice = precio
+    .trim()
+    .replace(/[^\d,.-]/g, "")
+    .replace(",", ".");
+
+  const parsedPrice = Number(normalizedPrice);
+  return Number.isFinite(parsedPrice) ? parsedPrice : 0;
+}
+
 function apiToProducto(article: ArticleApi): Producto {
   const categoria = article.categories?.[0]?.categoryArticle?.name ?? "";
   const colorCategoria = article.categories?.[0]?.categoryArticle?.color ?? "primary";
@@ -72,7 +84,7 @@ function productoToApi(producto: Partial<Producto>): CreateOrUpdateArticlePayloa
     name: producto.nombre ?? "",
     description: producto.descripcion ?? "",
     longDescription: producto.descripcionDetallada ?? "",
-    price: Number(producto.precio ?? 0),
+    price: parsePrice(producto.precio),
     available: producto.disponible ?? true,
     image: producto.imageUrl ?? "",
     categoria: producto.categoria ?? "",
