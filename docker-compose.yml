@@ -74,7 +74,7 @@ services:
         condition: service_completed_successfully
     networks:
       - app-network
-    command: sh -c "yarn install --frozen-lockfile && yarn prisma generate && yarn prisma db push && yarn seed --if-empty && yarn start:dev"
+    command: sh -c "yarn install --frozen-lockfile && yarn prisma generate && yarn prisma migrate deploy && yarn seed --if-empty && yarn start:dev"
 
   # --- FRONTEND (Vite + React) ---
   front:
