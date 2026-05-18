@@ -1,0 +1,58 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt_strategy/jwt-auth.guard';
+import { CartService } from './cart.service';
+import { AddCartItemDto } from './dto/add-cart-item.dto';
+
+@UseGuards(JwtAuthGuard)
+@Controller('cart')
+export class CartController {
+  constructor(private readonly cartService: CartService) {}
+
+  @Get()
+  getCart(@Req() req: any) {
+    return this.cartService.getActiveCart(req.user.id);
+  }
+
+  @Post('items')
+  addItem(@Req() req: any, @Body() dto: AddCartItemDto) {
+    return this.cartService.addItem(req.user.id, dto.articleId, dto.quantity);
+  }
+
+  @Patch('items/:articleId')
+  updateItem(
+    @Req() req: any,
+    @Param('articleId', ParseIntPipe) articleId: number,
+    @Body() dto: AddCartItemDto,
+  ) {
+    return this.cartService.setItemQuantity(req.user.id, articleId, dto.quantity);
+  }
+
+  @Delete('items/:articleId')
+  removeItem(
+    @Req() req: any,
+    @Param('articleId', ParseIntPipe) articleId: number,
+  ) {
+    return this.cartService.removeItem(req.user.id, articleId);
+  }
+
+  @Delete()
+  clearCart(@Req() req: any) {
+    return this.cartService.clearCart(req.user.id);
+  }
+
+  @Post('reserve')
+  reserve(@Req() req: any) {
+    return this.cartService.reserve(req.user.id);
+  }
+}

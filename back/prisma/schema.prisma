@@ -40,6 +40,7 @@ model User {
   publications Publication[] // Publicaciones que ha realizado si es un admin/editor
   articles     Article[] // Articulos que ha creado si es un admin/editor
   purchases    Purchase[] // Compras que ha realizado si es un usuario normal
+  carts        Cart[]
   orders       Order[] // Pedidos que ha realizado si es un usuario normal
   comments     Comment[] // Comentarios que ha realizado si es un usuario norma y ha hecho minimo un pedido
   chats        Chat[] // Chats que ha realizado si es un usuario normal
@@ -111,6 +112,7 @@ model Article {
   description     String  @db.Text
   longDescription String? @db.Text
   price           Float
+  stock           Int     @default(0)
   available       Boolean @default(true)
   image           String? @db.VarChar(255)
   userId          Int //FK
@@ -123,6 +125,7 @@ model Article {
   categories ArticleCat[]
   labels     ArticleLabel[]
   purchases  PurchaseArticle[]
+  cartItems  CartItem[]
 }
 
 model CategoryArticle {
@@ -167,10 +170,55 @@ model ArticleLabel {
 
 // Compras y Pedidos
 
+enum CartStatus {
+  ACTIVE
+  RESERVED
+  EXPIRED
+}
+
+enum PurchaseStatus {
+  RESERVED
+  CANCELLED
+  COLLECTED
+}
+
+model Cart {
+  id             Int        @id @default(autoincrement())
+  userId         Int
+  status         CartStatus @default(ACTIVE)
+  reminderSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@index([userId, status])
+}
+
+model CartItem {
+  id        Int @id @default(autoincrement())
+  cartId    Int
+  articleId Int
+  quantity  Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id])
+
+  @@unique([cartId, articleId])
+}
+
 model Purchase {
-  id     Int      @id @default(autoincrement())
-  userId Int
-  date   DateTime @default(now())
+  id                  Int            @id @default(autoincrement())
+  userId              Int
+  date                DateTime       @default(now())
+  ticketCode          String?        @unique @db.VarChar(40)
+  status              PurchaseStatus @default(RESERVED)
+  reservationExpiresAt DateTime?
 
   createdAt DateTime @default(now())
 

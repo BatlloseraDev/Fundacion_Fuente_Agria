@@ -2,12 +2,13 @@ import type { Producto } from "../types/producto.interface";
 
 const API_URL = "http://localhost:3000";
 
-interface ArticleApi {
+export interface ArticleApi {
   id: number;
   name: string;
   description: string;
   longDescription?: string | null;
   price: number;
+  stock: number;
   available: boolean;
   image?: string | null;
   categories?: Array<{
@@ -31,6 +32,7 @@ interface CreateOrUpdateArticlePayload {
   description: string;
   longDescription?: string;
   price: number;
+  stock?: number;
   available: boolean;
   image?: string;
   categoria?: string;
@@ -71,6 +73,7 @@ function apiToProducto(article: ArticleApi): Producto {
     descripcionDetallada: article.longDescription ?? "",
     precio: String(article.price),
     precioDesde: false,
+    stock: article.stock ?? 0,
     categoria,
     colorCategoria,
     imageUrl: resolveImageUrl(article.image),
@@ -85,6 +88,7 @@ function productoToApi(producto: Partial<Producto>): CreateOrUpdateArticlePayloa
     description: producto.descripcion ?? "",
     longDescription: producto.descripcionDetallada ?? "",
     price: parsePrice(producto.precio),
+    stock: producto.stock ?? 0,
     available: producto.disponible ?? true,
     image: producto.imageUrl ?? "",
     categoria: producto.categoria ?? "",
@@ -192,4 +196,104 @@ export async function deleteProducto(id: string) {
     const errorText = await res.text();
     throw new Error(`Error eliminando producto: ${errorText}`);
   }
+}
+
+export interface CartItem {
+  articleId: number;
+  quantity: number;
+  article: ArticleApi;
+}
+
+export interface CartResponse {
+  id: number;
+  items: CartItem[];
+}
+
+interface ReserveCartResponse {
+  ticketCode: string;
+  reservationExpiresAt: string;
+  cart: CartResponse;
+}
+
+function authHeaders() {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${getToken()}`
+  };
+}
+
+export async function fetchCart(): Promise<CartResponse> {
+  const res = await fetch(`${API_URL}/cart`, {
+    headers: authHeaders()
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error cargando carrito: ${errorText}`);
+  }
+
+  const response = await res.json();
+  return response?.data ?? response;
+}
+
+export async function addToCart(articleId: string, quantity: number): Promise<CartResponse> {
+  const res = await fetch(`${API_URL}/cart/items`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ articleId: Number(articleId), quantity })
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error anadiendo al carrito: ${errorText}`);
+  }
+
+  const response = await res.json();
+  return response?.data ?? response;
+}
+
+export async function updateCartItem(articleId: number, quantity: number): Promise<CartResponse> {
+  const res = await fetch(`${API_URL}/cart/items/${articleId}`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    body: JSON.stringify({ articleId, quantity })
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error actualizando carrito: ${errorText}`);
+  }
+
+  const response = await res.json();
+  return response?.data ?? response;
+}
+
+export async function removeCartItem(articleId: number): Promise<CartResponse> {
+  const res = await fetch(`${API_URL}/cart/items/${articleId}`, {
+    method: "DELETE",
+    headers: authHeaders()
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error eliminando producto del carrito: ${errorText}`);
+  }
+
+  const response = await res.json();
+  return response?.data ?? response;
+}
+
+export async function reserveCart(): Promise<ReserveCartResponse> {
+  const res = await fetch(`${API_URL}/cart/reserve`, {
+    method: "POST",
+    headers: authHeaders()
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Error creando reserva: ${errorText}`);
+  }
+
+  const response = await res.json();
+  return response?.data ?? response;
 }

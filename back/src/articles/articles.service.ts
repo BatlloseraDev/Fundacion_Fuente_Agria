@@ -60,7 +60,8 @@ export class ArticlesService {
       description: dto.description,
       longDescription: dto.longDescription,
       price: dto.price,
-      available: dto.available,
+      stock: dto.stock ?? 0,
+      available: dto.available && (dto.stock ?? 0) > 0,
       image: dto.image,
       userId: user.id,
     },
@@ -169,7 +170,10 @@ export class ArticlesService {
             ? dto.longDescription
             : existing.longDescription,
         price: dto.price ?? existing.price,
-        available: dto.available ?? existing.available,
+        stock: dto.stock ?? existing.stock,
+        available:
+          (dto.available ?? existing.available) &&
+          (dto.stock ?? existing.stock) > 0,
         image: dto.image !== undefined ? dto.image : existing.image,
       },
     });

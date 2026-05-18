@@ -5,6 +5,7 @@ export interface Producto {
     descripcionDetallada: string;
     precio: string;
     precioDesde: boolean; // Si true, muestra "Desde X€"
+    stock: number;
     categoria: string;
     colorCategoria: 'primary' | 'success' | 'warning' | 'danger' | 'info' | string;
     imageUrl: string;
