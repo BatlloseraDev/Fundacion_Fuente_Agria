@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { Producto } from '../types/producto.interface';
+import { formatPrice } from '../utils/formatPrice';
 
 interface Props {
     producto: Producto | null;
@@ -23,6 +24,7 @@ export const ProductoModal = ({ producto, onClose }: Props) => {
     }, [producto, onClose]);
 
     if (!producto) return null;
+    const precioFormateado = formatPrice(producto.precio);
 
     return (
         <>
@@ -82,7 +84,7 @@ export const ProductoModal = ({ producto, onClose }: Props) => {
                                 </h2>
                                 <div className="text-end">
                                     <span className="fw-bold fs-4 text-primary">
-                                        {producto.precioDesde ? `Desde ${producto.precio}` : producto.precio}
+                                        {producto.precioDesde ? `Desde ${precioFormateado}` : precioFormateado}
                                     </span>
                                 </div>
                             </div>

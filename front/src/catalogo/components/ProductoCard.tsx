@@ -1,4 +1,5 @@
 import type { Producto } from '../types/producto.interface';
+import { formatPrice } from '../utils/formatPrice';
 
 interface Props {
     producto: Producto;
@@ -6,7 +7,8 @@ interface Props {
 }
 
 export const ProductoCard = ({ producto, onVerDetalles }: Props) => {
-    const { nombre, descripcion, precio, precioDesde, categoria, colorCategoria, imageUrl, disponible } = producto;
+    const { nombre, descripcion, precio, precioDesde, categoria, colorCategoria, imageUrl } = producto;
+    const precioFormateado = formatPrice(precio);
 
     return (
         <article className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
@@ -40,7 +42,7 @@ export const ProductoCard = ({ producto, onVerDetalles }: Props) => {
                         className="fw-bold rounded-pill px-3 py-1 text-dark"
                         style={{ backgroundColor: '#f8f9fa', fontSize: '0.9rem' }}
                     >
-                        {precioDesde ? `Desde ${precio}` : precio}
+                        {precioDesde ? `Desde ${precioFormateado}` : precioFormateado}
                     </span>
                 </div>
 
