@@ -82,7 +82,7 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
 
       await tx.cart.update({
         where: { id: cart.id },
-        data: { reminderSentAt: null },
+        data: { reminderSentAt: null, lastActivityAt: new Date() },
       });
     });
 
@@ -137,7 +137,7 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
 
       await tx.cart.update({
         where: { id: cart.id },
-        data: { reminderSentAt: null },
+        data: { reminderSentAt: null, lastActivityAt: new Date() },
       });
     });
 
@@ -149,13 +149,13 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
     const item = cart.items.find((cartItem) => cartItem.articleId === articleId);
     if (!item) return cart;
 
-    await this.restoreItems(cart.id, [item]);
+    await this.restoreItems(cart.id, [item], true);
     return this.ensureActiveCart(userId);
   }
 
   async clearCart(userId: number) {
     const cart = await this.ensureActiveCart(userId);
-    await this.restoreItems(cart.id, cart.items);
+    await this.restoreItems(cart.id, cart.items, true);
     return this.ensureActiveCart(userId);
   }
 
@@ -232,7 +232,7 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
       where: {
         status: 'ACTIVE',
         items: { some: {} },
-        updatedAt: { lte: twelveHoursAgo },
+        lastActivityAt: { lte: twelveHoursAgo },
       },
       include: {
         user: true,
@@ -241,20 +241,24 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
     });
 
     for (const cart of carts) {
+      if (cart.lastActivityAt <= twentyFourHoursAgo) {
+        if (!cart.reminderSentAt) {
+          await this.mailService.sendCartReminder(cart.user.email, cart);
+        }
+
+        await this.restoreItems(cart.id, cart.items);
+        await this.prisma.cart.update({
+          where: { id: cart.id },
+          data: { status: 'EXPIRED' },
+        });
+        continue;
+      }
+
       if (!cart.reminderSentAt) {
         await this.mailService.sendCartReminder(cart.user.email, cart);
         await this.prisma.cart.update({
           where: { id: cart.id },
           data: { reminderSentAt: new Date() },
-        });
-        continue;
-      }
-
-      if (cart.reminderSentAt <= twelveHoursAgo || cart.updatedAt <= twentyFourHoursAgo) {
-        await this.restoreItems(cart.id, cart.items);
-        await this.prisma.cart.update({
-          where: { id: cart.id },
-          data: { status: 'EXPIRED' },
         });
       }
     }
@@ -275,7 +279,11 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  private async restoreItems(cartId: number, items: Array<{ articleId: number; quantity: number }>) {
+  private async restoreItems(
+    cartId: number,
+    items: Array<{ articleId: number; quantity: number }>,
+    touchActivity = false,
+  ) {
     await this.prisma.$transaction(async (tx) => {
       for (const item of items) {
         const article = await tx.article.findUnique({ where: { id: item.articleId } });
@@ -299,7 +307,10 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
 
       await tx.cart.update({
         where: { id: cartId },
-        data: { reminderSentAt: null },
+        data: {
+          reminderSentAt: null,
+          ...(touchActivity ? { lastActivityAt: new Date() } : {}),
+        },
       });
     });
   }

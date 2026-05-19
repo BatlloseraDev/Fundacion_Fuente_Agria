@@ -187,6 +187,7 @@ model Cart {
   userId         Int
   status         CartStatus @default(ACTIVE)
   reminderSentAt DateTime?
+  lastActivityAt DateTime   @default(now())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -195,6 +196,7 @@ model Cart {
   items CartItem[]
 
   @@index([userId, status])
+  @@index([status, lastActivityAt])
 }
 
 model CartItem {
