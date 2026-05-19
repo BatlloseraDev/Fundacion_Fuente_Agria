@@ -26,13 +26,17 @@ import {
 } from '../services/catalogo.service';
 import type { Producto } from '../types/producto.interface';
 import { EditorContext } from '../../context/editorContext';
+import { UserContext } from '../../context/userContext';
 
 const ITEMS_POR_PAGINA = 8;
 
 export function CatalogoPage() {
     const editorContext = use(EditorContext);
+    const { isAuthenticated, hasRole } = use(UserContext);
 
     const isEditor = editorContext?.editMode ?? false;
+    const isStaffUser = hasRole(['ADMIN', 'EDITOR', 'COLABORADOR']);
+    const canUseCart = isAuthenticated && !isStaffUser;
     const setSaveActionRaw = editorContext?.setSaveAction;
 
     const [productos, setProductos] = useState<Producto[]>([]);
@@ -75,7 +79,10 @@ export function CatalogoPage() {
 
     const cargarCarrito = useCallback(async () => {
         const token = localStorage.getItem('jwt_token') ?? localStorage.getItem('accessToken');
-        if (!token) return;
+        if (!token || !canUseCart) {
+            setCart(null);
+            return;
+        }
 
         try {
             const data = await fetchCart();
@@ -83,7 +90,7 @@ export function CatalogoPage() {
         } catch (err) {
             console.error(err);
         }
-    }, []);
+    }, [canUseCart]);
 
     useEffect(() => {
         cargarCarrito();
@@ -149,6 +156,13 @@ export function CatalogoPage() {
     };
 
     const handleAddToCart = async (producto: Producto, quantity = 1) => {
+        if (!canUseCart) {
+            setTicketCode('');
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            setCarritoAbierto(true);
+            return;
+        }
+
         try {
             setCartLoading(true);
             setCartError('');
@@ -167,6 +181,11 @@ export function CatalogoPage() {
     };
 
     const handleUpdateCartItem = async (articleId: number, quantity: number) => {
+        if (!canUseCart) {
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            return;
+        }
+
         try {
             setCartLoading(true);
             setCartError('');
@@ -181,6 +200,11 @@ export function CatalogoPage() {
     };
 
     const handleRemoveCartItem = async (articleId: number) => {
+        if (!canUseCart) {
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            return;
+        }
+
         try {
             setCartLoading(true);
             setCartError('');
@@ -195,6 +219,11 @@ export function CatalogoPage() {
     };
 
     const handleReserveCart = async () => {
+        if (!canUseCart) {
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            return;
+        }
+
         try {
             setCartLoading(true);
             setCartError('');
@@ -488,7 +517,7 @@ export function CatalogoPage() {
             <ProductoModal
                 producto={isEditor ? null : productoSeleccionado}
                 onClose={() => setProductoSeleccionado(null)}
-                onAddToCart={handleAddToCart}
+                onAddToCart={isEditor ? undefined : handleAddToCart}
             />
 
             <CarritoModal
