@@ -1,4 +1,4 @@
-import type { AdminUser, AdminOrder, AdminChat, AdminMessage, AdminRole, OrderStatus } from '../types/admin.types';
+import type { AdminUser, AdminOrder, AdminChat, AdminMessage, AdminRole, AdminReservation, OrderStatus } from '../types/admin.types';
 
 const apiUrl = () => import.meta.env.VITE_API_URL as string;
 const token = () => localStorage.getItem('jwt_token') ?? '';
@@ -106,6 +106,25 @@ export const updateOrder = (
     headers: authHeaders(),
     body: JSON.stringify(data),
   }).then((r) => handleResponse<AdminOrder>(r));
+
+// Reservas de catalogo
+
+export const getReservations = (): Promise<AdminReservation[]> =>
+  fetch(`${apiUrl()}/cart/reservations`, { headers: authHeaders() }).then((r) =>
+    handleResponse<AdminReservation[]>(r),
+  );
+
+export const cancelReservation = (id: number): Promise<AdminReservation> =>
+  fetch(`${apiUrl()}/cart/reservations/${id}/cancel`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+  }).then((r) => handleResponse<AdminReservation>(r));
+
+export const collectReservation = (id: number): Promise<AdminReservation> =>
+  fetch(`${apiUrl()}/cart/reservations/${id}/collect`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+  }).then((r) => handleResponse<AdminReservation>(r));
 
 // ── Chats / Soporte ───────────────────────────────────────────────────────────
 

@@ -4,14 +4,16 @@ import { EditoresPanel } from '../componentes/EditoresPanel';
 import { ActividadesPanel } from '../componentes/ActividadesPanel';
 import { ChatSoportePanel } from '../componentes/ChatSoportePanel';
 import { EncargosPanel } from '../componentes/EncargosPanel';
+import { ReservasPanel } from '../componentes/ReservasPanel';
 
-type Tab = 'colaboradores' | 'editores' | 'actividades' | 'encargos' | 'chat-soporte' | 'chat-ventas' | 'pie-pagina';
+type Tab = 'colaboradores' | 'editores' | 'actividades' | 'encargos' | 'reservas' | 'chat-soporte' | 'chat-ventas' | 'pie-pagina';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'colaboradores', label: 'Colaboradores',  icon: 'bi-people-fill'            },
   { id: 'editores',      label: 'Usuarios',       icon: 'bi-person-badge-fill'      },
   { id: 'actividades',   label: 'Actividades',    icon: 'bi-calendar-event-fill'    },
   { id: 'encargos',      label: 'Encargos',       icon: 'bi-clipboard2-check-fill'  },
+  { id: 'reservas',      label: 'Reservas',       icon: 'bi-bag-check-fill'         },
   { id: 'chat-soporte',  label: 'Chat soporte',   icon: 'bi-chat-dots-fill'         },
   { id: 'chat-ventas',   label: 'Chat ventas',    icon: 'bi-bag-heart-fill'         },
   { id: 'pie-pagina',    label: 'Pie de página',  icon: 'bi-layout-text-window'     },
@@ -91,6 +93,7 @@ export const AdminDashboard = () => {
           {activeTab === 'editores'      && <EditoresPanel />}
           {activeTab === 'actividades'   && <ActividadesPanel />}
           {activeTab === 'encargos'      && <EncargosPanel />}
+          {activeTab === 'reservas'      && <ReservasPanel />}
           {activeTab === 'chat-soporte'  && <ChatSoportePanel />}
           {activeTab === 'chat-ventas'   && <ProximamentePanel label="Chat ventas" />}
           {activeTab === 'pie-pagina'    && <ProximamentePanel label="Pie de página" />}

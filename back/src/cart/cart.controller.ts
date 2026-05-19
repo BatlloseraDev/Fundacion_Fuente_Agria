@@ -55,4 +55,19 @@ export class CartController {
   reserve(@Req() req: any) {
     return this.cartService.reserve(req.user.id);
   }
+
+  @Get('reservations')
+  findReservations() {
+    return this.cartService.findReservations();
+  }
+
+  @Patch('reservations/:id/cancel')
+  cancelReservation(@Param('id', ParseIntPipe) id: number) {
+    return this.cartService.cancelReservation(id);
+  }
+
+  @Patch('reservations/:id/collect')
+  collectReservation(@Param('id', ParseIntPipe) id: number) {
+    return this.cartService.collectReservation(id);
+  }
 }

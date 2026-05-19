@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
-import { RoleName } from '../common/types/role-name.enum';
+import { WebsocketsGateway } from '../websockets/websockets.gateway';
 
 const CART_INCLUDE = {
   items: {
@@ -24,6 +24,23 @@ const CART_INCLUDE = {
   },
 };
 
+const PURCHASE_INCLUDE = {
+  user: {
+    select: {
+      id: true,
+      name: true,
+      subname: true,
+      email: true,
+    },
+  },
+  articles: {
+    include: {
+      article: true,
+    },
+    orderBy: { id: 'asc' as const },
+  },
+};
+
 @Injectable()
 export class CartService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CartService.name);
@@ -32,6 +49,7 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly wsGateway: WebsocketsGateway,
   ) {}
 
   onModuleInit() {
@@ -182,10 +200,7 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
             })),
           },
         },
-        include: {
-          user: true,
-          articles: { include: { article: true } },
-        },
+        include: PURCHASE_INCLUDE,
       });
 
       await tx.cart.update({
@@ -196,24 +211,8 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
       return createdPurchase;
     });
 
-    const admins = await this.prisma.user.findMany({
-      where: {
-        roles: {
-          some: {
-            role: {
-              name: { in: [RoleName.ADMIN, RoleName.EDITOR] },
-            },
-          },
-        },
-      },
-      select: { email: true },
-    });
-
     await this.mailService.sendReservationConfirmation(purchase.user.email, purchase);
-    await this.mailService.sendReservationAdminNotice(
-      admins.map((admin) => admin.email),
-      purchase,
-    );
+    this.wsGateway.emitNewReservation(this.toReservationCase(purchase));
 
     return {
       ticketCode,
@@ -221,6 +220,62 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
       purchase,
       cart: await this.ensureActiveCart(userId),
     };
+  }
+
+  async findReservations() {
+    const reservations = await this.prisma.purchase.findMany({
+      include: PURCHASE_INCLUDE,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return reservations.map((reservation) => this.toReservationCase(reservation));
+  }
+
+  async cancelReservation(id: number) {
+    const reservation = await this.prisma.purchase.findUnique({
+      where: { id },
+      include: PURCHASE_INCLUDE,
+    });
+
+    if (!reservation) throw new NotFoundException('Reserva no encontrada');
+    if (reservation.status !== 'RESERVED') return this.toReservationCase(reservation);
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      for (const item of reservation.articles) {
+        const article = await tx.article.findUnique({ where: { id: item.articleId } });
+        if (!article) continue;
+
+        await tx.article.update({
+          where: { id: item.articleId },
+          data: {
+            stock: { increment: item.quantity },
+            available: article.stock + item.quantity > 0,
+          },
+        });
+      }
+
+      return tx.purchase.update({
+        where: { id },
+        data: { status: 'CANCELLED' },
+        include: PURCHASE_INCLUDE,
+      });
+    });
+
+    const reservationCase = this.toReservationCase(updated);
+    this.wsGateway.emitReservationUpdated(reservationCase);
+    return reservationCase;
+  }
+
+  async collectReservation(id: number) {
+    const reservation = await this.prisma.purchase.update({
+      where: { id },
+      data: { status: 'COLLECTED' },
+      include: PURCHASE_INCLUDE,
+    });
+
+    const reservationCase = this.toReservationCase(reservation);
+    this.wsGateway.emitReservationUpdated(reservationCase);
+    return reservationCase;
   }
 
   async processAbandonedCarts() {
@@ -343,5 +398,31 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
         data: { available: false },
       });
     }
+  }
+
+  private toReservationCase(reservation: any) {
+    const expiresAt = reservation.reservationExpiresAt
+      ? new Date(reservation.reservationExpiresAt)
+      : null;
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const daysRemaining = expiresAt
+      ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / msPerDay))
+      : null;
+
+    return {
+      id: reservation.id,
+      ticketCode: reservation.ticketCode,
+      status: reservation.status,
+      date: reservation.date,
+      createdAt: reservation.createdAt,
+      reservationExpiresAt: reservation.reservationExpiresAt,
+      daysRemaining,
+      user: reservation.user,
+      articles: reservation.articles,
+      total: (reservation.articles ?? []).reduce(
+        (sum: number, item: any) => sum + Number(item.estimatedPrice ?? 0) * item.quantity,
+        0,
+      ),
+    };
   }
 }

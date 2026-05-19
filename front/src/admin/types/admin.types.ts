@@ -18,6 +18,7 @@ export interface AdminUser {
 }
 
 export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type ReservationStatus = 'RESERVED' | 'CANCELLED' | 'COLLECTED';
 
 export interface AdminOrder {
   id: number;
@@ -38,6 +39,36 @@ export interface AdminOrder {
     subname: string;
     email: string;
   };
+}
+
+export interface AdminReservationArticle {
+  id: number;
+  articleId: number;
+  quantity: number;
+  estimatedPrice: number;
+  article: {
+    id: number;
+    name: string;
+    image?: string | null;
+  };
+}
+
+export interface AdminReservation {
+  id: number;
+  ticketCode: string;
+  status: ReservationStatus;
+  date: string;
+  createdAt: string;
+  reservationExpiresAt?: string | null;
+  daysRemaining?: number | null;
+  total: number;
+  user: {
+    id: number;
+    name: string;
+    subname: string;
+    email: string;
+  };
+  articles: AdminReservationArticle[];
 }
 
 export interface AdminChat {
