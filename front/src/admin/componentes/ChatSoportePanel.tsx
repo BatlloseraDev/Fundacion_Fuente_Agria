@@ -15,6 +15,7 @@ export const ChatSoportePanel = () => {
   const [messages, setMessages] = useState<AdminMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [chatsSinLeer, setChatsSinLeer] = useState<number[]>([]);
   const socketRef = useRef<Socket | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null); 
   const selectedChatIdRef = useRef<number | null>(null);
@@ -39,7 +40,14 @@ export const ChatSoportePanel = () => {
     socketRef.current.emit('joinAdmins');
 
     socketRef.current.on('newMessage', (nuevoMensaje: any) => {
-      if (String(nuevoMensaje.chatId) === String(selectedChatIdRef.current)) {
+      const isSelected = String(nuevoMensaje.chatId) === String(selectedChatIdRef.current);
+      const isFromAdmin = String(nuevoMensaje.user.id) === String(user?.id);
+
+      if (!isSelected && !isFromAdmin) {
+        setChatsSinLeer(prev => prev.includes(nuevoMensaje.chatId) ? prev : [...prev, nuevoMensaje.chatId]);
+      }
+
+      if (isSelected) {
         setMessages((prev) => [...prev, nuevoMensaje]);
       }
       
@@ -61,6 +69,7 @@ export const ChatSoportePanel = () => {
     setSelectedChat(chat);
     selectedChatIdRef.current = chat.id;
     setLoadingMessages(true);
+    setChatsSinLeer(prev => prev.filter(id => id !== chat.id));
     try { 
         setMessages(await getChatMessages(chat.id)); 
         socketRef.current?.emit('joinChat', { chatId: chat.id });
@@ -115,11 +124,18 @@ export const ChatSoportePanel = () => {
                   <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0 bg-light text-dark shadow-sm" style={{ width: '42px', height: '42px' }}>
                     {chat.user?.avatarUrl ? <img src={chat.user.avatarUrl} alt="" className="rounded-circle w-100 h-100 object-fit-cover" /> : chat.user?.name?.charAt(0).toUpperCase()}
                   </div>
-                  <div className="overflow-hidden flex-grow-1 text-start">
+                  <div className="overflow-hidden flex-grow-1 text-start position-relative pe-3">
                     <div className="fw-semibold text-truncate">{chat.user?.name} {chat.user?.subname}</div>
                     <div className={`text-truncate small ${isSelected ? 'text-white-50' : 'text-secondary'}`}>
                       {lastMsg ? lastMsg.message : 'Sin mensajes'}
                     </div>
+                    
+                    {chatsSinLeer.includes(chat.id) && (
+                      <span 
+                        className="position-absolute top-50 end-0 translate-middle-y p-1 bg-danger border border-light rounded-circle shadow-sm" 
+                        style={{ width: '12px', height: '12px' }}
+                      ></span>
+                    )}
                   </div>
                 </button>
               );
