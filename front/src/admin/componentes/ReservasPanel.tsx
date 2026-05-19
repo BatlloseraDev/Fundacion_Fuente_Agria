@@ -47,7 +47,7 @@ export const ReservasPanel = () => {
   const [reservations, setReservations] = useState<AdminReservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState<ReservationStatus | 'ALL'>('RESERVED');
+  const [filter, setFilter] = useState<ReservationStatus | 'ALL'>('ALL');
   const [newCount, setNewCount] = useState(0);
   const [workingId, setWorkingId] = useState<number | null>(null);
   const socketRef = useRef<Socket | null>(null);
@@ -78,10 +78,23 @@ export const ReservasPanel = () => {
     };
   }, []);
 
-  const filtered = useMemo(
-    () => (filter === 'ALL' ? reservations : reservations.filter((reservation) => reservation.status === filter)),
-    [filter, reservations],
-  );
+  const filtered = useMemo(() => {
+    const filteredReservations =
+      filter === 'ALL'
+        ? reservations
+        : reservations.filter((reservation) => reservation.status === filter);
+
+    return [...filteredReservations].sort((a, b) => {
+      const aIsOpen = a.status === 'RESERVED';
+      const bIsOpen = b.status === 'RESERVED';
+
+      if (filter === 'ALL' && aIsOpen !== bIsOpen) {
+        return aIsOpen ? -1 : 1;
+      }
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [filter, reservations]);
 
   const handleStatusAction = async (reservation: AdminReservation, action: 'cancel' | 'collect') => {
     setWorkingId(reservation.id);
@@ -165,8 +178,17 @@ export const ReservasPanel = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((reservation) => (
-                <tr key={reservation.id} style={{ background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>
+              {filtered.map((reservation) => {
+                const isOpen = reservation.status === 'RESERVED';
+                return (
+                <tr
+                  key={reservation.id}
+                  style={{
+                    background: isOpen ? '#fff' : '#f8f9fa',
+                    boxShadow: isOpen ? '0 1px 3px rgba(0,0,0,.06)' : 'none',
+                    opacity: isOpen ? 1 : 0.72,
+                  }}
+                >
                   <td className="border-0 py-3 ps-0">
                     <div className="fw-semibold">{reservation.ticketCode}</div>
                     <div className="text-muted small">Reservado el {formatDate(reservation.createdAt)}</div>
@@ -198,7 +220,7 @@ export const ReservasPanel = () => {
                     <StatusBadge status={reservation.status} />
                   </td>
                   <td className="border-0 text-end">
-                    {reservation.status === 'RESERVED' ? (
+                    {isOpen ? (
                       <div className="d-flex justify-content-end gap-2 flex-wrap">
                         <button
                           type="button"
@@ -218,11 +240,21 @@ export const ReservasPanel = () => {
                         </button>
                       </div>
                     ) : (
-                      <span className="text-muted small">Sin acciones</span>
+                      <span
+                        className="badge rounded-pill px-3 py-2"
+                        style={{
+                          background: reservation.status === 'COLLECTED' ? '#e5e7eb' : '#fee2e2',
+                          color: reservation.status === 'COLLECTED' ? '#374151' : '#7f1d1d',
+                          fontSize: '0.78rem',
+                        }}
+                      >
+                        {reservation.status === 'COLLECTED' ? 'Entregado' : 'Cancelada'}
+                      </span>
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
