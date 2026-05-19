@@ -64,6 +64,7 @@ services:
       MAIL_USER: ${MAIL_USER}
       MAIL_PASS: ${MAIL_PASS}
       MAIL_FROM: ${MAIL_FROM}
+      RESERVATION_HOLIDAYS: ${RESERVATION_HOLIDAYS:-}
     volumes:
       - ./back:/app
       - back_node_modules:/app/node_modules

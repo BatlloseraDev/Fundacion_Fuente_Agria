@@ -383,11 +383,47 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
 
     while (added < days) {
       result.setDate(result.getDate() + 1);
-      const day = result.getDay();
-      if (day !== 0 && day !== 6) added += 1;
+      if (this.isBusinessDay(result)) added += 1;
     }
 
     return result;
+  }
+
+  private countBusinessDaysUntil(date: Date) {
+    const today = new Date();
+    const cursor = new Date(today);
+    let days = 0;
+
+    cursor.setHours(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+
+    while (cursor < date) {
+      cursor.setDate(cursor.getDate() + 1);
+      if (cursor <= date && this.isBusinessDay(cursor)) days += 1;
+    }
+
+    return days;
+  }
+
+  private isBusinessDay(date: Date) {
+    const day = date.getDay();
+    if (day === 0 || day === 6) return false;
+    return !this.getReservationHolidays().has(this.toDateKey(date));
+  }
+
+  private getReservationHolidays() {
+    return new Set(
+      (process.env.RESERVATION_HOLIDAYS ?? '')
+        .split(',')
+        .map((date) => date.trim())
+        .filter(Boolean),
+    );
+  }
+
+  private toDateKey(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private async syncArticleAvailability(tx: any, articleId: number) {
@@ -404,9 +440,8 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
     const expiresAt = reservation.reservationExpiresAt
       ? new Date(reservation.reservationExpiresAt)
       : null;
-    const msPerDay = 24 * 60 * 60 * 1000;
     const daysRemaining = expiresAt
-      ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / msPerDay))
+      ? Math.max(0, this.countBusinessDaysUntil(expiresAt))
       : null;
 
     return {
