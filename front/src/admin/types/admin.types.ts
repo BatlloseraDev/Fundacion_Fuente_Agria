@@ -98,6 +98,25 @@ export interface AdminMessage {
   };
 }
 
+// ── Footer config ─────────────────────────────────────────────────────────────
+
+export interface FooterCollaborator {
+  id: string;
+  name: string;
+  imageUrl: string;
+}
+
+export interface FooterConfig {
+  description: string;
+  contact: {
+    address: string;
+    phone: string;
+    email: string;
+    hours: string;
+  };
+  collaborators: FooterCollaborator[];
+}
+
 export interface AdminRole {
   id: number;
   name: string;

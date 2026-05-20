@@ -17,6 +17,7 @@ import { ActividadesModule } from './actividades/actividades.module';
 import { ChatModule } from './chat/chat.module';
 import { WebsocketsModule } from './websockets/websockets.module';
 import { CartModule } from './cart/cart.module';
+import { PagesModule } from './pages/pages.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CartModule } from './cart/cart.module';
     ChatModule,
     WebsocketsModule,
     CartModule,
+    PagesModule,
   ],
   providers: [PrismaService],
 })

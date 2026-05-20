@@ -6,6 +6,7 @@ import { ChatSoportePanel } from '../componentes/ChatSoportePanel';
 import { EncargosPanel } from '../componentes/EncargosPanel';
 import { ReservasPanel } from '../componentes/ReservasPanel';
 import { FacturacionPanel } from '../componentes/FacturacionPanel';
+import { PiePaginaPanel } from '../componentes/PiePaginaPanel';
 
 type Tab = 'colaboradores' | 'editores' | 'actividades' | 'encargos' | 'reservas' | 'chat-soporte' | 'facturacion' | 'pie-pagina';
 
@@ -97,7 +98,7 @@ export const AdminDashboard = () => {
           {activeTab === 'reservas'      && <ReservasPanel />}
           {activeTab === 'chat-soporte'  && <ChatSoportePanel />}
           {activeTab === 'facturacion'   && <FacturacionPanel />}
-          {activeTab === 'pie-pagina'    && <ProximamentePanel label="Pie de página" />}
+          {activeTab === 'pie-pagina'    && <PiePaginaPanel />}
         </div>
       </div>
     </div>

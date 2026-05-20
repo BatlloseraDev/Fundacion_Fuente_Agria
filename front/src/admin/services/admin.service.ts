@@ -1,4 +1,4 @@
-import type { AdminUser, AdminOrder, AdminChat, AdminMessage, AdminRole, AdminReservation, OrderStatus, UserBilling } from '../types/admin.types';
+import type { AdminUser, AdminOrder, AdminChat, AdminMessage, AdminRole, AdminReservation, OrderStatus, UserBilling, FooterConfig } from '../types/admin.types';
 
 const apiUrl = () => import.meta.env.VITE_API_URL as string;
 const token = () => localStorage.getItem('jwt_token') ?? '';
@@ -144,3 +144,15 @@ export const getChatMessages = (chatId: number): Promise<AdminMessage[]> =>
   fetch(`${apiUrl()}/chats/${chatId}/messages`, { headers: authHeaders() }).then((r) =>
     handleResponse<AdminMessage[]>(r),
   );
+
+// ── Footer config ─────────────────────────────────────────────────────────────
+
+export const getFooterConfig = (): Promise<FooterConfig> =>
+  fetch(`${apiUrl()}/pages/footer`).then((r) => handleResponse<FooterConfig>(r));
+
+export const saveFooterConfig = (data: FooterConfig): Promise<FooterConfig> =>
+  fetch(`${apiUrl()}/pages/footer`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  }).then((r) => handleResponse<FooterConfig>(r));
