@@ -102,3 +102,48 @@ export interface AdminRole {
   id: number;
   name: string;
 }
+
+// ── Facturación ───────────────────────────────────────────────────────────────
+
+export interface BillingOrder {
+  id: number;
+  title: string;
+  text: string;
+  status: OrderStatus;
+  price: number | null;
+  createdAt: string;
+  timeInitial: string | null;
+  timeFinal: string | null;
+}
+
+export interface BillingPurchaseArticle {
+  id: number;
+  articleId: number;
+  quantity: number;
+  estimatedPrice: number;
+  article: { id: number; name: string; image?: string | null };
+}
+
+export interface BillingPurchase {
+  id: number;
+  ticketCode: string | null;
+  status: ReservationStatus;
+  date: string;
+  createdAt: string;
+  reservationExpiresAt: string | null;
+  total: number;
+  articles: BillingPurchaseArticle[];
+}
+
+export interface UserBilling {
+  user: {
+    id: number;
+    name: string;
+    subname: string;
+    email: string;
+    dni: string | null;
+    address: string | null;
+  };
+  orders: BillingOrder[];
+  purchases: BillingPurchase[];
+}

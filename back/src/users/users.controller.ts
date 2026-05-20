@@ -26,6 +26,12 @@ export class UsersController {
     return this.usersService.findByRole(roleName);
   }
 
+  @Get(':id/billing')
+  @UseGuards(JwtAuthGuard)
+  getBilling(@Param('id') id: string) {
+    return this.usersService.getBilling(+id);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
