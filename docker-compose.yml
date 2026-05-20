@@ -64,6 +64,7 @@ services:
       MAIL_USER: ${MAIL_USER}
       MAIL_PASS: ${MAIL_PASS}
       MAIL_FROM: ${MAIL_FROM}
+      RESERVATION_HOLIDAYS: ${RESERVATION_HOLIDAYS:-}
     volumes:
       - ./back:/app
       - back_node_modules:/app/node_modules
@@ -74,7 +75,7 @@ services:
         condition: service_completed_successfully
     networks:
       - app-network
-    command: sh -c "yarn install --frozen-lockfile && yarn prisma generate && yarn prisma db push && yarn seed --if-empty && yarn start:dev"
+    command: sh -c "yarn install --frozen-lockfile && yarn prisma generate && yarn prisma migrate deploy && yarn seed --if-empty && yarn start:dev"
 
   # --- FRONTEND (Vite + React) ---
   front:

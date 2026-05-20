@@ -54,12 +54,26 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
     return { status: 'ok' };
   }
 
+  @SubscribeMessage('joinReservations')
+  handleJoinReservations(@ConnectedSocket() client: Socket) {
+    client.join('reservations_room');
+    return { status: 'ok' };
+  }
+
   emitNewOrder(order: any) {
     this.io.to('orders_room').emit('newOrder', order);
   }
 
   emitOrderUpdated(order: any) {
     this.io.to('orders_room').emit('orderUpdated', order);
+  }
+
+  emitNewReservation(reservation: any) {
+    this.io.to('reservations_room').emit('newReservation', reservation);
+  }
+
+  emitReservationUpdated(reservation: any) {
+    this.io.to('reservations_room').emit('reservationUpdated', reservation);
   }
 
   @SubscribeMessage('sendMessage')

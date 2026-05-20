@@ -14,6 +14,10 @@ export class CreateArticleDto {
   @IsNumber()
   price: number;
 
+  @IsOptional()
+  @IsNumber()
+  stock?: number;
+
   @IsBoolean()
   available: boolean;
 

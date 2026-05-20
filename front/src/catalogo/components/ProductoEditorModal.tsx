@@ -15,6 +15,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
         descripcionDetallada: '',
         precio: '',
         precioDesde: false,
+        stock: 0,
         categoria: '',
         colorCategoria: 'primary',
         imageUrl: '',
@@ -40,6 +41,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                 descripcionDetallada: '',
                 precio: '',
                 precioDesde: false,
+                stock: 0,
                 categoria: '',
                 colorCategoria: 'primary',
                 imageUrl: '',
@@ -61,6 +63,7 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
         setForm((prev) => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
+            ...(name === 'stock' ? { stock: Math.max(0, Number(value) || 0) } : {}),
         }));
     }
 
@@ -154,6 +157,19 @@ export default function ProductoEditorModal({ producto, onClose, onSave }: Props
                                             name="precio"
                                             className="form-control"
                                             value={form.precio ?? ''}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-6">
+                                        <label className="form-label">Inventario</label>
+                                        <input
+                                            type="number"
+                                            name="stock"
+                                            className="form-control"
+                                            min={0}
+                                            value={form.stock ?? 0}
                                             onChange={handleChange}
                                             required
                                         />

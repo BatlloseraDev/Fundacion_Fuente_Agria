@@ -1,18 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { Producto } from '../types/producto.interface';
+import { formatPrice } from '../utils/formatPrice';
 
 interface Props {
     producto: Producto | null;
     onClose: () => void;
+    onAddToCart?: (producto: Producto, quantity: number) => void;
 }
 
-export const ProductoModal = ({ producto, onClose }: Props) => {
+export const ProductoModal = ({ producto, onClose, onAddToCart }: Props) => {
+    const [quantity, setQuantity] = useState(1);
     // Cerrar modal con Escape
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
         };
         if (producto) {
+            setQuantity(1);
             document.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
         }
@@ -23,6 +27,8 @@ export const ProductoModal = ({ producto, onClose }: Props) => {
     }, [producto, onClose]);
 
     if (!producto) return null;
+    const precioFormateado = formatPrice(producto.precio);
+    const puedeAnadir = producto.disponible && producto.stock > 0;
 
     return (
         <>
@@ -82,15 +88,15 @@ export const ProductoModal = ({ producto, onClose }: Props) => {
                                 </h2>
                                 <div className="text-end">
                                     <span className="fw-bold fs-4 text-primary">
-                                        {producto.precioDesde ? `Desde ${producto.precio}` : producto.precio}
+                                        {producto.precioDesde ? `Desde ${precioFormateado}` : precioFormateado}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Disponibilidad */}
-                            {producto.disponible ? (
+                            {puedeAnadir ? (
                                 <span className="badge bg-success-subtle text-success rounded-pill mb-3">
-                                    <i className="bi bi-check-circle me-1"></i> Disponible
+                                    <i className="bi bi-check-circle me-1"></i> {producto.stock} disponible{producto.stock !== 1 ? 's' : ''}
                                 </span>
                             ) : (
                                 <span className="badge bg-danger-subtle text-danger rounded-pill mb-3">
@@ -116,12 +122,42 @@ export const ProductoModal = ({ producto, onClose }: Props) => {
 
                             {/* Acciones */}
                             <div className="d-flex gap-3 flex-wrap">
+                                {onAddToCart && puedeAnadir && (
+                                    <div className="input-group" style={{ maxWidth: 150 }}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="number"
+                                            className="form-control text-center"
+                                            min={1}
+                                            max={producto.stock}
+                                            value={quantity}
+                                            onChange={(event) => {
+                                                const value = Number(event.target.value);
+                                                setQuantity(Math.min(producto.stock, Math.max(1, value || 1)));
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            onClick={() => setQuantity((prev) => Math.min(producto.stock, prev + 1))}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                )}
                                 <button
                                     className="btn btn-primary rounded-pill px-4 fw-semibold flex-grow-1"
-                                    disabled={!producto.disponible}
+                                    disabled={!puedeAnadir}
+                                    onClick={() => onAddToCart?.(producto, quantity)}
                                 >
                                     <i className="bi bi-bag-plus me-2"></i>
-                                    Encargar
+                                    Anadir al carrito
                                 </button>
                                 <button
                                     className="btn btn-outline-secondary rounded-pill px-4"

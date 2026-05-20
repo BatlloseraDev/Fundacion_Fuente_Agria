@@ -10,22 +10,33 @@ import { CatalogoHeader } from '../components/CatalogoHeader';
 import { ProductoCard } from '../components/ProductoCard';
 import { ProductoModal } from '../components/ProductoModal';
 import ProductoEditorModal from '../components/ProductoEditorModal';
+import { CarritoModal } from '../components/CarritoModal';
 import { ComponenteEditable } from '../../components/ui/ComponenteEditable';
 import {
     fetchCatalogo,
     createProducto,
     updateProducto,
     deleteProducto,
+    fetchCart,
+    addToCart,
+    updateCartItem,
+    removeCartItem,
+    reserveCart,
+    type CartResponse,
 } from '../services/catalogo.service';
 import type { Producto } from '../types/producto.interface';
 import { EditorContext } from '../../context/editorContext';
+import { UserContext } from '../../context/userContext';
 
 const ITEMS_POR_PAGINA = 8;
 
 export function CatalogoPage() {
     const editorContext = use(EditorContext);
+    const { isAuthenticated, hasRole } = use(UserContext);
 
     const isEditor = editorContext?.editMode ?? false;
+    const isStaffUser = hasRole(['ADMIN', 'EDITOR', 'COLABORADOR']);
+    const canUseCart = isAuthenticated && !isStaffUser;
     const setSaveActionRaw = editorContext?.setSaveAction;
 
     const [productos, setProductos] = useState<Producto[]>([]);
@@ -36,6 +47,11 @@ export function CatalogoPage() {
     const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null);
     const [productoEditando, setProductoEditando] = useState<Producto | null>(null);
     const [modalEditorAbierto, setModalEditorAbierto] = useState(false);
+    const [carritoAbierto, setCarritoAbierto] = useState(false);
+    const [cart, setCart] = useState<CartResponse | null>(null);
+    const [cartLoading, setCartLoading] = useState(false);
+    const [cartError, setCartError] = useState('');
+    const [ticketCode, setTicketCode] = useState('');
     const [visibles, setVisibles] = useState(ITEMS_POR_PAGINA);
 
     const [idsEliminados, setIdsEliminados] = useState<string[]>([]);
@@ -60,6 +76,25 @@ export function CatalogoPage() {
     useEffect(() => {
         cargarCatalogo();
     }, [cargarCatalogo]);
+
+    const cargarCarrito = useCallback(async () => {
+        const token = localStorage.getItem('jwt_token') ?? localStorage.getItem('accessToken');
+        if (!token || !canUseCart) {
+            setCart(null);
+            return;
+        }
+
+        try {
+            const data = await fetchCart();
+            setCart(data);
+        } catch (err) {
+            console.error(err);
+        }
+    }, [canUseCart]);
+
+    useEffect(() => {
+        cargarCarrito();
+    }, [cargarCarrito]);
 
     useEffect(() => {
         setVisibles(ITEMS_POR_PAGINA);
@@ -120,6 +155,89 @@ export function CatalogoPage() {
         setModalEditorAbierto(true);
     };
 
+    const handleAddToCart = async (producto: Producto, quantity = 1) => {
+        if (!canUseCart) {
+            setTicketCode('');
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            setCarritoAbierto(true);
+            return;
+        }
+
+        try {
+            setCartLoading(true);
+            setCartError('');
+            setTicketCode('');
+            const updatedCart = await addToCart(producto.id, quantity);
+            setCart(updatedCart);
+            await cargarCatalogo();
+            setCarritoAbierto(true);
+            setProductoSeleccionado(null);
+        } catch (err) {
+            setCartError(err instanceof Error ? err.message : 'No se pudo anadir al carrito.');
+            setCarritoAbierto(true);
+        } finally {
+            setCartLoading(false);
+        }
+    };
+
+    const handleUpdateCartItem = async (articleId: number, quantity: number) => {
+        if (!canUseCart) {
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            return;
+        }
+
+        try {
+            setCartLoading(true);
+            setCartError('');
+            const updatedCart = await updateCartItem(articleId, quantity);
+            setCart(updatedCart);
+            await cargarCatalogo();
+        } catch (err) {
+            setCartError(err instanceof Error ? err.message : 'No se pudo actualizar el carrito.');
+        } finally {
+            setCartLoading(false);
+        }
+    };
+
+    const handleRemoveCartItem = async (articleId: number) => {
+        if (!canUseCart) {
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            return;
+        }
+
+        try {
+            setCartLoading(true);
+            setCartError('');
+            const updatedCart = await removeCartItem(articleId);
+            setCart(updatedCart);
+            await cargarCatalogo();
+        } catch (err) {
+            setCartError(err instanceof Error ? err.message : 'No se pudo quitar el producto.');
+        } finally {
+            setCartLoading(false);
+        }
+    };
+
+    const handleReserveCart = async () => {
+        if (!canUseCart) {
+            setCartError('Solo los usuarios pueden realizar reservas.');
+            return;
+        }
+
+        try {
+            setCartLoading(true);
+            setCartError('');
+            const result = await reserveCart();
+            setCart(result.cart);
+            setTicketCode(result.ticketCode);
+            await cargarCatalogo();
+        } catch (err) {
+            setCartError(err instanceof Error ? err.message : 'No se pudo crear la reserva.');
+        } finally {
+            setCartLoading(false);
+        }
+    };
+
     const eliminarProductoLocal = (id: string) => {
         if (!id.startsWith('temp-')) {
             setIdsEliminados((prev) => [...new Set([...prev, id])]);
@@ -161,6 +279,7 @@ export function CatalogoPage() {
             descripcionDetallada: data.descripcionDetallada ?? '',
             precio: data.precio ?? '',
             precioDesde: data.precioDesde ?? false,
+            stock: data.stock ?? 0,
             categoria: data.categoria ?? '',
             colorCategoria: data.colorCategoria ?? 'primary',
             imageUrl: data.imageUrl ?? '',
@@ -262,6 +381,28 @@ export function CatalogoPage() {
                         </div>
                     )}
 
+                    {!isEditor && (
+                        <div className="d-flex justify-content-end mb-4">
+                            <button
+                                type="button"
+                                className="btn btn-primary rounded-pill px-4 py-2 fw-semibold position-relative"
+                                onClick={() => {
+                                    setCartError('');
+                                    setTicketCode('');
+                                    setCarritoAbierto(true);
+                                }}
+                            >
+                                <i className="bi bi-cart3 me-2"></i>
+                                Carrito
+                                {(cart?.items.length ?? 0) > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {cart?.items.reduce((sum, item) => sum + item.quantity, 0)}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    )}
+
                     {loading && (
                         <div className="text-center py-5">
                             <div className="spinner-border text-primary" role="status" />
@@ -298,6 +439,11 @@ export function CatalogoPage() {
                                                     >
                                                         <ProductoCard
                                                             producto={producto}
+                                                            onAddToCart={
+                                                                isEditor
+                                                                    ? undefined
+                                                                    : (item) => handleAddToCart(item, 1)
+                                                            }
                                                             onVerDetalles={
                                                                 isEditor
                                                                     ? () => {}
@@ -371,6 +517,19 @@ export function CatalogoPage() {
             <ProductoModal
                 producto={isEditor ? null : productoSeleccionado}
                 onClose={() => setProductoSeleccionado(null)}
+                onAddToCart={isEditor ? undefined : handleAddToCart}
+            />
+
+            <CarritoModal
+                cart={cart}
+                open={carritoAbierto}
+                loading={cartLoading}
+                error={cartError}
+                ticketCode={ticketCode}
+                onClose={() => setCarritoAbierto(false)}
+                onUpdateQuantity={handleUpdateCartItem}
+                onRemove={handleRemoveCartItem}
+                onReserve={handleReserveCart}
             />
 
             {modalEditorAbierto && (

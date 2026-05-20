@@ -1,12 +1,16 @@
 import type { Producto } from '../types/producto.interface';
+import { formatPrice } from '../utils/formatPrice';
 
 interface Props {
     producto: Producto;
     onVerDetalles: (producto: Producto) => void;
+    onAddToCart?: (producto: Producto) => void;
 }
 
-export const ProductoCard = ({ producto, onVerDetalles }: Props) => {
-    const { nombre, descripcion, precio, precioDesde, categoria, colorCategoria, imageUrl, disponible } = producto;
+export const ProductoCard = ({ producto, onVerDetalles, onAddToCart }: Props) => {
+    const { nombre, descripcion, precio, precioDesde, stock, categoria, colorCategoria, imageUrl } = producto;
+    const precioFormateado = formatPrice(precio);
+    const puedeAnadir = producto.disponible && stock > 0;
 
     return (
         <article className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
@@ -40,7 +44,7 @@ export const ProductoCard = ({ producto, onVerDetalles }: Props) => {
                         className="fw-bold rounded-pill px-3 py-1 text-dark"
                         style={{ backgroundColor: '#f8f9fa', fontSize: '0.9rem' }}
                     >
-                        {precioDesde ? `Desde ${precio}` : precio}
+                        {precioDesde ? `Desde ${precioFormateado}` : precioFormateado}
                     </span>
                 </div>
 
@@ -48,15 +52,31 @@ export const ProductoCard = ({ producto, onVerDetalles }: Props) => {
                 <h3 className="fw-bold mb-2" style={{ fontSize: '1.05rem' }}>{nombre}</h3>
 
                 {/* Descripción */}
-                <p className="text-secondary small mb-4 flex-grow-1">{descripcion}</p>
+                <p className="text-secondary small mb-3 flex-grow-1">{descripcion}</p>
+
+                <div className="small text-secondary mb-3">
+                    {puedeAnadir ? `${stock} disponible${stock !== 1 ? 's' : ''}` : 'Sin stock'}
+                </div>
 
                 {/* Botón */}
-                <button
-                    className="btn btn-outline-primary rounded-pill w-100 fw-semibold"
-                    onClick={() => onVerDetalles(producto)}
-                >
-                    Ver detalles
-                </button>
+                <div className="d-grid gap-2">
+                    <button
+                        className="btn btn-outline-primary rounded-pill w-100 fw-semibold"
+                        onClick={() => onVerDetalles(producto)}
+                    >
+                        Ver detalles
+                    </button>
+                    {onAddToCart && (
+                        <button
+                            className="btn btn-primary rounded-pill w-100 fw-semibold"
+                            onClick={() => onAddToCart(producto)}
+                            disabled={!puedeAnadir}
+                        >
+                            <i className="bi bi-cart-plus me-2"></i>
+                            Anadir al carrito
+                        </button>
+                    )}
+                </div>
             </div>
         </article>
     );

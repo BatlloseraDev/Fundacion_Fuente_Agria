@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { use } from 'react';
 import { UserContext } from '../../context/userContext';
 
