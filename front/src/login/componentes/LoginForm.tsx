@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { loginApi, saveAuth } from '../api/authApi';
 import { use } from 'react';
 import { UserContext } from '../../context/userContext';
+import { useNavigate } from 'react-router';
+
 
 type Props = {
     onSuccess?: () => void;
@@ -16,6 +18,8 @@ export function LoginForm({ onSuccess, goRegister }: Props) {
     const [error, setError] = useState('');
 
     const {login} = use(UserContext);
+    const navigate = useNavigate();
+
 
 
     async function handleSubmit(e: React.FormEvent) {
@@ -84,6 +88,15 @@ export function LoginForm({ onSuccess, goRegister }: Props) {
                         </button>
                     </p>
                 )}
+                <p className="text-center mt-3">
+                    <button
+                        type="button"
+                        className="btn btn-link p-0"
+                        onClick={() => navigate('/forgot-password')}
+                    >
+                        ¿Olvidaste tu contraseña?
+                    </button>
+                </p>
             </div>
         </form>
     );

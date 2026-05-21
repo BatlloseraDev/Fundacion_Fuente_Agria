@@ -151,6 +151,37 @@ export class MailService {
     }
   }
 
+  async sendResetPasswordEmail(email: string, resetLink: string) {    try {
+      const mailOptions = {
+        from: process.env.MAIL_FROM,
+        to: email,
+        subject: 'Recuperación de contraseña - Fundación Fuente Agria',
+        html: `
+          <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #1a1f36;">Recuperación de contraseña 🔐</h2>
+            <p>Has solicitado restablecer tu contraseña. Haz clic en el botón de abajo para elegir una nueva:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" 
+                 style="background-color: #4cc9f0; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Restablecer Contraseña
+              </a>
+            </div>
+            <p>Este enlace caducará en <strong>1 hora</strong> por motivos de seguridad.</p>
+            <p style="font-size: 0.9em; color: #666;">Si no has solicitado este cambio, puedes ignorar este correo de forma segura.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 0.8em; color: #999;">Si tienes problemas con el botón, copia y pega este enlace en tu navegador:<br>${resetLink}</p>
+          </div>
+        `,
+      };
+      await this.transporter.sendMail(mailOptions);
+      this.logger.verbose(`Correo de recuperación enviado a: ${email}`);
+    } catch (error) {
+      this.logger.error(`Error enviando correo de recuperación a ${email}`, error);
+    }
+  }
+  
+
+
   private formatReservationItems(reservation: any) {
     const rows = (reservation.articles ?? [])
       .map(

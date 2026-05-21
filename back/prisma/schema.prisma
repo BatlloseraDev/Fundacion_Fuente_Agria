@@ -31,6 +31,7 @@ model User {
   dni      String? @unique @db.VarChar(9)
   avatarUrl String? @db.VarChar(500)
   inactiveAt DateTime? // null = activo, con valor = baja (soft delete)
+  
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -45,6 +46,18 @@ model User {
   comments     Comment[] // Comentarios que ha realizado si es un usuario norma y ha hecho minimo un pedido
   chats        Chat[] // Chats que ha realizado si es un usuario normal
   messages     Message[] // Mensajes que ha realizado (puede ser tambien admin y editor)
+  passwordResetTokens PasswordResetToken[] // Tokens de restablecimiento de contraseña
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Role {
