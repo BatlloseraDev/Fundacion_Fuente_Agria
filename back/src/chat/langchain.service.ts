@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { Ollama, OllamaEmbeddings } from '@langchain/ollama';
+import { ConfigService } from '@nestjs/config';
+import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
 import { MemoryVectorStore } from '@langchain/classic/vectorstores/memory';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { createStuffDocumentsChain } from '@langchain/classic/chains/combine_documents';
@@ -16,7 +17,10 @@ export class LangchainService implements OnModuleInit {
   private documentChain: any;
   private retriever: any;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   // Historial de conversación por socket (efímero, como la conexión)
   private sessionHistories = new Map<string, Array<HumanMessage | AIMessage>>();
@@ -48,10 +52,10 @@ export class LangchainService implements OnModuleInit {
       // k=5 para dar más contexto al modelo sin disparar el tiempo de respuesta
       this.retriever = vectorStore.asRetriever({ k: 4 });
 
-      const llm = new Ollama({
+      const llm = new ChatOllama({
         baseUrl: 'http://ollama:11434',
-        model: process.env.OLLAMA_CHAT_MODEL || 'qwen2.5:1.5b',
-        temperature: 0.1,
+        model: this.configService.get<string>('OLLAMA_CHAT_MODEL') || 'qwen2.5:1.5b',
+        temperature: 0,
         numPredict: 500,
         numCtx: 4096,
         keepAlive: '10m',
@@ -76,7 +80,6 @@ No inventes productos, encargos, actividades, categorias ni etiquetas que no apa
 Si preguntan por precio, tiempo, disponibilidad o fecha de un elemento concreto, busca el nombre mas parecido en la base de datos y responde ese dato concreto.
 Si preguntan por tipos, categorias o etiquetas, agrupa por categorias o etiquetas en vez de inventar familias nuevas.
 Si no encuentras una coincidencia clara pero hay opciones parecidas, mencionalas y pide aclaracion.
-
 Contexto:
 {context}`,
         ],
