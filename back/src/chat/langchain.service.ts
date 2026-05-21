@@ -66,20 +66,14 @@ export class LangchainService implements OnModuleInit {
         [
           'system',
           `Eres el asistente virtual de la Fundación Fuente Agria. 
-Responde ÚNICAMENTE con información del siguiente contexto. 
-Si la pregunta no tiene respuesta en el contexto, di exactamente: 
-"Lo siento, no tengo esa información. Contacta directamente con la Fundación Fuente Agria."
-No añadas nada más en ese caso. Sé amable y conciso.
+Responde ÚNICAMENTE basándote en la información proporcionada en el Contexto. 
+Si la respuesta no está en el Contexto, di exactamente: "Lo siento, no tengo esa información. Contacta directamente con la Fundación Fuente Agria."
 
-Da respuestas completas. Si haces una lista, cierrala con una frase final util.
-No cortes una frase a medias.
-Si hay contexto dinamico de base de datos, responde solo con esos datos de base de datos.
-Si el contexto contiene datos de base de datos con un total de elementos, debes listar TODOS esos elementos.
-No resumas ni omitas productos, encargos o actividades cuando el usuario pregunte que hay, cuales hay o que teneis.
-No inventes productos, encargos, actividades, categorias ni etiquetas que no aparezcan en el contexto de base de datos.
-Si preguntan por precio, tiempo, disponibilidad o fecha de un elemento concreto, busca el nombre mas parecido en la base de datos y responde ese dato concreto.
-Si preguntan por tipos, categorias o etiquetas, agrupa por categorias o etiquetas en vez de inventar familias nuevas.
-Si no encuentras una coincidencia clara pero hay opciones parecidas, mencionalas y pide aclaracion.
+Instrucciones:
+- Si el usuario pregunta qué productos, actividades o encargos hay, enumera de forma clara y resumida los que aparezcan en el Contexto.
+- Si el usuario pone una condición (ej. "disponibles"), filtra la lista del Contexto y nombra ÚNICAMENTE los que la cumplan (ej. los que dicen "Estado: disponible").
+- Si el usuario hace una pregunta de procedimiento (ej. "cómo comprar" o "cómo apuntarme"), usa el Contexto para explicarle los pasos.
+- NUNCA inventes productos, precios o información que no exista en el Contexto.
 Contexto:
 {context}`,
         ],
@@ -223,70 +217,6 @@ Contexto:
     return /\b(actividades?|talleres?|eventos?|excursiones?|ceramica|senderismo|mercadillo|cursos?|jornadas?|participar|apuntarme|apuntar|inscripcion|inscribirme|calendario|proxim[ao]s?|fecha|cuando)\b/.test(question);
   }
 
-  private isListQuestion(question: string) {
-    return /\b(que hay|cuales|todos|todas|lista|listado|teneis|haceis|organiza|organizan|muestrame|dime)\b/.test(question);
-  }
-
-  private isActivitiesListQuestion(question: string) {
-    return (
-      this.isListQuestion(question) ||
-      /\b(actividades?|talleres?|eventos?|excursiones?|cursos?|jornadas?)\b/.test(question)
-    );
-  }
-
-  private isCatalogListQuestion(question: string) {
-    return (
-      this.isListQuestion(question) ||
-      /\b(productos?|catalogo|articulos?|tienda)\b/.test(question)
-    );
-  }
-
-  private isOrdersListQuestion(question: string) {
-    return (
-      this.isListQuestion(question) ||
-      /\b(encargos?|pedidos?|trabajos?|servicios?)\b/.test(question)
-    );
-  }
-
-  private isCategoryQuestion(question: string) {
-    return /\b(tipos?|categorias?|clases)\b/.test(question);
-  }
-
-  private isLabelQuestion(question: string) {
-    return /\b(etiquetas?|tags)\b/.test(question);
-  }
-
-  private isPriceQuestion(question: string) {
-    return /\b(precio|precios|vale|valen|cuesta|cuestan|coste|cuanto)\b/.test(question);
-  }
-
-  private significantWords(text: string) {
-    const ignored = new Set([
-      'que',
-      'hay',
-      'de',
-      'del',
-      'la',
-      'el',
-      'los',
-      'las',
-      'un',
-      'una',
-      'y',
-      'o',
-      'en',
-      'por',
-      'para',
-      'me',
-      'dime',
-      'no',
-    ]);
-
-    return this.normalizeQuestion(text)
-      .split(/\s+/)
-      .filter((word) => word.length > 2 && !ignored.has(word));
-  }
-
   private compactText(text?: string | null, maxLength = 220) {
     if (!text) return 'Sin descripcion detallada';
     const compacted = text.replace(/\s+/g, ' ').trim();
@@ -306,17 +236,6 @@ Contexto:
       .filter(Boolean)
       .slice(0, 3)
       .join(' ');
-  }
-
-  private getEstimatedDays(timeInitial?: Date | null, timeFinal?: Date | null) {
-    if (!timeInitial || !timeFinal) return null;
-    return Math.max(1, Math.ceil((timeFinal.getTime() - timeInitial.getTime()) / 86400000));
-  }
-
-  private hasEntityMatch(question: string, text: string) {
-    const askedWords = this.significantWords(question);
-    const searchableWords = this.significantWords(text);
-    return askedWords.some((word) => searchableWords.includes(word));
   }
 
   private async getOrdersHeaderContext() {
@@ -354,56 +273,18 @@ Contexto:
       return 'Catalogo actual: no hay productos publicados.';
     }
 
-    const categoryMap = new Map<string, string[]>();
-    const labelMap = new Map<string, string[]>();
-
-    for (const product of products) {
-      const categories = product.categories.length
-        ? product.categories.map((item) => item.categoryArticle.name)
-        : ['Sin categoria'];
-      const labels = product.labels.length
-        ? product.labels.map((item) => item.label.name)
-        : ['Sin etiquetas'];
-
-      for (const category of categories) {
-        categoryMap.set(category, [...(categoryMap.get(category) ?? []), product.name]);
-      }
-
-      for (const label of labels) {
-        labelMap.set(label, [...(labelMap.get(label) ?? []), product.name]);
-      }
-    }
-
-    const categoryLines = [...categoryMap.entries()]
-      .map(([category, names]) => `- ${category}: ${names.length} producto(s): ${names.join(', ')}`)
-      .join('\n');
-
-    const labelLines = [...labelMap.entries()]
-      .map(([label, names]) => `- ${label}: ${names.length} producto(s): ${names.join(', ')}`)
-      .join('\n');
-
     const productLines = products
+      .slice(0, 20) // Limitamos a 20 para no desbordar el límite de tokens de la IA
       .map((product) => {
         const category = product.categories[0]?.categoryArticle?.name ?? 'Sin categoria';
         const availability = product.available ? 'disponible' : 'no disponible';
         const labels = product.labels.map((item) => item.label.name).join(', ') || 'sin etiquetas';
-        const detail = this.compactText(product.longDescription ?? product.description);
-        return `- ${product.name}. Categoria: ${category}. Precio: ${product.price.toFixed(2)} EUR. Estado: ${availability}. Etiquetas: ${labels}. Descripcion: ${product.description}. Detalle: ${detail}`;
+        const detail = this.compactText(product.description, 100);
+        return `- Producto: ${product.name} | Categoria: ${category} | Precio: ${product.price.toFixed(2)} EUR | Estado: ${availability} | Etiquetas: ${labels} | Info: ${detail}`;
       })
       .join('\n');
 
-    return `Catalogo actual desde base de datos.
-Total de productos: ${products.length}.
-Categorias reales del catalogo:
-${categoryLines}
-
-Etiquetas reales del catalogo:
-${labelLines}
-
-Productos reales del catalogo. Debes listar exactamente ${products.length} productos si el usuario pregunta por productos:
-${productLines}
-
-Instrucciones catalogo: si preguntan por el precio de un producto concreto, busca el nombre del producto en esta lista. Si preguntan por tipos de productos, usa las categorias reales. Si preguntan por etiquetas, usa las etiquetas reales.`;
+    return `[DATOS DEL CATÁLOGO DE PRODUCTOS EN BASE DE DATOS]\nTotal de productos encontrados: ${products.length} (mostrando últimos ${Math.min(products.length, 20)}).\n${productLines}\nFIN DE DATOS DEL CATÁLOGO`;
   }
 
   private async getOrdersContext() {
@@ -418,6 +299,7 @@ Instrucciones catalogo: si preguntan por el precio de un producto concreto, busc
     }
 
     const orderLines = orders
+      .slice(0, 15) // Limitamos a 15 para proteger el contexto
       .map((order) => {
         const price = order.price !== null ? `${order.price.toFixed(2)} EUR` : 'precio por confirmar';
         const days =
@@ -428,16 +310,11 @@ Instrucciones catalogo: si preguntan por el precio de un producto concreto, busc
               )
             : null;
         const time = days ? `${days} dias aproximadamente` : 'tiempo por confirmar';
-        return `- ${order.title}. Precio orientativo: ${price}. Tiempo estimado: ${time}. Descripcion: ${this.compactText(order.text)}`;
+        return `- Encargo: ${order.title} | Precio orientativo: ${price} | Tiempo estimado: ${time} | Info: ${this.compactText(order.text, 100)}`;
       })
       .join('\n');
 
-    return `Encargos actuales desde base de datos.
-${headerContext}
-Total de encargos: ${orders.length}. Debes listar exactamente ${orders.length} encargos si el usuario pregunta por encargos:
-${orderLines}
-
-Instrucciones encargos: son trabajos o servicios personalizables, con precios orientativos. Si preguntan como pedir uno, indica que deben contar su idea mediante el formulario o contactar con la fundacion para concretar presupuesto, plazo y detalles.`;
+    return `[DATOS DE ENCARGOS ACTIVOS EN BASE DE DATOS]\n${headerContext}\nTotal de encargos: ${orders.length}.\n${orderLines}\nFIN DE DATOS DE ENCARGOS`;
   }
 
   private async getActivitiesContext() {
@@ -456,204 +333,16 @@ Instrucciones encargos: son trabajos o servicios personalizables, con precios or
     }
 
     const activityLines = activities
+      .slice(0, 15) // Limitamos a 15 para proteger el contexto
       .map((activity) => {
         const category = activity.category?.name ?? 'Sin categoria';
         const date = activity.date.toLocaleDateString('es-ES');
-        const detail = this.compactText(this.jsonContentToText(activity.contentJson) || activity.description);
-        return `- ${activity.title}. Categoria: ${category}. Fecha: ${date}. Descripcion: ${activity.description}. Detalle: ${detail}`;
+        const detail = this.compactText(this.jsonContentToText(activity.contentJson) || activity.description, 100);
+        return `- Actividad: ${activity.title} | Categoria: ${category} | Fecha: ${date} | Info: ${detail}`;
       })
       .join('\n');
 
-    const categoryLines = categories.length
-      ? categories.map((category) => `- ${category.name}`).join('\n')
-      : '- Sin categorias activas';
-
-    return `Actividades actuales desde base de datos.
-Categorias reales de actividades:
-${categoryLines}
-
-Total de actividades: ${activities.length}. Debes listar exactamente ${activities.length} actividades si el usuario pregunta por actividades:
-${activityLines}
-
-Instrucciones actividades: cuando el usuario pregunte que actividades hay, responde siempre con nombre de la actividad, tipo/categoria y fecha. No respondas solo con la categoria. Si preguntan cuando es una actividad, responde con la fecha. Si preguntan como participar o apuntarse, indica que consulten el detalle de la actividad o contacten con la fundacion para confirmar plazas y condiciones.`;
-  }
-
-  private async getDirectActivitiesAnswer(question: string) {
-    if (!this.isActivitiesQuestion(question)) return null;
-
-    const activities = await this.prisma.actividad.findMany({
-      include: { category: true },
-      orderBy: { date: 'desc' },
-    });
-
-    if (activities.length === 0) {
-      return 'Ahora mismo no hay actividades publicadas en la base de datos.';
-    }
-
-    const formatActivity = (activity: (typeof activities)[number]) => {
-      const category = activity.category?.name ?? 'Sin categoria';
-      const date = activity.date.toLocaleDateString('es-ES');
-      return `${activity.title}. Tipo: ${category}. Fecha: ${date}.`;
-    };
-
-    if (this.isActivitiesListQuestion(question)) {
-      const activityLines = activities
-        .map((activity, index) => `${index + 1}. ${formatActivity(activity)}`)
-        .join('\n');
-      return `Hay ${activities.length} actividad(es) publicada(s):\n${activityLines}`;
-    }
-
-    const askedWords = this.significantWords(question);
-    const matchedActivity = activities.find((activity) => {
-      const searchable = this.significantWords(
-        `${activity.title} ${activity.description} ${activity.category?.name ?? ''}`,
-      );
-      return askedWords.some((word) => searchable.includes(word));
-    });
-
-    if (matchedActivity) {
-      return `Si, hay una actividad relacionada: ${formatActivity(matchedActivity)}`;
-    }
-
-    return null;
-  }
-
-  private async getDirectCatalogAnswer(question: string) {
-    if (!this.isCatalogQuestion(question)) return null;
-
-    const products = await this.prisma.article.findMany({
-      include: {
-        categories: { include: { categoryArticle: true } },
-        labels: { include: { label: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (products.length === 0) {
-      return 'Ahora mismo no hay productos publicados en la base de datos.';
-    }
-
-    const formatProduct = (product: (typeof products)[number]) => {
-      const categories =
-        product.categories.map((item) => item.categoryArticle.name).join(', ') || 'Sin categoria';
-      const labels = product.labels.map((item) => item.label.name).join(', ') || 'sin etiquetas';
-      const availability = product.available ? 'disponible' : 'no disponible';
-      return `${product.name}. Categoria: ${categories}. Precio: ${product.price.toFixed(2)} EUR. Estado: ${availability}. Etiquetas: ${labels}.`;
-    };
-
-    const matchedProduct = products.find((product) =>
-      this.hasEntityMatch(
-        question,
-        `${product.name} ${product.description} ${product.longDescription ?? ''} ${product.categories
-          .map((item) => item.categoryArticle.name)
-          .join(' ')} ${product.labels.map((item) => item.label.name).join(' ')}`,
-      ),
-    );
-
-    if (matchedProduct && this.isPriceQuestion(question)) {
-      const availability = matchedProduct.available ? 'disponible' : 'no disponible';
-      return `${matchedProduct.name} cuesta ${matchedProduct.price.toFixed(2)} EUR y esta ${availability}.`;
-    }
-
-    if (matchedProduct && !this.isCatalogListQuestion(question)) {
-      return `Si, hay un producto relacionado: ${formatProduct(matchedProduct)}`;
-    }
-
-    if (this.isCategoryQuestion(question)) {
-      const categoryMap = new Map<string, string[]>();
-      for (const product of products) {
-        const categories = product.categories.length
-          ? product.categories.map((item) => item.categoryArticle.name)
-          : ['Sin categoria'];
-        for (const category of categories) {
-          categoryMap.set(category, [...(categoryMap.get(category) ?? []), product.name]);
-        }
-      }
-
-      const categoryLines = [...categoryMap.entries()]
-        .map(([category, names]) => `- ${category}: ${names.join(', ')}`)
-        .join('\n');
-
-      return `Los tipos de productos del catalogo son:\n${categoryLines}`;
-    }
-
-    if (this.isLabelQuestion(question)) {
-      const labelMap = new Map<string, string[]>();
-      for (const product of products) {
-        const labels = product.labels.length
-          ? product.labels.map((item) => item.label.name)
-          : ['Sin etiquetas'];
-        for (const label of labels) {
-          labelMap.set(label, [...(labelMap.get(label) ?? []), product.name]);
-        }
-      }
-
-      const labelLines = [...labelMap.entries()]
-        .map(([label, names]) => `- ${label}: ${names.join(', ')}`)
-        .join('\n');
-
-      return `Las etiquetas del catalogo son:\n${labelLines}`;
-    }
-
-    if (this.isCatalogListQuestion(question)) {
-      const productLines = products
-        .map((product, index) => `${index + 1}. ${formatProduct(product)}`)
-        .join('\n');
-      return `Hay ${products.length} producto(s) publicado(s):\n${productLines}`;
-    }
-
-    return null;
-  }
-
-  private async getDirectOrdersAnswer(question: string) {
-    if (!this.isOrdersQuestion(question)) return null;
-
-    const orders = await this.prisma.order.findMany({
-      where: { active: true },
-      orderBy: { id: 'desc' },
-    });
-
-    if (orders.length === 0) {
-      return 'Ahora mismo no hay encargos activos publicados en la base de datos.';
-    }
-
-    const formatOrder = (order: (typeof orders)[number]) => {
-      const price = order.price !== null ? `${order.price.toFixed(2)} EUR` : 'precio por confirmar';
-      const days = this.getEstimatedDays(order.timeInitial, order.timeFinal);
-      const time = days ? `${days} dias aproximadamente` : 'tiempo por confirmar';
-      return `${order.title}. Precio orientativo: ${price}. Tiempo estimado: ${time}.`;
-    };
-
-    const matchedOrder = orders.find((order) =>
-      this.hasEntityMatch(question, `${order.title} ${order.text}`),
-    );
-
-    if (matchedOrder && this.isPriceQuestion(question)) {
-      const price =
-        matchedOrder.price !== null
-          ? `${matchedOrder.price.toFixed(2)} EUR`
-          : 'precio por confirmar';
-      return `${matchedOrder.title} tiene un precio orientativo de ${price}.`;
-    }
-
-    if (matchedOrder && /\b(tiempo|tarda|tardan|plazo|cuando)\b/.test(question)) {
-      const days = this.getEstimatedDays(matchedOrder.timeInitial, matchedOrder.timeFinal);
-      const time = days ? `${days} dias aproximadamente` : 'tiempo por confirmar';
-      return `${matchedOrder.title} tiene un tiempo estimado de ${time}.`;
-    }
-
-    if (matchedOrder && !this.isOrdersListQuestion(question)) {
-      return `Si, hay un encargo relacionado: ${formatOrder(matchedOrder)}`;
-    }
-
-    if (this.isOrdersListQuestion(question)) {
-      const orderLines = orders
-        .map((order, index) => `${index + 1}. ${formatOrder(order)}`)
-        .join('\n');
-      return `Hay ${orders.length} encargo(s) activo(s):\n${orderLines}`;
-    }
-
-    return null;
+    return `[DATOS DE ACTIVIDADES EN BASE DE DATOS]\nTotal de actividades: ${activities.length}.\n${activityLines}\nFIN DE DATOS DE ACTIVIDADES`;
   }
 
   private async getDynamicContext(question: string) {
@@ -707,40 +396,12 @@ Instrucciones actividades: cuando el usuario pregunte que actividades hay, respo
         return finalAnswer;
       }
 
-      const directActivitiesAnswer = await this.getDirectActivitiesAnswer(normalizedQuestion);
-
-      if (directActivitiesAnswer) {
-        finalAnswer = directActivitiesAnswer;
-        if (onChunk) onChunk(finalAnswer);
-        history.push(new HumanMessage(question));
-        history.push(new AIMessage(finalAnswer));
-        return finalAnswer;
-      }
-
-      const directCatalogAnswer = await this.getDirectCatalogAnswer(normalizedQuestion);
-
-      if (directCatalogAnswer) {
-        finalAnswer = directCatalogAnswer;
-        if (onChunk) onChunk(finalAnswer);
-        history.push(new HumanMessage(question));
-        history.push(new AIMessage(finalAnswer));
-        return finalAnswer;
-      }
-
-      const directOrdersAnswer = await this.getDirectOrdersAnswer(normalizedQuestion);
-
-      if (directOrdersAnswer) {
-        finalAnswer = directOrdersAnswer;
-        if (onChunk) onChunk(finalAnswer);
-        history.push(new HumanMessage(question));
-        history.push(new AIMessage(finalAnswer));
-        return finalAnswer;
-      }
-
       const retrievedDocs = await this.retriever.invoke(normalizedQuestion);
       const dynamicContext = await this.getDynamicContext(normalizedQuestion);
+      
+      // Combinar el conocimiento del Markdown (retrievedDocs) con el de la BBDD (dynamicContext)
       const context = dynamicContext
-        ? [new Document({ pageContent: dynamicContext })]
+        ? [...retrievedDocs, new Document({ pageContent: dynamicContext })]
         : retrievedDocs;
 
       if (onChunk) {
