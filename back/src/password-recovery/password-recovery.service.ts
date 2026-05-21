@@ -39,8 +39,7 @@ export class PasswordRecoveryService {
     });
 
     // Construir enlace 
-    const resetLink = `${this.configService.get<string>('FRONTEND_URL')||'http://localhost:5173'}/reset-password/${resetToken}?email=${email}`;
-
+const resetLink = `${this.configService.get<string>('FRONTEND_URL') || 'http://localhost'}/reset-password/${resetToken}?email=${email}`;
     // Enviar correo (
     await this.mailService.sendResetPasswordEmail(user.email, resetLink);
   

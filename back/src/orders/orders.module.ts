@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
-import { PrismaModule } from 'src/prisma/prisma.module';
-import { WebsocketsModule } from 'src/websockets/websockets.module';
+import { JwtAuthGuard } from '../auth/jwt_strategy/jwt-auth.guard';
+import { WebsocketsModule } from '../websockets/websockets.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { MailModule } from '../mail/mail.module';
 
 @Module({

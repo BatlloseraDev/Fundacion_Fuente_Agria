@@ -1,6 +1,7 @@
 import type { Producto } from "../types/producto.interface";
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
 
 export interface ArticleApi {
   id: number;

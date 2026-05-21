@@ -20,7 +20,7 @@ export class LangchainService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   // Historial de conversación por socket (efímero, como la conexión)
   private sessionHistories = new Map<string, Array<HumanMessage | AIMessage>>();
@@ -32,7 +32,7 @@ export class LangchainService implements OnModuleInit {
   private async initializeRAG() {
     this.logger.log('Inicializando RAG en memoria...');
     try {
-      const mdPath = path.join(process.cwd(), 'src', 'chat', 'data', 'conocimiento.md');
+      const mdPath = path.join(__dirname, 'data', 'conocimiento.md');
       const textContent = fs.readFileSync(mdPath, 'utf8');
       const docs = [new Document({ pageContent: textContent })];
 
@@ -65,17 +65,17 @@ export class LangchainService implements OnModuleInit {
       const prompt = ChatPromptTemplate.fromMessages([
         [
           'system',
-          `Eres el asistente virtual de la Fundación Fuente Agria. 
-Responde ÚNICAMENTE basándote en la información proporcionada en el Contexto. 
-Si la respuesta no está en el Contexto, di exactamente: "Lo siento, no tengo esa información. Contacta directamente con la Fundación Fuente Agria."
+          `Eres el asistente virtual de la Fundación Fuente Agria. Tu tarea es responder a las consultas utilizando EXCLUSIVAMENTE la información de la sección "CONTEXTO".
 
-Instrucciones:
-- Si el usuario pregunta qué productos, actividades o encargos hay, enumera de forma clara y resumida los que aparezcan en el Contexto.
-- Si el usuario pone una condición (ej. "disponibles"), filtra la lista del Contexto y nombra ÚNICAMENTE los que la cumplan (ej. los que dicen "Estado: disponible").
-- Si el usuario hace una pregunta de procedimiento (ej. "cómo comprar" o "cómo apuntarme"), usa el Contexto para explicarle los pasos.
-- NUNCA inventes productos, precios o información que no exista en el Contexto.
-Contexto:
-{context}`,
+REGLAS ESTRICTAS:
+1. Si te preguntan por productos, actividades o encargos, lee el CONTEXTO y dale al usuario los datos concretos (nombre, precio, estado).
+2. Si el usuario pide los "disponibles", muestra ÚNICAMENTE los que digan "Estado: disponible" en el CONTEXTO.
+3. Si la respuesta no está en el CONTEXTO, no inventes nada. Di EXACTAMENTE: "Lo siento, no tengo esa información. Contacta directamente con la Fundación Fuente Agria."
+4. NUNCA sugieras al usuario que visite otra sección de la web; dale tú mismo la información utilizando el CONTEXTO.
+
+--- CONTEXTO INICIO ---
+{context}
+--- CONTEXTO FIN ---`,
         ],
         // Historial de la conversación (últimas N rondas)
         new MessagesPlaceholder('chat_history'),
@@ -305,9 +305,9 @@ Contexto:
         const days =
           order.timeInitial && order.timeFinal
             ? Math.max(
-                1,
-                Math.ceil((order.timeFinal.getTime() - order.timeInitial.getTime()) / 86400000),
-              )
+              1,
+              Math.ceil((order.timeFinal.getTime() - order.timeInitial.getTime()) / 86400000),
+            )
             : null;
         const time = days ? `${days} dias aproximadamente` : 'tiempo por confirmar';
         return `- Encargo: ${order.title} | Precio orientativo: ${price} | Tiempo estimado: ${time} | Info: ${this.compactText(order.text, 100)}`;
@@ -351,7 +351,7 @@ Contexto:
     if (this.isCatalogQuestion(question)) {
       sections.push(await this.getCatalogContext());
     }
-    
+    console.log(sections)
     if (this.isOrdersQuestion(question)) {
       sections.push(await this.getOrdersContext());
     }
@@ -398,15 +398,15 @@ Contexto:
 
       const retrievedDocs = await this.retriever.invoke(normalizedQuestion);
       const dynamicContext = await this.getDynamicContext(normalizedQuestion);
-      
+
       // Combinar el conocimiento del Markdown (retrievedDocs) con el de la BBDD (dynamicContext)
-      const context = dynamicContext
-        ? [...retrievedDocs, new Document({ pageContent: dynamicContext })]
+     const context = dynamicContext
+        ? [new Document({ pageContent: dynamicContext }), ...retrievedDocs]
         : retrievedDocs;
 
       if (onChunk) {
         const stream = await this.documentChain.stream({
-          input: normalizedQuestion,
+          input: question,
           chat_history: recentHistory,
           context,
         });
@@ -423,7 +423,7 @@ Contexto:
         }
       } else {
         const response = await this.documentChain.invoke({
-          input: normalizedQuestion,
+          input: question,
           chat_history: recentHistory,
           context,
         });

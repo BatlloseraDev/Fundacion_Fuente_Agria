@@ -25,7 +25,12 @@ export function FloatingChat() {
 
   useEffect(() => {
     if (isOpen) {
-      const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const backendUrl = apiUrl
+      ? apiUrl.startsWith('/')
+        ? window.location.origin // En producción: apunta al dominio actual (Nginx en puerto 80)
+        : apiUrl.replace('/api', '') // En desarrollo externo: limpia el subdominio /api
+      : 'http://localhost:3000'; // Fallback absoluto para desarrollo local estándar
       const socket = io(backendUrl);
       socketRef.current = socket;
 
