@@ -147,18 +147,7 @@ Explica que se realizan trabajos personalizados para eventos, empresas o regalos
 Actividades:
 Presenta talleres y eventos grupales enfocados en la integracion y el desarrollo personal. Desde esta zona el usuario puede ir a la pagina de actividades.
 
-Novedades visibles en Inicio:
-- Taller abierto: iniciacion a la ceramica. Fecha: 01/02/2026. Categoria: Eventos. Describe una sesion practica para conocer tecnicas basicas y apoyar la inclusion mediante el aprendizaje.
-- Nueva linea de productos en madera reciclada. Fecha: 24/01/2026. Categoria: Artesanias. Muestra pequenas piezas decorativas creadas con restos de madera recuperada y acabados naturales.
-- Restauracion solidaria: antes y despues de enero. Fecha: 18/01/2026. Categoria: Restauracion. Indica que se finalizaron 6 restauraciones con barnices al agua y reparaciones estructurales.
-- Buscamos voluntariado para recogida y logistica. Fecha: 10/01/2026. Categoria: Voluntariado. Invita a colaborar unas horas a la semana.
-- Proyecto social: formacion en oficios artesanos. Fecha: 20/12/2025. Categoria: Proyecto social. Explica itinerarios formativos conectados con habilidades y empleo.
-- Campana Regala con impacto, edicion invierno. Fecha: 05/12/2025. Categoria: Artesanias. Trata sobre encargos personalizados para empresas y particulares con empaquetado sostenible.
 
-Comentarios visibles:
-- Marta G. comenta que los regalos personalizados fueron un exito y destaca el trato cercano.
-- Carlos R. comenta que su aparador de madera volvio a brillar y destaca el mimo en el proceso.
-- Elena P. destaca la iniciativa social, el proceso de encargo claro y la comunicacion rapida.
 
 Respuesta recomendada si preguntan "Que hay en Inicio?":
 "En Inicio puedes ver una presentacion general de la Fundacion Fuente Agria, novedades, accesos a Tienda, Encargos y Actividades, comentarios de usuarios y datos de contacto. Es la pagina pensada para orientarte rapidamente por la web."
@@ -178,69 +167,6 @@ El catalogo permite:
 - Abrir un modal o ventana con informacion detallada del producto.
 - Ver si un producto esta disponible.
 
-Categorias principales:
-- Artesania.
-- Restauracion.
-
-Etiquetas posibles:
-- Hecho a mano.
-- Personalizable.
-- Ideal regalo.
-- Madera natural.
-- Decoracion.
-- Solidario.
-- Reciclado.
-- Vintage.
-
-Productos incluidos en el catalogo:
-
-Roca Decorativa Artesanal:
-- Categoria: Artesania.
-- Precio: 8,00 EUR.
-- Descripcion breve: piedra natural seleccionada a mano y decorada con motivos pintados a mano.
-- Descripcion detallada: cada roca es unica. Se seleccionan piedras de rio de tamano mediano y se decoran con pintura acrilica resistente al agua. Los motivos pueden incluir flores, paisajes y patrones abstractos. Sirve como decoracion para el hogar, jardin o regalo.
-- Etiquetas: hecho a mano, personalizable, ideal regalo.
-- Disponible: si.
-
-Caja de Madera Personalizada:
-- Categoria: Artesania.
-- Precio: 18,00 EUR.
-- Descripcion breve: caja de madera natural grabada con nombre o mensaje.
-- Descripcion detallada: fabricada en madera maciza y lijada a mano. Puede personalizarse con nombres, fechas o frases mediante grabado laser o pintura artesanal. Ideal para recuerdos, joyas u objetos personales.
-- Etiquetas: personalizable, madera natural, hecho a mano.
-- Disponible: si.
-
-Marco de Fotos Rustico:
-- Categoria: Artesania.
-- Precio: 12,50 EUR.
-- Descripcion breve: marco artesanal en madera reciclada.
-- Descripcion detallada: elaborado con madera reciclada tratada y restaurada. Puede colgarse en pared o colocarse sobre una mesa. Cada unidad presenta vetas y tonalidades distintas.
-- Etiquetas: reciclado, decoracion, madera natural.
-- Disponible: si.
-
-Pulsera Tejida Solidaria:
-- Categoria: Artesania.
-- Precio: 5,00 EUR.
-- Descripcion breve: pulsera artesanal tejida con hilo de algodon.
-- Descripcion detallada: tejida a mano con hilo de algodon resistente y cierre ajustable. Disponible en varios colores. Cada compra contribuye a los proyectos sociales de la fundacion.
-- Etiquetas: solidario, hecho a mano.
-- Disponible: si.
-
-Lampara de Mesa Restaurada:
-- Categoria: Restauracion.
-- Precio: 35,00 EUR.
-- Descripcion breve: lampara antigua restaurada y personalizada.
-- Descripcion detallada: lampara recuperada y restaurada cuidadosamente en el taller. Se revisa la instalacion electrica y se renueva la pintura o el acabado exterior. Combina funcionalidad y diseno vintage.
-- Etiquetas: vintage, decoracion, personalizable.
-- Disponible: si.
-
-Silla Restaurada Vintage:
-- Categoria: Restauracion.
-- Precio: 45,00 EUR.
-- Descripcion breve: silla clasica restaurada y tapizada.
-- Descripcion detallada: silla de madera maciza restaurada y retapizada con tela resistente. Se refuerza la estructura y se renueva el acabado para garantizar durabilidad y estilo.
-- Etiquetas: vintage, decoracion.
-- Disponible: no, segun los datos de ejemplo actuales.
 
 Respuesta recomendada si preguntan "Que puedo comprar?":
 "En el catalogo puedes encontrar articulos de artesania y restauracion, como rocas decorativas, cajas de madera personalizadas, marcos rusticos, pulseras tejidas solidarias, lamparas restauradas y sillas restauradas."
@@ -259,29 +185,7 @@ Mensaje principal de la seccion:
 Texto general:
 La fundacion realiza trabajos a medida para bodas, eventos corporativos o regalos unicos. El usuario puede contar su idea y la fundacion le dara forma.
 
-Tipos de encargos destacados:
-- Tazas personalizadas.
-- Reparacion de muebles de madera.
-- Bordado y textiles.
-- Detalles artesanales.
 
-Encargos populares:
-
-Taza personalizada:
-- Tiempo estimado: 3 a 5 dias.
-- Precio orientativo: desde 9,90 EUR.
-
-Reparacion de silla de madera:
-- Tiempo estimado: 5 a 10 dias.
-- Precio orientativo: desde 35,00 EUR.
-
-Plato decorativo artesanal:
-- Tiempo estimado: 4 a 7 dias.
-- Precio orientativo: desde 18,00 EUR.
-
-Bolsa de tela bordada:
-- Tiempo estimado: 7 a 12 dias.
-- Precio orientativo: desde 22,00 EUR.
 
 Como funciona una solicitud de encargo:
 1. El usuario entra en la seccion Encargos.
@@ -334,28 +238,7 @@ En la pagina de detalle de una actividad se puede ver:
 - Bloques de contenido con informacion ampliada.
 - Boton para volver al listado de actividades.
 
-Actividad principal registrada:
 
-Taller de Ceramica y Pintura:
-- Fecha: 15/10/2025.
-- Categoria: Taller Creativo.
-- Descripcion: los usuarios disfrutaron de una jornada creativa moldeando arcilla y expresando emociones a traves de la pintura.
-- Objetivo: mejorar la motricidad fina, fomentar la imaginacion y crear un ambiente relajado y colaborativo.
-- Desarrollo: el taller comenzo con una introduccion a tecnicas basicas de modelado en arcilla. Los participantes eligieron formas y disenos guiados por una monitora especializada.
-- Por la tarde se realizo pintura con acuarelas, acrilicos y tecnicas mixtas sobre lienzo.
-- El resultado fue una exposicion improvisada al final del dia que emociono a participantes y familias.
-
-Otras actividades de ejemplo:
-
-Senderismo en el Valle de Alcudia:
-- Fecha: 22/09/2025.
-- Categoria: Excursion.
-- Descripcion: ruta de senderismo adaptado, convivencia con la naturaleza, aprendizaje sobre flora local y almuerzo saludable al aire libre.
-
-Mercadillo Solidario Anual:
-- Fecha: 10/09/2025.
-- Categoria: Evento.
-- Descripcion: puesto en la plaza con artesanias fabricadas en talleres ocupacionales. La recaudacion se destino a comprar nuevo material deportivo.
 
 Respuesta recomendada si preguntan "Que actividades hace la fundacion?":
 "La fundacion organiza talleres creativos, excursiones, eventos y actividades comunitarias. Algunos ejemplos son el Taller de Ceramica y Pintura, rutas de senderismo adaptado y mercadillos solidarios con artesanias realizadas en los talleres."

@@ -351,7 +351,7 @@ Contexto:
     if (this.isCatalogQuestion(question)) {
       sections.push(await this.getCatalogContext());
     }
-
+    
     if (this.isOrdersQuestion(question)) {
       sections.push(await this.getOrdersContext());
     }
