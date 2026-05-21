@@ -1,7 +1,7 @@
 import { formatPrice } from '../utils/formatPrice';
 import type { CartResponse } from '../services/catalogo.service';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 function imageUrl(image?: string | null) {
     if (!image) return '';

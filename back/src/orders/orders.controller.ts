@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { JwtAuthGuard } from 'src/auth/jwt_strategy/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt_strategy/jwt-auth.guard';
 
 @Controller('orders')
 export class OrdersController {
