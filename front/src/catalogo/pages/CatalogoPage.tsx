@@ -35,7 +35,7 @@ export function CatalogoPage() {
     const { isAuthenticated, hasRole } = use(UserContext);
 
     const isEditor = editorContext?.editMode ?? false;
-    const isStaffUser = hasRole(['ADMIN', 'EDITOR', 'COLABORADOR']);
+    const isStaffUser = hasRole(['ADMIN', 'EDITOR']);
     const canUseCart = isAuthenticated && !isStaffUser;
     const setSaveActionRaw = editorContext?.setSaveAction;
 

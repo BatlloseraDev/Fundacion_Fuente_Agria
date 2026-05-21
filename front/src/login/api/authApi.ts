@@ -65,3 +65,17 @@ export async function googleLoginApi(idToken: string) {
     body: JSON.stringify({ idToken }),
   });
 }
+
+export async function requestPasswordReset(email: string) {
+  return request<{ message: string }>('/auth/recovery/request', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(email: string, token: string, newPassword: string) {
+  return request<{ message: string }>('/auth/recovery/reset', {
+    method: 'POST',
+    body: JSON.stringify({ email, token, newPassword }),
+  });
+}

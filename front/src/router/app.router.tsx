@@ -2,17 +2,20 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { AppLayout } from '../components/layout/AppLayout';
 
 import InicioPage from '../inicio/pages/InicioPage';
-import {CatalogoPage} from "../catalogo/pages/CatalogoPage";
+import { CatalogoPage } from "../catalogo/pages/CatalogoPage";
 import EncargosPage from '../encargos/pages/EncargosPage';
 import { ActividadesPage } from '../actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from '../actividades/pages/ActividadDetailPage';
 import { AdminDashboard } from '../admin/pages/AdminDashboard';
-import {VideotutorialesPage} from "../videotutoriales/pages/videotutorialesPage";
+import { VideotutorialesPage } from "../videotutoriales/pages/videotutorialesPage";
 
 import { PrivateRoute } from './PrivateRoute';
 
 import { LoginPage } from '../login/pages/LoginPage';
 import { RegisterPage } from '../login/pages/RegisterPage';
+
+import { ForgotPasswordPage } from '../login/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '../login/pages/ResetPasswordPage';
 
 export const appRouter = createBrowserRouter([
   {
@@ -32,6 +35,14 @@ export const appRouter = createBrowserRouter([
       { path: '/videotutoriales', element: <VideotutorialesPage /> },
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      {
+        path: '/forgot-password',
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: '/reset-password/:token',
+        element: <ResetPasswordPage />,
+      },
       {
         path: '/perfil',
         element: <PrivateRoute element={<div>Pagina de Perfil (Solo Login)</div>} />,

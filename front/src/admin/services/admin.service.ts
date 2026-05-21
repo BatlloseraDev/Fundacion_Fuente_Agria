@@ -24,10 +24,10 @@ export const getRoles = (): Promise<AdminRole[]> =>
     handleResponse<AdminRole[]>(r),
   );
 
-// ── Colaboradores (usuarios con rol COLABORADOR) ───────────────────────────────
+// ── Colaboradores (usuarios con rol EDITOR) ────────────────────────────────────
 
 export const getColaboradores = (): Promise<AdminUser[]> =>
-  fetch(`${apiUrl()}/users/by-role/COLABORADOR`, { headers: authHeaders() }).then((r) =>
+  fetch(`${apiUrl()}/users/by-role/EDITOR`, { headers: authHeaders() }).then((r) =>
     handleResponse<AdminUser[]>(r),
   );
 

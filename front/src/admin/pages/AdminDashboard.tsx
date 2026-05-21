@@ -21,15 +21,6 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'pie-pagina',    label: 'Pie de página',  icon: 'bi-layout-text-window'     },
 ];
 
-const ProximamentePanel = ({ label }: { label: string }) => (
-  <div className="text-center py-5">
-    <div className="mb-3" style={{ fontSize: '3rem', opacity: .2 }}>
-      <i className="bi bi-tools" />
-    </div>
-    <div className="fw-semibold text-muted">{label}</div>
-    <div className="text-muted small mt-1">Esta sección está en desarrollo</div>
-  </div>
-);
 
 export const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<Tab>('colaboradores');

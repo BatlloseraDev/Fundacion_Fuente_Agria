@@ -17,6 +17,7 @@ export function LoginPage() {
       <div className="d-flex justify-content-center">
         <GoogleLoginButton onSuccess={() => navigate('/inicio', { replace: true })} />
       </div>
+      
     </div>
   );
 }

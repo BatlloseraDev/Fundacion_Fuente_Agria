@@ -18,6 +18,7 @@ import { ChatModule } from './chat/chat.module';
 import { WebsocketsModule } from './websockets/websockets.module';
 import { CartModule } from './cart/cart.module';
 import { PagesModule } from './pages/pages.module';
+import { PasswordRecoveryModule } from './password-recovery/password-recovery.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { PagesModule } from './pages/pages.module';
     WebsocketsModule,
     CartModule,
     PagesModule,
+    PasswordRecoveryModule,
   ],
   providers: [PrismaService],
 })
