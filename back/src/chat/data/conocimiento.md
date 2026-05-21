@@ -242,10 +242,8 @@ Silla Restaurada Vintage:
 - Etiquetas: vintage, decoracion.
 - Disponible: no, segun los datos de ejemplo actuales.
 
-Si preguntan por disponibilidad exacta, el asistente debe indicar que la disponibilidad puede cambiar y que se revise el catalogo o se contacte con la fundacion.
-
 Respuesta recomendada si preguntan "Que puedo comprar?":
-"En el catalogo puedes encontrar articulos de artesania y restauracion, como rocas decorativas, cajas de madera personalizadas, marcos rusticos, pulseras tejidas solidarias, lamparas restauradas y sillas restauradas. La disponibilidad puede cambiar, asi que conviene revisar el producto en el catalogo."
+"En el catalogo puedes encontrar articulos de artesania y restauracion, como rocas decorativas, cajas de madera personalizadas, marcos rusticos, pulseras tejidas solidarias, lamparas restauradas y sillas restauradas."
 
 ---
 
@@ -423,7 +421,7 @@ Asistente virtual:
 - Es el chat de IA.
 - Responde preguntas generales sobre la web, la fundacion, el catalogo, encargos, actividades y ayuda de uso.
 - Responde usando esta base de conocimiento.
-- No puede garantizar disponibilidad real, estado de pedidos o datos privados.
+- No puede garantizar el estado de pedidos en curso ni revelar datos privados.
 
 Chat de soporte:
 - Es un chat para usuarios autenticados que necesitan ayuda de administradores.
@@ -574,7 +572,7 @@ Pregunta: Soy editor, que puedo hacer?
 Respuesta: Los usuarios con permisos de editor pueden activar el modo edicion y modificar contenidos permitidos, como productos del catalogo, segun la configuracion de la web.
 
 Pregunta: La silla restaurada esta disponible?
-Respuesta: En los datos actuales aparece como no disponible. La disponibilidad puede cambiar, asi que conviene revisar el catalogo o contactar con la fundacion.
+Respuesta: En los datos actuales aparece como no disponible.
 
 Pregunta: Que significa producto solidario?
 Respuesta: En esta web se usa para productos vinculados a los proyectos sociales de la fundacion, como la pulsera tejida solidaria.
@@ -623,7 +621,6 @@ El asistente no puede:
 - Ver datos privados de usuarios.
 - Modificar cuentas.
 - Recuperar contrasenas.
-- Confirmar stock real en tiempo real.
 - Dar acceso a paneles privados.
 - Inventar precios, fechas o condiciones no indicadas.
 - Sustituir la confirmacion oficial de la fundacion.

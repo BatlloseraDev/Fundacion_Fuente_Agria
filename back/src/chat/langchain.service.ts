@@ -55,7 +55,7 @@ export class LangchainService implements OnModuleInit {
       const llm = new ChatOllama({
         baseUrl: 'http://ollama:11434',
         model: this.configService.get<string>('OLLAMA_CHAT_MODEL') || 'qwen2.5:1.5b',
-        temperature: 0,
+        temperature: 0.2,
         numPredict: 500,
         numCtx: 4096,
         keepAlive: '10m',
