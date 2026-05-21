@@ -12,7 +12,7 @@ export const ChatWidget = () => {
     const socketRef = useRef<Socket | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const isAdminOrEditor = hasRole(['ADMIN', 'EDITOR', 'COLABORADOR']);
+    const isAdminOrEditor = hasRole(['ADMIN', 'EDITOR']);
 
     useEffect(() => {
         if (!isAuthenticated || isAdminOrEditor || !user) {

@@ -85,7 +85,7 @@ export class CartController {
     );
 
     const isStaff = roles.some((role: string) =>
-      [RoleName.ADMIN, RoleName.EDITOR, RoleName.COLABORADOR].includes(role as RoleName),
+      [RoleName.ADMIN, RoleName.EDITOR].includes(role as RoleName),
     );
 
     if (isStaff || !roles.includes(RoleName.USER)) {

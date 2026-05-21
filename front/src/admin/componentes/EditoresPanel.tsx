@@ -15,7 +15,6 @@ const ROLE_COLORS: Record<string, string> = {
   ADMIN: '#1a1f36',
   EDITOR: '#4361ee',
   USER: '#6c757d',
-  COLABORADOR: '#06d6a0',
 };
 
 // ── Modal ──────────────────────────────────────────────────────────────────────

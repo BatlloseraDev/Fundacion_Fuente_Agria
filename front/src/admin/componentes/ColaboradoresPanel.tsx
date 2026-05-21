@@ -117,7 +117,7 @@ export const ColaboradoresPanel = () => {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const colaboradorRoleId = roles.find((r) => r.name === 'COLABORADOR')?.id;
+  const colaboradorRoleId = roles.find((r) => r.name === 'EDITOR')?.id;
 
   const load = async () => {
     try {
@@ -137,7 +137,7 @@ export const ColaboradoresPanel = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!colaboradorRoleId) { setFormError('El rol COLABORADOR no existe en la base de datos.'); return; }
+    if (!colaboradorRoleId) { setFormError('El rol EDITOR no existe en la base de datos.'); return; }
     if (!editTarget && !form.password) { setFormError('La contraseña es obligatoria.'); return; }
     setSaving(true); setFormError('');
     try {
@@ -185,7 +185,7 @@ export const ColaboradoresPanel = () => {
       {!colaboradorRoleId && (
         <div className="alert alert-warning rounded-3 border-0 small d-flex align-items-center gap-2">
           <i className="bi bi-exclamation-triangle-fill" />
-          <span>El rol <strong>COLABORADOR</strong> no existe en la BD. Ejecuta: <code>INSERT INTO Role (name) VALUES ('COLABORADOR');</code></span>
+          <span>El rol <strong>EDITOR</strong> no existe en la BD.</span>
         </div>
       )}
 
