@@ -1,0 +1,350 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// generator client {
+//   provider     = "prisma-client"
+//   output       = "../generated/prisma"
+//   moduleFormat = "cjs"
+// }
+
+generator client {
+  provider     = "prisma-client-js"
+  //output       = "../generated/prisma"
+
+}
+
+datasource db {
+  provider = "mysql"
+  // no poner url aquí en Prisma 7
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique @db.VarChar(100)
+  password String?  @db.VarChar(255)
+  name     String  @db.VarChar(50)
+  subname  String  @db.VarChar(150)
+  address  String? @db.VarChar(150)
+  dni      String? @unique @db.VarChar(9)
+  avatarUrl String? @db.VarChar(500)
+  inactiveAt DateTime? // null = activo, con valor = baja (soft delete)
+  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  roles        UserRole[] // Relación explícita
+  publications Publication[] // Publicaciones que ha realizado si es un admin/editor
+  articles     Article[] // Articulos que ha creado si es un admin/editor
+  purchases    Purchase[] // Compras que ha realizado si es un usuario normal
+  carts        Cart[]
+  orders       Order[] // Pedidos que ha realizado si es un usuario normal
+  comments     Comment[] // Comentarios que ha realizado si es un usuario norma y ha hecho minimo un pedido
+  chats        Chat[] // Chats que ha realizado si es un usuario normal
+  messages     Message[] // Mensajes que ha realizado (puede ser tambien admin y editor)
+  passwordResetTokens PasswordResetToken[] // Tokens de restablecimiento de contraseña
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar(20) // ADMIN, USER, EDITOR
+
+  users UserRole[]
+}
+
+// Tabla intermedia explícita para Roles 
+model UserRole {
+  id     Int @id @default(autoincrement())
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId]) // Evita que un usuario tenga el mismo rol dos veces
+}
+
+// Publicaciones y categorías
+
+model Publication {
+  id          Int      @id @default(autoincrement())
+  imageHeader String?  @db.Text
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  date        DateTime //sin @default(now()) ya que cuando escribas la publicación puede ser de otro dia pasado
+  userId      Int //FK
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  user       User       @relation(fields: [userId], references: [id])
+  categories PubliCat[]
+}
+
+model CategoryPublicaton {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique @db.VarChar(100)
+  color String? @db.VarChar(20)
+
+  //Relaciones
+  publications PubliCat[]
+}
+
+model PubliCat {
+  id                    Int @id @default(autoincrement())
+  publicationId         Int
+  categoryPublicationId Int
+
+  publication         Publication        @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  categoryPublication CategoryPublicaton @relation(fields: [categoryPublicationId], references: [id], onDelete: Cascade)
+
+  @@unique([publicationId, categoryPublicationId]) // Evita que una publicación tenga la misma categoría dos veces
+}
+
+// Articulos, categorias y etiquetas
+
+model Article {
+  id              Int     @id @default(autoincrement())
+  name            String  @unique @db.VarChar(150)
+  description     String  @db.Text
+  longDescription String? @db.Text
+  price           Float
+  stock           Int     @default(0)
+  available       Boolean @default(true)
+  image           String? @db.VarChar(255)
+  userId          Int //FK
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //Relaciones
+  user       User              @relation(fields: [userId], references: [id])
+  categories ArticleCat[]
+  labels     ArticleLabel[]
+  purchases  PurchaseArticle[]
+  cartItems  CartItem[]
+}
+
+model CategoryArticle {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique @db.VarChar(100)
+  color String? @db.VarChar(20)
+
+  //Relaciones
+  articles ArticleCat[]
+}
+
+model ArticleCat {
+  id                Int @id @default(autoincrement())
+  articleId         Int
+  categoryArticleId Int
+
+  article         Article         @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  categoryArticle CategoryArticle @relation(fields: [categoryArticleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, categoryArticleId]) // Evita que un artículo tenga la misma categoría dos veces 
+}
+
+model Label {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique @db.VarChar(100)
+  color String? @db.VarChar(20)
+
+  //Relaciones
+  articles ArticleLabel[]
+}
+
+model ArticleLabel {
+  id        Int @id @default(autoincrement())
+  articleId Int
+  labelId   Int
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  label   Label   @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, labelId])
+}
+
+// Compras y Pedidos
+
+enum CartStatus {
+  ACTIVE
+  RESERVED
+  EXPIRED
+}
+
+enum PurchaseStatus {
+  RESERVED
+  CANCELLED
+  COLLECTED
+}
+
+model Cart {
+  id             Int        @id @default(autoincrement())
+  userId         Int
+  status         CartStatus @default(ACTIVE)
+  reminderSentAt DateTime?
+  lastActivityAt DateTime   @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@index([userId, status])
+  @@index([status, lastActivityAt])
+}
+
+model CartItem {
+  id        Int @id @default(autoincrement())
+  cartId    Int
+  articleId Int
+  quantity  Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id])
+
+  @@unique([cartId, articleId])
+}
+
+model Purchase {
+  id                  Int            @id @default(autoincrement())
+  userId              Int
+  date                DateTime       @default(now())
+  ticketCode          String?        @unique @db.VarChar(40)
+  status              PurchaseStatus @default(RESERVED)
+  reservationExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user     User              @relation(fields: [userId], references: [id])
+  articles PurchaseArticle[]
+}
+
+model PurchaseArticle {
+  id             Int   @id @default(autoincrement())
+  purchaseId     Int
+  articleId      Int
+  estimatedPrice Float
+  quantity       Int   @default(1)
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  article  Article  @relation(fields: [articleId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  title       String      @db.VarChar(255)
+  text        String      @db.Text
+  quantity    Int?
+  imageBefore String?     @db.Text
+  imageAfter  String?     @db.Text
+  active      Boolean     @default(true)
+  status      OrderStatus @default(PENDING)
+  price       Float?
+  timeInitial DateTime?
+  timeFinal   DateTime?
+  createdAt   DateTime    @default(now())
+
+  userId      Int
+
+  //Relaciones
+  user User @relation(fields: [userId], references: [id])
+}
+
+
+
+//Interacción social y contenido
+
+
+model Comment{
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  description String   @db.Text
+  
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id])
+}
+
+
+model Chat {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+
+  //Relacion
+  user User @relation(fields: [userId], references: [id])
+  messages Message[]
+}
+
+
+model Message{
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  chatId      Int
+  message     String   @db.Text
+  createdAt   DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id])
+  chat Chat @relation(fields: [chatId], references: [id])
+}
+
+
+model Page{
+  id          Int      @id @default(autoincrement())
+  stage       String   @db.VarChar(100)
+  contentJson Json
+}
+
+// Actividades
+
+model CategoriaActividad {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(100)
+  color     String?   @db.VarChar(20)
+  deletedAt DateTime?
+
+  actividades Actividad[]
+}
+
+model Actividad {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  date        DateTime
+  coverImage  String?  @db.LongText
+  categoryId  Int?
+  contentJson Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  category CategoriaActividad? @relation(fields: [categoryId], references: [id])
+}

@@ -1,0 +1,7 @@
+.env
+.env.production
+postgres_data/
+.vscode
+nginx/ssl/
+gemini.md
+back/uploads/

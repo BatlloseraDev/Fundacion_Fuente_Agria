@@ -1,0 +1,175 @@
+import { useEffect, useState } from 'react';
+import type { Producto } from '../types/producto.interface';
+import { formatPrice } from '../utils/formatPrice';
+
+interface Props {
+    producto: Producto | null;
+    onClose: () => void;
+    onAddToCart?: (producto: Producto, quantity: number) => void;
+}
+
+export const ProductoModal = ({ producto, onClose, onAddToCart }: Props) => {
+    const [quantity, setQuantity] = useState(1);
+    // Cerrar modal con Escape
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
+        if (producto) {
+            setQuantity(1);
+            document.addEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = 'hidden';
+        }
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = '';
+        };
+    }, [producto, onClose]);
+
+    if (!producto) return null;
+    const precioFormateado = formatPrice(producto.precio);
+    const puedeAnadir = producto.disponible && producto.stock > 0;
+
+    return (
+        <>
+            {/* Backdrop */}
+            <div
+                className="modal-backdrop show"
+                style={{ zIndex: 1040 }}
+                onClick={onClose}
+            />
+
+            {/* Modal */}
+            <div
+                className="modal d-block"
+                style={{ zIndex: 1050 }}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="productoModalLabel"
+            >
+                <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div className="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
+
+                        {/* Imagen cabecera */}
+                        <div style={{ maxHeight: '320px', overflow: 'hidden' }}>
+                            <img
+                                src={producto.imageUrl}
+                                alt={producto.nombre}
+                                className="w-100"
+                                style={{ objectFit: 'cover', height: '320px' }}
+                            />
+                        </div>
+
+                        <div className="modal-body p-4 p-lg-5">
+                            {/* Categoría + cerrar */}
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                <span
+                                    className="badge rounded-pill px-3 py-2"
+                                    style={{
+                                        backgroundColor: `var(--bs-${producto.colorCategoria}-bg-subtle, #e9ecef)`,
+                                        color: `var(--bs-${producto.colorCategoria}-text-emphasis, #495057)`,
+                                        fontSize: '0.8rem'
+                                    }}
+                                >
+                                    {producto.categoria}
+                                </span>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={onClose}
+                                    aria-label="Cerrar"
+                                />
+                            </div>
+
+                            {/* Nombre y precio */}
+                            <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                                <h2 id="productoModalLabel" className="fw-bold mb-0" style={{ fontSize: '1.5rem' }}>
+                                    {producto.nombre}
+                                </h2>
+                                <div className="text-end">
+                                    <span className="fw-bold fs-4 text-primary">
+                                        {producto.precioDesde ? `Desde ${precioFormateado}` : precioFormateado}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Disponibilidad */}
+                            {puedeAnadir ? (
+                                <span className="badge bg-success-subtle text-success rounded-pill mb-3">
+                                    <i className="bi bi-check-circle me-1"></i> {producto.stock} disponible{producto.stock !== 1 ? 's' : ''}
+                                </span>
+                            ) : (
+                                <span className="badge bg-danger-subtle text-danger rounded-pill mb-3">
+                                    <i className="bi bi-x-circle me-1"></i> No disponible
+                                </span>
+                            )}
+
+                            {/* Descripción detallada */}
+                            <p className="text-secondary lh-lg mb-4">
+                                {producto.descripcionDetallada}
+                            </p>
+
+                            {/* Etiquetas */}
+                            {producto.etiquetas && producto.etiquetas.length > 0 && (
+                                <div className="d-flex flex-wrap gap-2 mb-4">
+                                    {producto.etiquetas.map((tag) => (
+                                        <span key={tag} className="badge bg-light text-dark border rounded-pill px-3 py-2">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Acciones */}
+                            <div className="d-flex gap-3 flex-wrap">
+                                {onAddToCart && puedeAnadir && (
+                                    <div className="input-group" style={{ maxWidth: 150 }}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="number"
+                                            className="form-control text-center"
+                                            min={1}
+                                            max={producto.stock}
+                                            value={quantity}
+                                            onChange={(event) => {
+                                                const value = Number(event.target.value);
+                                                setQuantity(Math.min(producto.stock, Math.max(1, value || 1)));
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            onClick={() => setQuantity((prev) => Math.min(producto.stock, prev + 1))}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                )}
+                                <button
+                                    className="btn btn-primary rounded-pill px-4 fw-semibold flex-grow-1"
+                                    disabled={!puedeAnadir}
+                                    onClick={() => onAddToCart?.(producto, quantity)}
+                                >
+                                    <i className="bi bi-bag-plus me-2"></i>
+                                    Anadir al carrito
+                                </button>
+                                <button
+                                    className="btn btn-outline-secondary rounded-pill px-4"
+                                    onClick={onClose}
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};

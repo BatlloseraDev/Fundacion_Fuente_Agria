@@ -1,0 +1,83 @@
+import type { Producto } from '../types/producto.interface';
+import { formatPrice } from '../utils/formatPrice';
+
+interface Props {
+    producto: Producto;
+    onVerDetalles: (producto: Producto) => void;
+    onAddToCart?: (producto: Producto) => void;
+}
+
+export const ProductoCard = ({ producto, onVerDetalles, onAddToCart }: Props) => {
+    const { nombre, descripcion, precio, precioDesde, stock, categoria, colorCategoria, imageUrl } = producto;
+    const precioFormateado = formatPrice(precio);
+    const puedeAnadir = producto.disponible && stock > 0;
+
+    return (
+        <article className="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            {/* Imagen */}
+            <div style={{ height: '200px', overflow: 'hidden' }}>
+                <img
+                    src={imageUrl}
+                    alt={nombre}
+                    className="w-100 h-100"
+                    style={{ objectFit: 'cover', transition: 'transform 0.3s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                />
+            </div>
+
+            {/* Cuerpo */}
+            <div className="card-body p-4 d-flex flex-column">
+                {/* Categoría + precio */}
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span
+                        className="badge rounded-pill px-3 py-2"
+                        style={{
+                            backgroundColor: `var(--bs-${colorCategoria}-bg-subtle, #e9ecef)`,
+                            color: `var(--bs-${colorCategoria}-text-emphasis, #495057)`,
+                            fontSize: '0.75rem'
+                        }}
+                    >
+                        {categoria}
+                    </span>
+                    <span
+                        className="fw-bold rounded-pill px-3 py-1 text-dark"
+                        style={{ backgroundColor: '#f8f9fa', fontSize: '0.9rem' }}
+                    >
+                        {precioDesde ? `Desde ${precioFormateado}` : precioFormateado}
+                    </span>
+                </div>
+
+                {/* Nombre */}
+                <h3 className="fw-bold mb-2" style={{ fontSize: '1.05rem' }}>{nombre}</h3>
+
+                {/* Descripción */}
+                <p className="text-secondary small mb-3 flex-grow-1">{descripcion}</p>
+
+                <div className="small text-secondary mb-3">
+                    {puedeAnadir ? `${stock} disponible${stock !== 1 ? 's' : ''}` : 'Sin stock'}
+                </div>
+
+                {/* Botón */}
+                <div className="d-grid gap-2">
+                    <button
+                        className="btn btn-outline-primary rounded-pill w-100 fw-semibold"
+                        onClick={() => onVerDetalles(producto)}
+                    >
+                        Ver detalles
+                    </button>
+                    {onAddToCart && (
+                        <button
+                            className="btn btn-primary rounded-pill w-100 fw-semibold"
+                            onClick={() => onAddToCart(producto)}
+                            disabled={!puedeAnadir}
+                        >
+                            <i className="bi bi-cart-plus me-2"></i>
+                            Anadir al carrito
+                        </button>
+                    )}
+                </div>
+            </div>
+        </article>
+    );
+};
