@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -142,6 +143,29 @@ export class UsersService {
       // Prisma unique constraint error (GPT)
       if (error.code === 'P2002') {
         throw new ConflictException('Email o DNI ya está en uso');
+      }
+      throw error;
+    }
+  }
+
+  async updateProfile(id: number, dto: UpdateProfileDto) {
+    const { password, ...fields } = dto;
+
+    const data: any = { ...fields };
+
+    if (password) {
+      data.password = await bcrypt.hash(password, 10);
+    }
+
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data,
+        select: this.userSelect,
+      });
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('El email o DNI ya está en uso');
       }
       throw error;
     }
