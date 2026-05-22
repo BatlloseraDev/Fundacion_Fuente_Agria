@@ -6,6 +6,7 @@ import {
     useState,
     use,
 } from 'react';
+import { io } from 'socket.io-client';
 import { CatalogoHeader } from '../components/CatalogoHeader';
 import { ProductoCard } from '../components/ProductoCard';
 import { ProductoModal } from '../components/ProductoModal';
@@ -76,6 +77,19 @@ export function CatalogoPage() {
     useEffect(() => {
         cargarCatalogo();
     }, [cargarCatalogo]);
+
+    useEffect(() => {
+        const socketUrl = import.meta.env.VITE_SOCKET_URL ?? import.meta.env.VITE_API_URL?.replace('/api', '') ?? '';
+        const socket = io(socketUrl, { transports: ['websocket'] });
+
+        socket.on('stockUpdated', (data: { id: number; stock: number; available: boolean }) => {
+            setProductos(prev =>
+                prev.map(p => p.id === String(data.id) ? { ...p, stock: data.stock, available: data.available } : p)
+            );
+        });
+
+        return () => { socket.disconnect(); };
+    }, []);
 
     const cargarCarrito = useCallback(async () => {
         const token = localStorage.getItem('jwt_token') ?? localStorage.getItem('accessToken');

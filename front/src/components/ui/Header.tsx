@@ -48,9 +48,15 @@ export const Header = () => {
 
           <div className="ms-lg-3 d-flex align-items-center gap-2">
             {isAuthenticated ? (
-              <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={logout}>
-                Cerrar sesión
-              </button>
+              <>
+                <Link className="btn btn-sm btn-outline-primary px-3 rounded-pill d-flex align-items-center gap-1" to="/perfil">
+                  <i className="bi bi-person-circle" />
+                  <span>Mi perfil</span>
+                </Link>
+                <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={logout}>
+                  Cerrar sesión
+                </button>
+              </>
             ) : (
               <Link className="btn btn-sm btn-primary px-3 rounded-pill" to="/login">
                 Iniciar sesión

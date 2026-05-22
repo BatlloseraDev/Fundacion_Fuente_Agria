@@ -4,12 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { WebsocketsGateway } from '../websockets/websockets.gateway';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 
 @Injectable()
 export class ArticlesService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly websocketsGateway: WebsocketsGateway,
+  ) { }
 
   private userHasEditorRole(user: any) {
     const roles = user?.roles ?? [];
@@ -236,7 +240,7 @@ export class ArticlesService {
       }
     }
 
-    return this.prisma.article.findUnique({
+    const updated = await this.prisma.article.findUnique({
       where: { id },
       include: {
         categories: {
@@ -251,6 +255,14 @@ export class ArticlesService {
         },
       },
     });
+
+    this.websocketsGateway.emitStockUpdated({
+      id: updated!.id,
+      stock: updated!.stock,
+      available: updated!.available,
+    });
+
+    return updated;
   }
 
   async remove(id: number, user: any) {

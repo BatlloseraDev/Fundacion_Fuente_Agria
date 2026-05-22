@@ -8,6 +8,7 @@ import { ActividadesPage } from '../actividades/pages/ActividadesPage';
 import { ActividadDetailPage } from '../actividades/pages/ActividadDetailPage';
 import { AdminDashboard } from '../admin/pages/AdminDashboard';
 import { VideotutorialesPage } from "../videotutoriales/pages/videotutorialesPage";
+import { PerfilPage } from '../perfil/pages/PerfilPage';
 
 import { PrivateRoute } from './PrivateRoute';
 
@@ -45,7 +46,7 @@ export const appRouter = createBrowserRouter([
       },
       {
         path: '/perfil',
-        element: <PrivateRoute element={<div>Pagina de Perfil (Solo Login)</div>} />,
+        element: <PrivateRoute element={<PerfilPage />} />,
       },
       {
         path: '/admin',
