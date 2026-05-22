@@ -76,6 +76,10 @@ export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconne
     this.io.to('reservations_room').emit('reservationUpdated', reservation);
   }
 
+  emitStockUpdated(article: { id: number; stock: number; available: boolean }) {
+    this.io.emit('stockUpdated', article);
+  }
+
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @MessageBody() data: { chatId?: number; userId: number; message: string },
